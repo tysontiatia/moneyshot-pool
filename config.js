@@ -30,17 +30,17 @@
 
 const CONFIG = {
 
-  // Paste your Player Picks published CSV URL here
-  PICKS_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSXIUH5qLr0fmY8lBgUEbomnbHdoG2mG75etMbjHH-qZLaaIS2beloShfe3_4JYHg/pub?gid=711475419&single=true&output=csv',
+  // Your Google Sheets published CSV URLs
+  PICKS_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTzIiByrRjuFDPn19oUthDSy558EVJRT4Ae5D9mMRyynro4vxkHg804n0kBKgsz-Q/pub?gid=1993458520&single=true&output=csv',
 
-  // Paste your Master Bracket published CSV URL here
-  MASTER_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSXIUH5qLr0fmY8lBgUEbomnbHdoG2mG75etMbjHH-qZLaaIS2beloShfe3_4JYHg/pub?gid=1870384661&single=true&output=csv',
+  // Paste your Results sheet published CSV URL here once ready
+  MASTER_URL: '',
 
   // Pool settings
   POOL_NAME: 'The MoneyShot Pool',
   SEASON: '2026',
 
-  // Scoring rules — points = round multiplier × seed number
+  // Scoring rules — points = round multiplier x seed number
   ROUND_MULTIPLIERS: {
     R1:  1,
     R2:  2,
@@ -51,9 +51,13 @@ const CONFIG = {
   },
 
   // Tiatia household — highlighted in the dashboard
-  HIGHLIGHT_PLAYERS: ['Tyson Tiatia', 'Kristin Zamani'],
+  HIGHLIGHT_PLAYERS: ['Tyson Tiatia', 'Kristin Tiatia'],
 
   // Auto-refresh interval in minutes
   REFRESH_MINUTES: 5,
+
+  // CORS proxy — fixes Google Sheets cross-origin blocking
+  USE_PROXY: true,
+  PROXY_URL: 'https://api.allorigins.win/raw?url=',
 
 };
