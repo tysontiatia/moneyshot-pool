@@ -51,7 +51,7 @@ const CONFIG = {
   },
 
   // Tiatia household — highlighted in the dashboard
-  HIGHLIGHT_PLAYERS: ['Tyson Tiatia', 'Kristin Tiatia'],
+  HIGHLIGHT_PLAYERS: ['Tyson Tiatia', 'Kristin Zamani'],
 
   // Auto-refresh interval in minutes
   REFRESH_MINUTES: 5,
