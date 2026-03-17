@@ -735,17 +735,17 @@
 <div id="error-view" class="view">
   <div class="error-banner">
     <strong>⚠️ Could not load data</strong>
-    <span id="error-msg">Check your Google Sheets connection in config.js</span>
+    <span id="error-msg">Trying to connect to Google Sheets...</span>
   </div>
   <div class="setup-banner">
-    <strong>📋 Setup Instructions</strong>
-    1. Open your Google Sheet<br>
-    2. Go to <strong>File → Share → Publish to web</strong><br>
-    3. Select <strong>"Player Picks"</strong> sheet, format <strong>"CSV"</strong><br>
-    4. Click Publish and copy the URL<br>
-    5. Open <code>config.js</code> and paste the URL as <code>PICKS_URL</code><br>
-    6. Do the same for the <strong>"Master Bracket"</strong> sheet as <code>MASTER_URL</code><br>
-    7. Save and reload this page
+    <strong>🔧 Quick Debug Steps</strong>
+    1. Make sure your Google Sheet is published: <strong>File → Share → Publish to web → CSV → Publish</strong><br>
+    2. Open this URL directly in your browser to test it works:<br>
+    <code id="debug-url"></code><br><br>
+    3. If the URL shows CSV data in your browser, the sheet is published correctly<br>
+    4. If it shows an error, re-publish the sheet and try again<br><br>
+    <strong>📋 Your current URL:</strong><br>
+    <code id="current-url"></code>
   </div>
 </div>
 
@@ -928,13 +928,35 @@ function proxyUrl(url) {
   return url;
 }
 
+async function fetchWithFallback(url) {
+  // Try multiple CORS proxies in order
+  const proxies = [
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://thingproxy.freeboard.io/fetch/${url}`,
+    url, // try direct last
+  ];
+
+  let lastErr;
+  for (const proxyUrl of proxies) {
+    try {
+      const res = await fetch(proxyUrl, { cache: 'no-cache' });
+      if (res.ok) {
+        const text = await res.text();
+        if (text && text.length > 10) return text;
+      }
+    } catch(e) {
+      lastErr = e;
+      continue;
+    }
+  }
+  throw new Error(`Could not load data after trying all proxies. Last error: ${lastErr?.message || 'unknown'}`);
+}
+
 async function loadData() {
   try {
-    // Load player picks via CORS proxy
-    const picksUrl = proxyUrl(CONFIG.PICKS_URL);
-    const picksRes = await fetch(picksUrl);
-    if (!picksRes.ok) throw new Error('Could not fetch player picks — check your Google Sheets URL in config.js');
-    const picksText = await picksRes.text();
+    // Load player picks
+    const picksText = await fetchWithFallback(CONFIG.PICKS_URL);
     const picksRows = parseCSV(picksText);
 
     // Skip header rows (first 3 rows are headers)
@@ -976,10 +998,11 @@ async function loadData() {
 
     // Load master bracket if URL set
     if (CONFIG.MASTER_URL && CONFIG.MASTER_URL !== '') {
-      const masterRes = await fetch(proxyUrl(CONFIG.MASTER_URL));
-      if (masterRes.ok) {
-        const masterText = await masterRes.text();
+      try {
+        const masterText = await fetchWithFallback(CONFIG.MASTER_URL);
         STATE.masterResults = parseMasterBracket(masterText);
+      } catch(e) {
+        console.warn('Master bracket not loaded:', e.message);
       }
     }
 
@@ -991,10 +1014,10 @@ async function loadData() {
     renderApp();
 
   } catch(err) {
-    console.error(err);
+    console.error('Load error:', err);
     document.getElementById('loading').classList.remove('active');
     document.getElementById('error-view').classList.add('active');
-    document.getElementById('error-msg').textContent = err.message + ' — Open browser console (F12) for details.';
+    document.getElementById('error-msg').textContent = err.message;
   }
 }
 
@@ -1516,6 +1539,14 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('error-view').classList.add('active');
     return;
   }
+
+  // Show debug URLs
+  const debugUrl = `https://corsproxy.io/?${encodeURIComponent(CONFIG.PICKS_URL)}`;
+  const debugEl = document.getElementById('debug-url');
+  const currentEl = document.getElementById('current-url');
+  if (debugEl) debugEl.textContent = debugUrl;
+  if (currentEl) currentEl.textContent = CONFIG.PICKS_URL;
+
   loadData();
 
   // Auto-refresh every 5 minutes
