@@ -264,7 +264,7 @@ function calcEarned(p, res) {
 // ── JSONBin ────────────────────────────────────────────────────────────────────
 async function fetchBin() {
   const r = await fetch(CONFIG.BIN_URL+'/latest',{
-    headers:{'X-Master-Key':CONFIG.API_KEY,'X-Bin-Meta':'false'}
+    headers:{'X-Master-Key':CONFIG.MASTER_KEY,'X-Access-Key':CONFIG.ACCESS_KEY,'X-Bin-Meta':'false'}
   });
   if(!r.ok) throw new Error(`JSONBin error ${r.status}: ${r.statusText}`);
   return r.json();
