@@ -31,7 +31,7 @@
 const CONFIG = {
 
   // Paste your Player Picks published CSV URL here
-  PICKS_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTzIiByrRjuFDPn19oUthDSy558EVJRT4Ae5D9mMRyynro4vxkHg804n0kBKgsz-Q/pub?gid=1993458520&single=true&output=csv',
+  PICKS_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSXIUH5qLr0fmY8lBgUEbomnbHdoG2mG75etMbjHH-qZLaaIS2beloShfe3_4JYHg/pub?gid=711475419&single=true&output=csv',
 
   // Paste your Master Bracket published CSV URL here
   MASTER_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSXIUH5qLr0fmY8lBgUEbomnbHdoG2mG75etMbjHH-qZLaaIS2beloShfe3_4JYHg/pub?gid=1870384661&single=true&output=csv',
