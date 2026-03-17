@@ -921,11 +921,19 @@ function parseCSV(text) {
   return rows;
 }
 
+function proxyUrl(url) {
+  if (CONFIG.USE_PROXY && url) {
+    return CONFIG.PROXY_URL + encodeURIComponent(url);
+  }
+  return url;
+}
+
 async function loadData() {
   try {
-    // Load player picks
-    const picksRes = await fetch(CONFIG.PICKS_URL);
-    if (!picksRes.ok) throw new Error('Could not fetch player picks');
+    // Load player picks via CORS proxy
+    const picksUrl = proxyUrl(CONFIG.PICKS_URL);
+    const picksRes = await fetch(picksUrl);
+    if (!picksRes.ok) throw new Error('Could not fetch player picks — check your Google Sheets URL in config.js');
     const picksText = await picksRes.text();
     const picksRows = parseCSV(picksText);
 
@@ -967,11 +975,10 @@ async function loadData() {
     });
 
     // Load master bracket if URL set
-    if (CONFIG.MASTER_URL && CONFIG.MASTER_URL !== 'YOUR_MASTER_BRACKET_CSV_URL') {
-      const masterRes = await fetch(CONFIG.MASTER_URL);
+    if (CONFIG.MASTER_URL && CONFIG.MASTER_URL !== '') {
+      const masterRes = await fetch(proxyUrl(CONFIG.MASTER_URL));
       if (masterRes.ok) {
         const masterText = await masterRes.text();
-        // Parse master results
         STATE.masterResults = parseMasterBracket(masterText);
       }
     }
@@ -987,7 +994,7 @@ async function loadData() {
     console.error(err);
     document.getElementById('loading').classList.remove('active');
     document.getElementById('error-view').classList.add('active');
-    document.getElementById('error-msg').textContent = err.message;
+    document.getElementById('error-msg').textContent = err.message + ' — Open browser console (F12) for details.';
   }
 }
 
