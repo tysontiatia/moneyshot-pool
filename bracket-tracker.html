@@ -2938,18 +2938,27 @@ function getGameStatus(game) {
 }
 
 async function toggleLiveStatus(slotId) {
+  console.log(`🔴 Toggling live status for game: ${slotId}`);
+  console.log(`🔴 Current live games before toggle:`, [...state.liveGames]);
+  
   if (state.liveGames.has(slotId)) {
     state.liveGames.delete(slotId);
+    console.log(`🔴 Game ${slotId} removed from live games`);
   } else {
     state.liveGames.add(slotId);
+    console.log(`🔴 Game ${slotId} added to live games`);
   }
+  
+  console.log(`🔴 Live games after toggle:`, [...state.liveGames]);
   
   // Persist to localStorage
   localStorage.setItem('liveGames', JSON.stringify([...state.liveGames]));
+  console.log(`💾 Live games saved to localStorage: ${[...state.liveGames].length} active`);
   
   // Sync to JSONBin for cross-device persistence
   try {
     await syncResultsToJsonBin();
+    console.log(`☁️ Live games synced to JSONBin successfully`);
   } catch (error) {
     console.warn('⚠️ Live game sync failed, but saved locally:', error.message);
   }
@@ -2957,6 +2966,7 @@ async function toggleLiveStatus(slotId) {
   // Re-render
   renderResults();
   if (state.activeTab === 'bracket') renderBracket();
+  console.log(`🎨 UI re-rendered after live game toggle`);
 }
 
 function renderBracketGame(game) {
