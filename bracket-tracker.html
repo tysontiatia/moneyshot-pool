@@ -3052,7 +3052,7 @@ function renderResults() {
   document.getElementById('tab-results').innerHTML = html;
 }
 
-function setWinner(slotId, teamId) {
+async function setWinner(slotId, teamId) {
   console.log('🏆 Setting winner for slot:', slotId, 'team:', teamId);
   
   // Debug: Show what picks exist for this slot
@@ -3073,7 +3073,11 @@ function setWinner(slotId, teamId) {
   localStorage.setItem('gameResults', JSON.stringify(state.results));
   
   // Sync results to JSONBin for cross-device persistence
-  syncResultsToJsonBin();
+  try {
+    await syncResultsToJsonBin();
+  } catch (error) {
+    console.warn('⚠️ Result sync failed, but saved locally:', error.message);
+  }
   
   // Remove from live games when winner is set
   if (state.liveGames.has(slotId)) {
@@ -3156,12 +3160,16 @@ function advanceWinnerToNextRound(completedMatchup) {
   }
 }
 
-function clearWinner(slotId) {
+async function clearWinner(slotId) {
   if (state.results) delete state.results[slotId];
   localStorage.setItem('gameResults', JSON.stringify(state.results));
   
   // Sync results to JSONBin for cross-device persistence
-  syncResultsToJsonBin();
+  try {
+    await syncResultsToJsonBin();
+  } catch (error) {
+    console.warn('⚠️ Result sync failed, but cleared locally:', error.message);
+  }
   
   const matchup = state.matchups.find(m => m.slotId === slotId);
   if (matchup) {
