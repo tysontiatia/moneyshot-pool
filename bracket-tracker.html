@@ -1517,25 +1517,26 @@ async function fetchPicks() {
     const teamMap = {};
 
     // Load individual entry files (entry-0.json through entry-6.json) 
+    // These are arrays containing 1 entry each
     for (let i = 0; i <= 6; i++) {
       try {
         const response = await fetch(`./entry-${i}.json`);
         if (response.ok) {
-          const entryData = await response.json();
+          const entryArray = await response.json();
           
-          // Add teams to teamMap
-          if (entryData.teams) {
-            entryData.teams.forEach(team => {
-              teamMap[team.cbsTeamId] = team;
-            });
-          }
-          
-          // Add entry
-          if (entryData.picks) {
-            allEntries.push({
-              name: entryData.name || entryData.entryName || `Entry ${allEntries.length + 1}`,
-              picks: entryData.picks,
-              championCbsTeamId: entryData.championCbsTeamId || null
+          // Handle array format
+          if (Array.isArray(entryArray)) {
+            entryArray.forEach(entry => {
+              // Add champion team to teamMap
+              if (entry.championTeam) {
+                teamMap[entry.championTeam.cbsTeamId] = entry.championTeam;
+              }
+              
+              allEntries.push({
+                name: entry.name,
+                picks: entry.picks || [],
+                championCbsTeamId: entry.championTeam?.cbsTeamId || null
+              });
             });
           }
         }
@@ -1544,7 +1545,7 @@ async function fetchPicks() {
       }
     }
     
-    // Load new-entries.json (different structure)
+    // Load new-entries.json (array of entries)
     try {
       const response = await fetch('./new-entries.json');
       if (response.ok) {
@@ -1566,7 +1567,7 @@ async function fetchPicks() {
       console.log('No new-entries.json found');
     }
     
-    // Load remaining-entries.json (same structure as new-entries)
+    // Load remaining-entries.json (array of entries)
     try {
       const response = await fetch('./remaining-entries.json');
       if (response.ok) {
@@ -1588,14 +1589,27 @@ async function fetchPicks() {
       console.log('No remaining-entries.json found');
     }
     
-    if (allEntries.length === 0) {
+    // Remove duplicates by name
+    const uniqueEntries = [];
+    const seenNames = new Set();
+    
+    allEntries.forEach(entry => {
+      if (!seenNames.has(entry.name)) {
+        uniqueEntries.push(entry);
+        seenNames.add(entry.name);
+      } else {
+        console.log(`⚠️ Skipping duplicate entry: ${entry.name}`);
+      }
+    });
+    
+    if (uniqueEntries.length === 0) {
       console.log('❌ No entry data found');
       return null;
     }
     
     // If we still don't have enough teams in teamMap, try to extract from picks
     const missingTeams = new Set();
-    allEntries.forEach(entry => {
+    uniqueEntries.forEach(entry => {
       entry.picks.forEach(pick => {
         if (!teamMap[pick.cbsTeamId]) {
           missingTeams.add(pick.cbsTeamId);
@@ -1613,8 +1627,9 @@ async function fetchPicks() {
       };
     });
     
-    const picksData = { teamMap, entries: allEntries };
-    console.log('✅ Local picks data loaded:', allEntries.length, 'entries with', Object.keys(teamMap).length, 'teams');
+    const picksData = { teamMap, entries: uniqueEntries };
+    console.log('✅ Local picks data loaded:', uniqueEntries.length, 'unique entries with', Object.keys(teamMap).length, 'teams');
+    console.log('📋 Entry names:', uniqueEntries.map(e => e.name));
     return picksData;
     
   } catch (error) {
