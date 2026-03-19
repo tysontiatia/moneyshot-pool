@@ -2676,6 +2676,51 @@ function calculatePickStats(picks, teamMap, round) {
 }
 
 // ─── ANALYTICS HELPERS ──────────────────────────────────────────────────────
+async function syncResultsToJsonBin() {
+  // Sync current results to JSONBin for cross-device persistence
+  if (!CONFIG.jsonbinId || !CONFIG.jsonbinKey) {
+    console.log('⚠️ JSONBin not configured, results only saved locally');
+    return;
+  }
+
+  try {
+    console.log('☁️ Syncing results to JSONBin...');
+    
+    // Get current JSONBin data first
+    const getResponse = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.jsonbinId}/latest`, {
+      headers: { 'X-Access-Key': CONFIG.jsonbinKey }
+    });
+    
+    if (!getResponse.ok) {
+      throw new Error(`Failed to fetch JSONBin: ${getResponse.status}`);
+    }
+    
+    const currentData = await getResponse.json();
+    
+    // Update the results in the data
+    const updatedData = { ...currentData.record, results: state.results || {} };
+    
+    // Save updated data back to JSONBin
+    const putResponse = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.jsonbinId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Access-Key': CONFIG.jsonbinKey
+      },
+      body: JSON.stringify(updatedData)
+    });
+    
+    if (putResponse.ok) {
+      console.log('✅ Results synced to JSONBin successfully');
+    } else {
+      throw new Error(`Failed to update JSONBin: ${putResponse.status}`);
+    }
+    
+  } catch (error) {
+    console.error('❌ Failed to sync results to JSONBin:', error.message);
+  }
+}
+
 function saveRankSnapshot() {
   // Save current standings to rank history
   if (!state.picks || !state.matchups) return;
@@ -3027,6 +3072,9 @@ function setWinner(slotId, teamId) {
   state.results[slotId] = teamId;
   localStorage.setItem('gameResults', JSON.stringify(state.results));
   
+  // Sync results to JSONBin for cross-device persistence
+  syncResultsToJsonBin();
+  
   // Remove from live games when winner is set
   if (state.liveGames.has(slotId)) {
     state.liveGames.delete(slotId);
@@ -3111,6 +3159,9 @@ function advanceWinnerToNextRound(completedMatchup) {
 function clearWinner(slotId) {
   if (state.results) delete state.results[slotId];
   localStorage.setItem('gameResults', JSON.stringify(state.results));
+  
+  // Sync results to JSONBin for cross-device persistence
+  syncResultsToJsonBin();
   
   const matchup = state.matchups.find(m => m.slotId === slotId);
   if (matchup) {
