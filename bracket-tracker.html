@@ -1967,6 +1967,11 @@ async function fetchAll() {
     const picks = await fetchPicks();
     state.picks = picks;
     
+    // 🐛 DEBUG: Show all entry names and current config
+    console.log('🔍 DEBUG - Current myName config:', CONFIG.myName);
+    console.log('🔍 DEBUG - Entry names in data:', picks.entries?.map(e => e.name) || []);
+    console.log('🔍 DEBUG - Your entry found?:', picks.entries?.find(e => e.name === CONFIG.myName) ? 'YES' : 'NO');
+    
     // Load manual results from localStorage
     const storedResults = localStorage.getItem('gameResults') || '{}';
     state.results = JSON.parse(storedResults);
