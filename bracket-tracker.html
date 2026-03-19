@@ -1504,7 +1504,7 @@ function computeStandings() {
   return entries.map(entry => {
     const { total, correct, maxPts, scored } = scoreEntry(entry, state.matchups, teamMap);
     return { ...entry, total, correct, maxPts, scored,
-      isMine: entry.name === CONFIG.myName };
+      isMine: entry.name.trim() === CONFIG.myName.trim() };
   }).sort((a,b) => b.total - a.total || b.correct - a.correct);
 }
 
@@ -1967,11 +1967,6 @@ async function fetchAll() {
     const picks = await fetchPicks();
     state.picks = picks;
     
-    // 🐛 DEBUG: Show all entry names and current config
-    console.log('🔍 DEBUG - Current myName config:', CONFIG.myName);
-    console.log('🔍 DEBUG - Entry names in data:', picks.entries?.map(e => e.name) || []);
-    console.log('🔍 DEBUG - Your entry found?:', picks.entries?.find(e => e.name === CONFIG.myName) ? 'YES' : 'NO');
-    
     // Load manual results from localStorage
     const storedResults = localStorage.getItem('gameResults') || '{}';
     state.results = JSON.parse(storedResults);
@@ -2139,11 +2134,11 @@ function renderSidebar() {
 
   // my summary
   if (state.picks) {
-    const me = state.picks.entries?.find(e => e.name === CONFIG.myName);
+    const me = state.picks.entries?.find(e => e.name.trim() === CONFIG.myName.trim());
     if (me) {
       const standings = computeStandings();
-      const myRank = standings.findIndex(e => e.name === CONFIG.myName) + 1;
-      const myEntry = standings.find(e => e.name === CONFIG.myName);
+      const myRank = standings.findIndex(e => e.name.trim() === CONFIG.myName.trim()) + 1;
+      const myEntry = standings.find(e => e.name.trim() === CONFIG.myName.trim());
       const champTeam = state.picks.teamMap?.[String(me.championCbsTeamId)];
       const leader = standings[0];
       const gapToLeader = myRank > 1 ? (leader.total - myEntry.total) : 0;
@@ -2198,7 +2193,7 @@ function renderSidebar() {
     const top3 = standings.slice(0, 3);
     let html = '<div style="display:flex;flex-direction:column;gap:6px;">';
     top3.forEach((entry, idx) => {
-      const isMe = entry.name === CONFIG.myName;
+      const isMe = entry.name.trim() === CONFIG.myName.trim();
       html += `
         <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:${isMe ? 'var(--accent-dim)' : 'var(--bg-secondary)'};border-radius:4px;border-left:2px solid ${isMe ? 'var(--accent)' : 'var(--border)'};">
           <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0;">
@@ -2340,7 +2335,7 @@ function renderPickComparison() {
   }
 
   const { teamMap, entries } = state.picks;
-  const myEntry = entries.find(e => e.name === CONFIG.myName);
+  const myEntry = entries.find(e => e.name.trim() === CONFIG.myName.trim());
   const round = compareFilter.round === 'all' ? null : parseInt(compareFilter.round);
 
   // Preserve focus state before re-rendering
@@ -2411,7 +2406,7 @@ function renderPickComparison() {
       <div class="pick-card-header">
         ${avatarHtml(entry.name, 24)}
         <span>${entry.name}</span>
-        ${entry.name === CONFIG.myName ? '<span class="you-tag">YOU</span>' : ''}
+        ${entry.name.trim() === CONFIG.myName.trim() ? '<span class="you-tag">YOU</span>' : ''}
       </div>`;
 
     // Show round-specific stats if a specific round is selected
@@ -2450,7 +2445,7 @@ function renderPickComparison() {
       const myPick = myEntry?.picks?.find(p =>
         p.tournamentRound === pick.tournamentRound && p.roundOrdinal === pick.roundOrdinal
       );
-      const matchesMe = myPick && myPick.cbsTeamId === pick.cbsTeamId && entry.name !== CONFIG.myName;
+      const matchesMe = myPick && myPick.cbsTeamId === pick.cbsTeamId && entry.name.trim() !== CONFIG.myName.trim();
 
       // Get game status
       const gameStatus = matchup ? getGameStatus(matchup) : { status: 'pending', label: '', class: '' };
@@ -2556,7 +2551,7 @@ function renderHeadToHeadComparison(entryA, entryB, round, teamMap) {
         <div class="pick-card-header">
           ${avatarHtml(entryA.name, 32)}
           <span style="font-size:16px;font-weight:600;">${entryA.name}</span>
-          ${entryA.name === CONFIG.myName ? '<span class="you-tag">YOU</span>' : ''}
+          ${entryA.name.trim() === CONFIG.myName.trim() ? '<span class="you-tag">YOU</span>' : ''}
         </div>
         <div class="pick-stats" style="margin-top:12px;">
           <div class="pick-stat">
@@ -2590,7 +2585,7 @@ function renderHeadToHeadComparison(entryA, entryB, round, teamMap) {
         <div class="pick-card-header">
           ${avatarHtml(entryB.name, 32)}
           <span style="font-size:16px;font-weight:600;">${entryB.name}</span>
-          ${entryB.name === CONFIG.myName ? '<span class="you-tag">YOU</span>' : ''}
+          ${entryB.name.trim() === CONFIG.myName.trim() ? '<span class="you-tag">YOU</span>' : ''}
         </div>
         <div class="pick-stats" style="margin-top:12px;">
           <div class="pick-stat">
@@ -3343,6 +3338,9 @@ function renderSettings() {
       <div class="config-row">
         <label>Your name</label>
         <input type="text" id="cfg-my-name" value="${CONFIG.myName}" placeholder="Tyson Tiatia">
+        <small style="color:var(--muted);font-size:10px;display:block;margin-top:4px;">
+          Must exactly match your entry. Available: ${state.picks?.entries?.map(e => `"${e.name}"`).slice(0, 3).join(', ') || 'Loading...'}${state.picks?.entries?.length > 3 ? '...' : ''}
+        </small>
       </div>
       <div class="config-row" style="margin-top:8px">
         <button class="save-btn" onclick="saveConfig()">Save & Reload</button>
@@ -3437,6 +3435,21 @@ function saveConfig() {
   CONFIG.jsonbinId = document.getElementById('cfg-bin-id').value.trim();
   CONFIG.jsonbinKey = document.getElementById('cfg-bin-key').value.trim();
   CONFIG.myName = document.getElementById('cfg-my-name').value.trim();
+  
+  // Validate name matches an entry (with flexible spacing)
+  if (state.picks?.entries && CONFIG.myName) {
+    const exactMatch = state.picks.entries.find(e => e.name === CONFIG.myName);
+    const trimmedMatch = state.picks.entries.find(e => e.name.trim() === CONFIG.myName);
+    
+    if (!exactMatch && trimmedMatch) {
+      console.log(`📝 Name auto-corrected: "${CONFIG.myName}" → "${trimmedMatch.name}" to match entry`);
+      CONFIG.myName = trimmedMatch.name; // Use exact entry name with original spacing
+      document.getElementById('cfg-my-name').value = CONFIG.myName;
+    } else if (!exactMatch && !trimmedMatch) {
+      alert(`Warning: "${CONFIG.myName}" doesn't match any entry name. Check spelling and spacing.`);
+    }
+  }
+  
   localStorage.setItem('jsonbinId', CONFIG.jsonbinId);
   localStorage.setItem('jsonbinKey', CONFIG.jsonbinKey);
   localStorage.setItem('myName', CONFIG.myName);
@@ -3723,7 +3736,7 @@ function renderWinProbability(entries, teamMap) {
     <div style="display:grid;gap:10px;">`;
   
   sorted.forEach(entry => {
-    const isMe = entry.name === CONFIG.myName;
+    const isMe = entry.name.trim() === CONFIG.myName.trim();
     const color = entry.winProb > 50 ? 'var(--green)' : entry.winProb > 20 ? 'var(--accent)' : entry.winProb > 0 ? 'var(--blue)' : 'var(--red)';
     const bgColor = entry.winProb > 50 ? 'rgba(61,220,132,0.1)' : entry.winProb > 20 ? 'rgba(232,255,71,0.1)' : 'rgba(91,156,246,0.1)';
     
@@ -3780,7 +3793,7 @@ function renderRankTimeline() {
   const timelineData = allNames.map(name => {
     return {
       name,
-      isMe: name === myName,
+      isMe: name.trim() === myName.trim(),
       ranks: history.map(snapshot => {
         const standing = snapshot.standings.find(s => s.name === name);
         return standing ? standing.rank : null;
@@ -3991,7 +4004,7 @@ function renderPickPopularity(entries, teamMap) {
     const isHighConsensus = consensus >= entries.length * 0.75;
     
     // Check if user is contrarian
-    const myEntry = entries.find(e => e.name === CONFIG.myName);
+    const myEntry = entries.find(e => e.name.trim() === CONFIG.myName.trim());
     const myPick = myEntry?.picks?.find(p => 
       p.tournamentRound === game.tournamentRound && 
       p.roundOrdinal === game.roundOrdinal
