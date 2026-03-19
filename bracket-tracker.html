@@ -1967,6 +1967,17 @@ async function fetchAll() {
     const picks = await fetchPicks();
     state.picks = picks;
     
+    // Generate matchups after picks are loaded
+    console.log('🏗️ Generating matchups from picks data...');
+    state.matchups = await fetchMatchups();
+    console.log('🏀 Matchups generated:', state.matchups ? state.matchups.length : 'FAILED');
+    
+    if (!state.matchups) {
+      console.error('❌ Matchup generation failed!');
+      setStatus('error');
+      return;
+    }
+    
     // Load manual results from localStorage
     const storedResults = localStorage.getItem('gameResults') || '{}';
     state.results = JSON.parse(storedResults);
