@@ -1970,7 +1970,15 @@ async function fetchAll() {
     // Load manual results from localStorage
     const storedResults = localStorage.getItem('gameResults') || '{}';
     state.results = JSON.parse(storedResults);
-    console.log('🏆 Manual results loaded:', Object.keys(state.results).length, 'completed');
+    console.log('🏆 Manual results loaded from localStorage:', Object.keys(state.results).length, 'completed');
+    
+    // Also check for results in JSONBin data
+    if (state.picks && state.picks.results && Object.keys(state.picks.results).length > 0) {
+      console.log('🏆 Found results in JSONBin data:', Object.keys(state.picks.results).length, 'completed');
+      // Merge JSONBin results with localStorage results (localStorage takes priority)
+      state.results = { ...state.picks.results, ...state.results };
+      console.log('🏆 Total results after merge:', Object.keys(state.results).length, 'completed');
+    }
     
     // Generate matchups after picks are loaded
     state.matchups = await fetchMatchups();
