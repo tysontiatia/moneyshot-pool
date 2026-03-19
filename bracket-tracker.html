@@ -1513,62 +1513,108 @@ async function fetchPicks() {
   console.log('🔄 Loading picks from local files...');
   
   try {
-    // Load all entry files
-    const entryFiles = [];
+    const allEntries = [];
+    const teamMap = {};
+
+    // Load individual entry files (entry-0.json through entry-6.json) 
     for (let i = 0; i <= 6; i++) {
       try {
         const response = await fetch(`./entry-${i}.json`);
         if (response.ok) {
           const entryData = await response.json();
-          entryFiles.push(entryData);
+          
+          // Add teams to teamMap
+          if (entryData.teams) {
+            entryData.teams.forEach(team => {
+              teamMap[team.cbsTeamId] = team;
+            });
+          }
+          
+          // Add entry
+          if (entryData.picks) {
+            allEntries.push({
+              name: entryData.name || entryData.entryName || `Entry ${allEntries.length + 1}`,
+              picks: entryData.picks,
+              championCbsTeamId: entryData.championCbsTeamId || null
+            });
+          }
         }
       } catch (e) {
         console.log(`Entry ${i} not found, skipping`);
       }
     }
     
-    // Load remaining entries
-    let remainingEntries = [];
+    // Load new-entries.json (different structure)
+    try {
+      const response = await fetch('./new-entries.json');
+      if (response.ok) {
+        const newEntries = await response.json();
+        newEntries.forEach(entry => {
+          if (entry.championTeam) {
+            // Add champion team to teamMap
+            teamMap[entry.championTeam.cbsTeamId] = entry.championTeam;
+          }
+          
+          allEntries.push({
+            name: entry.name,
+            picks: entry.picks || [],
+            championCbsTeamId: entry.championTeam?.cbsTeamId || null
+          });
+        });
+      }
+    } catch (e) {
+      console.log('No new-entries.json found');
+    }
+    
+    // Load remaining-entries.json (same structure as new-entries)
     try {
       const response = await fetch('./remaining-entries.json');
       if (response.ok) {
-        remainingEntries = await response.json();
+        const remainingEntries = await response.json();
+        remainingEntries.forEach(entry => {
+          if (entry.championTeam) {
+            // Add champion team to teamMap
+            teamMap[entry.championTeam.cbsTeamId] = entry.championTeam;
+          }
+          
+          allEntries.push({
+            name: entry.name,
+            picks: entry.picks || [],
+            championCbsTeamId: entry.championTeam?.cbsTeamId || null
+          });
+        });
       }
     } catch (e) {
       console.log('No remaining-entries.json found');
     }
-    
-    // Combine all entries
-    const allEntries = [...entryFiles, ...remainingEntries];
     
     if (allEntries.length === 0) {
       console.log('❌ No entry data found');
       return null;
     }
     
-    // Build the picks structure with teamMap
-    const teamMap = {};
-    const entries = [];
-    
+    // If we still don't have enough teams in teamMap, try to extract from picks
+    const missingTeams = new Set();
     allEntries.forEach(entry => {
-      if (entry.teams) {
-        // Add teams to teamMap
-        entry.teams.forEach(team => {
-          teamMap[team.cbsTeamId] = team;
-        });
-      }
-      
-      if (entry.picks) {
-        entries.push({
-          name: entry.name || entry.entryName || `Entry ${entries.length + 1}`,
-          picks: entry.picks,
-          championCbsTeamId: entry.championCbsTeamId || null
-        });
-      }
+      entry.picks.forEach(pick => {
+        if (!teamMap[pick.cbsTeamId]) {
+          missingTeams.add(pick.cbsTeamId);
+        }
+      });
     });
     
-    const picksData = { teamMap, entries };
-    console.log('✅ Local picks data loaded:', entries.length, 'entries with', Object.keys(teamMap).length, 'teams');
+    // Create basic team objects for missing teams
+    missingTeams.forEach(teamId => {
+      teamMap[teamId] = {
+        cbsTeamId: parseInt(teamId),
+        abbrev: `Team${teamId}`,
+        mediumName: `Team ${teamId}`,
+        seed: 1
+      };
+    });
+    
+    const picksData = { teamMap, entries: allEntries };
+    console.log('✅ Local picks data loaded:', allEntries.length, 'entries with', Object.keys(teamMap).length, 'teams');
     return picksData;
     
   } catch (error) {
