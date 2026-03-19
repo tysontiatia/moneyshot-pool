@@ -1992,6 +1992,28 @@ async function fetchAll() {
       const jsonBinLiveGames = new Set(state.picks.liveGames);
       state.liveGames = new Set([...jsonBinLiveGames, ...state.liveGames]);
       console.log('🔴 Total live games after merge:', state.liveGames.size, 'active');
+    }
+    
+    // Load and merge rank history
+    let storedRankHistory = JSON.parse(localStorage.getItem('rankHistory') || '[]');
+    console.log('📊 Rank history loaded from localStorage:', storedRankHistory.length, 'snapshots');
+    
+    // Also load rank history from JSONBin
+    if (state.picks && state.picks.rankHistory && Array.isArray(state.picks.rankHistory)) {
+      console.log('📊 Found rank history in JSONBin data:', state.picks.rankHistory.length, 'snapshots');
+      // Merge rank histories - JSONBin as base, localStorage additions
+      const mergedHistory = [...state.picks.rankHistory];
+      storedRankHistory.forEach(localSnapshot => {
+        const exists = mergedHistory.find(h => h.timestamp === localSnapshot.timestamp);
+        if (!exists) {
+          mergedHistory.push(localSnapshot);
+        }
+      });
+      // Sort by timestamp and save merged history
+      mergedHistory.sort((a, b) => a.timestamp - b.timestamp);
+      localStorage.setItem('rankHistory', JSON.stringify(mergedHistory));
+      console.log('📊 Total rank history after merge:', mergedHistory.length, 'snapshots');
+    }
     
     // Apply results to matchups
     if (state.matchups) {
@@ -2687,14 +2709,14 @@ function calculatePickStats(picks, teamMap, round) {
 
 // ─── ANALYTICS HELPERS ──────────────────────────────────────────────────────
 async function syncResultsToJsonBin() {
-  // Sync current results and live games to JSONBin for cross-device persistence
+  // Sync current results, live games, and rank history to JSONBin for cross-device persistence
   if (!CONFIG.jsonbinId || !CONFIG.jsonbinKey) {
-    console.log('⚠️ JSONBin not configured, results and live games only saved locally');
+    console.log('⚠️ JSONBin not configured, data only saved locally');
     return;
   }
 
   try {
-    console.log('☁️ Syncing results and live games to JSONBin...');
+    console.log('☁️ Syncing data to JSONBin...');
     
     // Get current JSONBin data first
     const getResponse = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.jsonbinId}/latest`, {
@@ -2707,11 +2729,12 @@ async function syncResultsToJsonBin() {
     
     const currentData = await getResponse.json();
     
-    // Update the results and live games in the data
+    // Update the results, live games, and rank history in the data
     const updatedData = { 
       ...currentData.record, 
       results: state.results || {},
-      liveGames: [...(state.liveGames || [])]
+      liveGames: [...(state.liveGames || [])],
+      rankHistory: JSON.parse(localStorage.getItem('rankHistory') || '[]')
     };
     
     // Save updated data back to JSONBin
@@ -2725,7 +2748,7 @@ async function syncResultsToJsonBin() {
     });
     
     if (putResponse.ok) {
-      console.log('✅ Results and live games synced to JSONBin successfully');
+      console.log('✅ All data synced to JSONBin successfully');
     } else {
       throw new Error(`Failed to update JSONBin: ${putResponse.status}`);
     }
@@ -2735,7 +2758,7 @@ async function syncResultsToJsonBin() {
   }
 }
 
-function saveRankSnapshot() {
+async function saveRankSnapshot() {
   // Save current standings to rank history
   if (!state.picks || !state.matchups) return;
   
@@ -2762,11 +2785,26 @@ function saveRankSnapshot() {
   
   localStorage.setItem('rankHistory', JSON.stringify(history));
   console.log('📊 Rank snapshot saved:', gamesComplete, 'games complete');
+  
+  // Sync rank history to JSONBin for cross-device persistence
+  try {
+    await syncResultsToJsonBin(); // This will now include the updated rank history
+  } catch (error) {
+    console.warn('⚠️ Rank history sync failed, but saved locally:', error.message);
+  }
 }
 
-function clearRankHistory() {
+async function clearRankHistory() {
   if (confirm('Clear all rank history? This cannot be undone.')) {
     localStorage.removeItem('rankHistory');
+    
+    // Sync empty rank history to JSONBin for cross-device persistence
+    try {
+      await syncResultsToJsonBin(); // This will now sync the empty rank history
+    } catch (error) {
+      console.warn('⚠️ Rank history clear sync failed, but cleared locally:', error.message);
+    }
+    
     renderAnalytics();
   }
 }
@@ -3109,7 +3147,11 @@ async function setWinner(slotId, teamId) {
   console.log('📊 Current results:', state.results);
   
   // Save rank snapshot for timeline tracking
-  saveRankSnapshot();
+  try {
+    await saveRankSnapshot();
+  } catch (error) {
+    console.warn('⚠️ Rank snapshot save failed:', error.message);
+  }
   
   // Update matchup in memory
   const matchup = state.matchups.find(m => m.slotId === slotId);
