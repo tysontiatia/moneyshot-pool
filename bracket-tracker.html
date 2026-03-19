@@ -1,0 +1,3896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Money Shot — 2026 Bracket Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --border2: #333;
+    --text: #f0f0f0;
+    --muted: #666;
+    --muted2: #888;
+    --accent: #e8ff47;
+    --accent-dim: #b8cc2a;
+    --green: #3ddc84;
+    --red: #ff5f57;
+    --orange: #ffaa00;
+    --blue: #5b9cf6;
+    --r1: #e8ff47;
+    --r2: #3ddc84;
+    --r3: #5b9cf6;
+    --r4: #c084fc;
+    --r5: #fb923c;
+    --r6: #f43f5e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+
+  .logo span { color: var(--muted2); font-size: 14px; font-family: 'DM Mono', monospace; font-weight: 400; margin-left: 10px; letter-spacing: 0; }
+
+  .header-right { display: flex; align-items: center; gap: 16px; }
+
+  .poll-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted2);
+  }
+
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+  .dot.live { background: var(--green); animation: pulse 2s infinite; }
+  .dot.error { background: var(--red); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .refresh-btn {
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--muted2);
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    transition: all 0.15s;
+  }
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* LAYOUT */
+  .main { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 56px); }
+
+  /* SIDEBAR */
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky;
+    top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+  }
+
+  .sidebar-section { padding: 0 16px; margin-bottom: 24px; }
+
+  .sidebar-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding: 0 4px;
+  }
+
+  /* STATS */
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+
+  .stat-box .val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .stat-box .lbl {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .stat-box.accent { border-color: var(--accent); }
+  .stat-box.accent .val { color: var(--accent); }
+
+  /* CONTENT */
+  .content { padding: 24px; overflow-x: auto; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--muted2);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+    font-weight: 400;
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+
+  /* STANDINGS TABLE */
+  .standings-wrap { 
+    overflow-x: auto;
+    margin: 0 auto;
+    max-width: 1400px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  th {
+    text-align: center;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 8px;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+    font-weight: 500;
+    background: var(--surface2);
+  }
+
+  th:first-child { text-align: center; }
+  th:nth-child(2) { text-align: left; }
+  th:nth-child(3) { text-align: left; }
+
+  td {
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    color: var(--text);
+    text-align: center;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+
+  /* STANDINGS SPECIFIC COLUMNS */
+  .champion-cell {
+    text-align: center !important;
+    padding: 8px !important;
+  }
+
+  .champion-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface2);
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    display: inline-block;
+  }
+
+  .name-cell {
+    text-align: left !important;
+    min-width: 140px;
+  }
+
+  .pts-col, .max-col, .correct-col {
+    text-align: center !important;
+    font-weight: 600;
+  }
+
+  .round-col {
+    text-align: center !important;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    min-width: 40px;
+  }
+
+  tr.mine td { 
+    background: rgba(232, 255, 71, 0.04);
+    border-left: 3px solid var(--accent);
+  }
+
+  tr:hover td { background: var(--surface2); }
+  tr.mine:hover td { background: rgba(232, 255, 71, 0.08); }
+  .rank { 
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    font-family: 'DM Mono', monospace; 
+    color: var(--muted2); 
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--surface2);
+    border-radius: 4px;
+  }
+
+  .rank.top { 
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 700;
+  }
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500;
+    flex-shrink: 0;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .you-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    background: rgba(232,255,71,0.15);
+    border: 1px solid var(--accent);
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .pts-cell { 
+    font-family: 'Bebas Neue', sans-serif; 
+    font-size: 20px; 
+    color: var(--text);
+    font-weight: 600;
+  }
+  
+  .pts-cell.zero { 
+    color: var(--muted); 
+    font-size: 16px; 
+  }
+
+  .max-pts {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted2);
+    font-weight: 500;
+  }
+
+  .correct-picks {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  /* RESPONSIVE STANDINGS */
+  @media (max-width: 1200px) {
+    .standings-wrap {
+      font-size: 11px;
+    }
+    
+    th, td {
+      padding: 8px 6px;
+    }
+    
+    .champion-name {
+      font-size: 11px;
+      padding: 3px 6px;
+    }
+    
+    .pts-cell {
+      font-size: 18px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .standings-wrap {
+      font-size: 10px;
+    }
+    
+    th, td {
+      padding: 6px 4px;
+    }
+    
+    .name-cell {
+      min-width: 120px;
+    }
+    
+    .pts-cell {
+      font-size: 16px;
+    }
+    
+    .champion-name {
+      font-size: 10px;
+      padding: 2px 4px;
+    }
+  }
+
+  .submitted { color: var(--green); font-family: 'DM Mono', monospace; font-size: 11px; }
+  .pending-tag { color: var(--orange); font-family: 'DM Mono', monospace; font-size: 11px; }
+
+  /* PICK COMPARISON */
+  .compare-controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 18px 20px;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  .compare-controls select, .compare-controls input {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.15s ease;
+  }
+
+  .compare-controls select:focus, .compare-controls input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(232,255,71,0.15);
+  }
+
+  .pick-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  .pick-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+  }
+
+  .pick-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+  }
+
+  .pick-card-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--surface2) 0%, var(--surface) 100%);
+  }
+
+  .pick-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .pick-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 8px;
+    background: var(--surface2);
+    transition: background 0.15s ease;
+  }
+
+  .pick-stat:hover {
+    background: var(--surface3);
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted2);
+    font-weight: 600;
+  }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+
+  .stat-value.correct {
+    color: var(--green);
+  }
+
+  .stat-value.pending {
+    color: var(--blue);
+  }
+
+  .stat-value.points {
+    color: var(--accent);
+  }
+
+  .stat-value.max {
+    color: var(--muted2);
+  }
+
+  .pick-card-body { 
+    padding: 8px;
+  }
+
+  .pick-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    gap: 12px;
+    min-height: 38px;
+    transition: all 0.15s ease;
+    position: relative;
+    margin-bottom: 3px;
+    border: 1px solid transparent;
+  }
+
+  .pick-row.live {
+    border: 1px solid var(--accent);
+    background: rgba(232, 255, 71, 0.08);
+    box-shadow: 0 0 0 1px rgba(232, 255, 71, 0.2);
+  }
+
+  .pick-row:hover {
+    background: var(--surface3);
+    border-color: var(--border2);
+  }
+  
+  .pick-row:last-child { 
+    margin-bottom: 0;
+  }
+
+  .pick-team { 
+    color: var(--text); 
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    flex: 1;
+    min-width: 0;
+    letter-spacing: 0.02em;
+  }
+  
+  .pick-round { 
+    color: var(--muted2); 
+    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    flex-shrink: 0;
+    width: 36px;
+    text-align: center;
+    background: var(--surface2);
+    padding: 4px 6px;
+    border-radius: 3px;
+  }
+  
+  .pick-pts {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 5px;
+    flex-shrink: 0;
+    min-width: 48px;
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+
+  .pick-status {
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid transparent;
+  }
+
+  .pick-status.final {
+    background: rgba(61,220,132,0.2);
+    color: var(--green);
+    border-color: rgba(61,220,132,0.3);
+  }
+
+  .pick-status.live {
+    background: rgba(232,255,71,0.25);
+    color: var(--accent);
+    border-color: var(--accent);
+    animation: live-pulse 2s ease-in-out infinite;
+  }
+
+  .pick-status.upcoming {
+    background: var(--surface2);
+    color: var(--muted);
+    border-color: var(--border);
+  }
+
+  .pick-status .status-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .pick-status.live .status-dot {
+    animation: pulse-dot 1.5s ease-in-out infinite;
+  }
+
+  .correct { 
+    background: rgba(61,220,132,0.15); 
+    color: var(--green);
+    font-weight: 700;
+  }
+  
+  .incorrect { 
+    background: rgba(255,95,87,0.15); 
+    color: var(--red);
+    font-weight: 700;
+  }
+  
+  .pending-pick { 
+    background: var(--surface2); 
+    color: var(--muted2);
+    font-weight: 500;
+  }
+
+  /* BRACKET VIEW - ROUND BY ROUND */
+  .bracket-controls {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .round-selector {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .round-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--muted2);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+
+  .round-btn:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .round-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+    font-weight: 600;
+  }
+
+  .bracket-round-view {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .round-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .round-title h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .round-stats {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--surface);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .bracket-regions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .bracket-region-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .region-header {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.1em;
+    color: var(--text);
+    text-align: center;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, var(--surface), var(--surface2));
+    border-bottom: 1px solid var(--border);
+  }
+
+  .region-games {
+    padding: 16px;
+  }
+
+  .bracket-finals {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .bracket-team {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    min-height: 40px;
+    transition: all 0.15s ease;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .bracket-team:hover {
+    background: rgba(255,255,255,0.02);
+  }
+
+  .bracket-team + .bracket-team {
+    border-top: 1px solid var(--border);
+  }
+
+  .bracket-team.winner {
+    background: rgba(61,220,132,0.08);
+    border-left: 3px solid var(--green);
+  }
+
+  .bracket-team.winner:hover {
+    background: rgba(61,220,132,0.12);
+  }
+
+  .bracket-team.winner .team-name {
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  .bracket-team.eliminated {
+    opacity: 0.5;
+    background: rgba(150,150,150,0.03);
+  }
+
+  .bracket-team.eliminated .team-name {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+
+  .seed-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--surface2);
+    color: var(--muted2);
+    margin-right: 12px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+
+  .bracket-team.winner .seed-badge {
+    background: rgba(61,220,132,0.15);
+    color: var(--green);
+    border-color: var(--green);
+  }
+
+  .team-name {
+    font-size: 13px;
+    font-weight: 500;
+    flex: 1;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+
+  .advance-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-left: 8px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px rgba(61,220,132,0.2);
+  }
+
+  .bracket-team.winner .advance-indicator {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+
+
+
+  /* TBD STYLING */
+  .bracket-team.tbd {
+    opacity: 0.5;
+  }
+
+  .bracket-team.tbd .team-name {
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  .bracket-game {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .bracket-game.live {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(232, 255, 71, 0.2);
+  }
+
+  .bracket-game:hover {
+    border-color: var(--border2);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+  }
+
+  .game-status-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .game-status-badge.final {
+    background: var(--green);
+    color: var(--bg);
+  }
+
+  .game-status-badge.live {
+    background: var(--accent);
+    color: var(--bg);
+    animation: live-pulse 2s ease-in-out infinite;
+  }
+
+  .game-status-badge.upcoming {
+    background: var(--surface3);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--bg);
+    animation: pulse-dot 1.5s ease-in-out infinite;
+  }
+
+  @keyframes live-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.6; }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 1200px) {
+    .bracket-regions {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+    
+    .round-selector {
+      gap: 6px;
+    }
+    
+    .round-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .results-regions {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+
+    .pick-grid {
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .main {
+      grid-template-columns: 1fr;
+    }
+    
+    .sidebar {
+      position: static;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .bracket-regions {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    
+    .round-selector {
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    
+    .round-btn {
+      padding: 6px 10px;
+      font-size: 11px;
+      flex: 1;
+      min-width: 80px;
+    }
+
+    .results-regions {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .results-finals .results-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .round-title h2 {
+      font-size: 22px;
+    }
+    
+    .bracket-team {
+      padding: 8px 10px;
+      min-height: 36px;
+    }
+    
+    .team-name {
+      font-size: 12px;
+    }
+    
+    .seed-badge {
+      width: 20px;
+      height: 20px;
+      font-size: 10px;
+      margin-right: 10px;
+    }
+
+    .pick-stats {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+    }
+
+    .pick-stat {
+      padding: 10px 6px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+    }
+
+    .pick-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .pick-row {
+      padding: 8px 10px;
+      gap: 8px;
+      min-height: 34px;
+    }
+
+    .pick-team {
+      font-size: 12px;
+    }
+
+    .pick-round {
+      width: 32px;
+      font-size: 8px;
+      padding: 3px 4px;
+    }
+
+    .pick-pts {
+      font-size: 10px;
+      padding: 3px 6px;
+      min-width: 38px;
+    }
+  }
+
+  /* LOADING */
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    gap: 10px;
+  }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-msg {
+    background: rgba(255,95,87,0.08);
+    border: 1px solid rgba(255,95,87,0.2);
+    border-radius: 6px;
+    padding: 12px 16px;
+    color: var(--red);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
+
+  /* CONFIG PANEL */
+  .config-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  .config-panel h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .config-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .config-row label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted2);
+    width: 100px;
+    flex-shrink: 0;
+  }
+
+  .config-row input {
+    flex: 1;
+    min-width: 200px;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 7px 12px;
+    border-radius: 5px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    outline: none;
+  }
+
+  .config-row input:focus { border-color: var(--accent); }
+
+  .save-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .save-btn:hover { opacity: 0.85; }
+
+  .similar-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    background: rgba(232,255,71,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(232,255,71,0.2);
+    white-space: nowrap;
+  }
+
+  .similar-count { font-size: 12px; color: var(--muted2); font-family: 'DM Mono', monospace; }
+
+  /* SCROLLBAR */
+  .sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 20px;
+  }
+
+  .empty-state .big { 
+    font-family: 'Bebas Neue', sans-serif; 
+    font-size: 36px; 
+    color: var(--muted2); 
+    display: block; 
+    margin-bottom: 12px; 
+    letter-spacing: 0.1em;
+  }
+
+  /* RESULTS STYLING */
+  .results-controls {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .results-header h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin: 0;
+  }
+
+  .results-round-view {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .results-regions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  .results-region-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .results-finals {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .results-finals .results-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+  .results-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+    gap: 12px;
+    padding: 16px;
+  }
+  .result-game {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .result-game.live {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(232, 255, 71, 0.2);
+  }
+
+  .result-game:hover {
+    border-color: var(--border2);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+
+  .game-teams { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    margin-bottom: 8px;
+  }
+
+  .result-team {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--surface);
+    min-height: 44px;
+  }
+
+  .result-team:hover { 
+    background: var(--surface2); 
+    border-color: var(--border2); 
+  }
+
+  .result-team.winner { 
+    background: rgba(61,220,132,0.15); 
+    border-color: var(--green); 
+    color: var(--green);
+  }
+  .result-team .seed {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted2);
+    min-width: 16px;
+  }
+  .result-team .team { font-weight: 500; }
+  .result-team .check { color: var(--green); font-weight: bold; margin-left: auto; }
+  .vs {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 0 4px;
+  }
+  .clear-result {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--muted2);
+    cursor: pointer;
+    text-align: center;
+    padding: 2px;
+    border-radius: 3px;
+  }
+  .clear-result:hover { color: var(--red); background: var(--red)11; }
+  .live-toggle {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--muted2);
+    cursor: pointer;
+    text-align: center;
+    padding: 4px 8px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    transition: all 0.15s ease;
+  }
+  .live-toggle:hover { 
+    color: var(--accent); 
+    background: rgba(232,255,71,0.1);
+    border-color: var(--accent);
+  }
+  .live-toggle.active {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 700;
+  }
+  .results-round { margin-bottom: 24px; }
+  .round-header h4 { font-size: 14px; margin: 0; color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;align-items:center;gap:0">
+    <div class="logo">The Money Shot <span>2026 NCAA</span></div>
+  </div>
+  <div class="header-right">
+    <div class="poll-status">
+      <div class="dot" id="status-dot"></div>
+      <span id="status-txt">connecting...</span>
+    </div>
+    <button class="refresh-btn" onclick="fetchAll()">↻ refresh</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Pool Overview</div>
+      <div class="stat-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="stat-box accent">
+          <div class="val" id="stat-games">—</div>
+          <div class="lbl">games played</div>
+        </div>
+        <div class="stat-box" style="background:var(--accent-dim);border:1px solid var(--accent);">
+          <div class="val" id="stat-live" style="color:var(--accent);">—</div>
+          <div class="lbl" style="color:var(--accent);">live games</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Your Position</div>
+      <div id="my-summary" style="font-size:13px;color:var(--muted2);padding:4px 4px 0 4px;line-height:1.8;"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Top 3</div>
+      <div id="mini-leaderboard" style="font-size:12px;"></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div id="error-banner" style="display:none" class="error-msg"></div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('standings',this)">Standings</div>
+      <div class="tab" onclick="showTab('picks',this)">Pick Comparison</div>
+      <div class="tab" onclick="showTab('analytics',this)">Analytics</div>
+      <div class="tab" onclick="showTab('bracket',this)">Live Bracket</div>
+      <div class="tab" onclick="showTab('results',this)">Set Results</div>
+      <div class="tab" onclick="showTab('settings',this)">Settings</div>
+    </div>
+
+    <div id="tab-standings"></div>
+    <div id="tab-picks" style="display:none"></div>
+    <div id="tab-analytics" style="display:none"></div>
+    <div id="tab-bracket" style="display:none"></div>
+    <div id="tab-results" style="display:none"></div>
+    <div id="tab-settings" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ────────────────────────────────────────────────────────────────
+let CONFIG = {
+  jsonbinId: localStorage.getItem('jsonbinId') || '',
+  jsonbinKey: localStorage.getItem('jsonbinKey') || '',
+  pollInterval: 60,
+  myName: localStorage.getItem('myName') || 'Tyson Tiatia'
+};
+
+// ─── ROUND MAP ──────────────────────────────────────────────────────────────
+const ROUND_INFO = {
+  2: { name: 'Round 1', short: 'R1', mult: 1, color: 'var(--r1)' },
+  3: { name: 'Round 2', short: 'R2', mult: 2, color: 'var(--r2)' },
+  4: { name: 'Sweet 16',    short: 'S16', mult: 3, color: 'var(--r3)' },
+  5: { name: 'Elite 8',     short: 'E8',  mult: 4, color: 'var(--r4)' },
+  6: { name: 'Final Four',  short: 'FF',  mult: 5, color: 'var(--r5)' },
+  7: { name: 'Championship Game',short: 'NCG', mult: 6, color: 'var(--r6)' }
+};
+
+// ─── AVATAR COLORS ──────────────────────────────────────────────────────────
+const AV_COLORS = [
+  ['#1e3a2e','#3ddc84'],['#1a2a3a','#5b9cf6'],['#2d1f3a','#c084fc'],
+  ['#3a2200','#ffaa00'],['#3a1a1a','#ff5f57'],['#1e2a1e','#86efac'],
+  ['#2a1a2a','#e879f9'],['#1a3a3a','#67e8f9'],['#2a2a1a','#fde047'],
+  ['#3a1f1f','#fca5a5']
+];
+const avMap = {};
+function getAv(name) {
+  if (!avMap[name]) {
+    const i = Object.keys(avMap).length % AV_COLORS.length;
+    avMap[name] = AV_COLORS[i];
+  }
+  return avMap[name];
+}
+function initials(name) {
+  return name.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+}
+function avatarHtml(name, size=30) {
+  const [bg,fg] = getAv(name);
+  return `<div class="avatar" style="width:${size}px;height:${size}px;background:${bg};color:${fg}">${initials(name)}</div>`;
+}
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+let state = {
+  picks: null,       // from jsonbin
+  matchups: null,    // from CBS
+  lastFetch: null,
+  activeTab: 'standings',
+  liveGames: new Set(JSON.parse(localStorage.getItem('liveGames') || '[]')) // Track live games
+};
+
+// ─── SCORING ENGINE ─────────────────────────────────────────────────────────
+function scorePick(pick, matchups, teamMap) {
+  const matchup = matchups.find(m =>
+    m.tournamentRound === pick.tournamentRound &&
+    m.roundOrdinal === pick.roundOrdinal
+  );
+  if (!matchup) return { pts: 0, correct: null };
+  if (!matchup.winnerId) return { pts: 0, correct: null };
+  const correct = matchup.winnerId === pick.cbsTeamId;
+  const team = teamMap[String(pick.cbsTeamId)];
+  const seed = team ? team.seed : 1;
+  // ALWAYS use ROUND_INFO multipliers (pick.multiplier from CBS is always 1)
+  const mult = ROUND_INFO[pick.tournamentRound]?.mult || 1;
+  return { pts: correct ? mult * seed : 0, correct };
+}
+
+function scoreEntry(entry, matchups, teamMap) {
+  let total = 0, correct = 0, potential = 0;
+  
+  const scored = entry.picks.map(pick => {
+    const result = scorePick(pick, matchups, teamMap);
+    total += result.pts;
+    if (result.correct) correct++;
+    
+    const team = teamMap[String(pick.cbsTeamId)];
+    const seed = team ? team.seed : 1;
+    // ALWAYS use ROUND_INFO multipliers (pick.multiplier from CBS is always 1)
+    const mult = ROUND_INFO[pick.tournamentRound]?.mult || 1;
+    const pickPoints = mult * seed;
+    
+    // CBS MAX calculation: count pending games only if team is still alive
+    // Once a team loses ANY game, all future picks with that team are excluded from max
+    if (result.correct === null) {
+      // Check if team is eliminated BEFORE adding to potential
+      const teamEliminated = isTeamEliminated(pick.cbsTeamId, pick.tournamentRound);
+      
+      if (!teamEliminated) {
+        // Game not played yet AND team still alive - add to potential
+        potential += pickPoints;
+      }
+    }
+    
+    return { ...pick, ...result };
+  });
+  // maxPts = current points + potential points from remaining games with alive teams
+  const maxPts = total + potential;
+  
+  return { total, correct, maxPts, scored };
+}
+
+function computeStandings() {
+  if (!state.picks || !state.matchups) return [];
+  const { teamMap, entries } = state.picks;
+  return entries.map(entry => {
+    const { total, correct, maxPts, scored } = scoreEntry(entry, state.matchups, teamMap);
+    return { ...entry, total, correct, maxPts, scored,
+      isMine: entry.name === CONFIG.myName };
+  }).sort((a,b) => b.total - a.total || b.correct - a.correct);
+}
+
+// ─── FETCH ──────────────────────────────────────────────────────────────────
+async function fetchPicks() {
+  if (!CONFIG.jsonbinId) {
+    console.log('❌ No bin ID configured');
+    return null;
+  }
+  console.log('🔄 Fetching picks from bin:', CONFIG.jsonbinId);
+  const headers = { 'X-Access-Key': CONFIG.jsonbinKey };
+  if (!CONFIG.jsonbinKey) delete headers['X-Access-Key'];
+  const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.jsonbinId}/latest`, { headers });
+  console.log('📦 JSONBin response:', res.status, res.statusText);
+  if (!res.ok) throw new Error(`jsonbin ${res.status}: ${res.statusText}`);
+  const data = await res.json();
+  console.log('✅ Picks data loaded:', data.record);
+  return data.record;
+}
+
+async function fetchMatchups() {
+  // Build bracket structure from actual picks data
+  console.log('🏗️ Building bracket structure from picks data...');
+  if (!state.picks?.teamMap || !state.picks?.entries?.length) {
+    console.log('❌ No picks data found, using basic structure');
+    return generateBasicBracket();
+  }
+  
+  const teamMap = state.picks.teamMap;
+  const matchups = [];
+  
+  // Get all R1 picks and build matchups from them
+  const r1Picks = state.picks.entries[0].picks?.filter(p => p.tournamentRound === 2) || [];
+  console.log('📊 Found', r1Picks.length, 'R1 picks to process');
+  
+  // Process each pick to determine the matchup
+  r1Picks.forEach(pick => {
+    const pickedTeam = teamMap[pick.cbsTeamId];
+    if (!pickedTeam) {
+      console.log('⚠️ Unknown team ID in pick:', pick.cbsTeamId);
+      return;
+    }
+    
+    // Find the opponent for this team based on region and seed
+    const region = pickedTeam.region;
+    const seed = pickedTeam.seed;
+    const opponentSeed = 17 - seed; // 1↔16, 2↔15, 3↔14, etc.
+    
+    const opponent = Object.values(teamMap).find(t => 
+      t.region === region && t.seed === opponentSeed
+    );
+    
+    if (!opponent) {
+      console.log('⚠️ No opponent found for', pickedTeam.abbrev, 'seed', seed, 'in', region);
+      return;
+    }
+    
+    // Add cbsTeamIds to team objects
+    const team1 = { ...pickedTeam, cbsTeamId: pick.cbsTeamId };
+    const team2 = { ...opponent, cbsTeamId: parseInt(Object.entries(teamMap).find(([id, t]) => t === opponent)[0]) };
+    
+    // Order teams by seed (lower seed first)
+    const topTeam = team1.seed < team2.seed ? team1 : team2;
+    const bottomTeam = team1.seed < team2.seed ? team2 : team1;
+    
+    console.log(`Slot ${pick.slotId}: ${topTeam.abbrev} (${topTeam.seed}) vs ${bottomTeam.abbrev} (${bottomTeam.seed}) - User picked ${pickedTeam.abbrev}`);
+    
+    matchups.push({
+      tournamentRound: 2,
+      roundOrdinal: pick.roundOrdinal,
+      groupName: region,
+      topTeam,
+      bottomTeam,
+      topItemSeed: topTeam.seed,
+      bottomItemSeed: bottomTeam.seed,
+      winnerId: null,
+      winnerTeam: null,
+      slotId: pick.slotId // Use exact CBS slotId!
+    });
+  });
+  
+  // Generate empty matchups for subsequent rounds (Round 2-6)
+  generateEmptyRounds(matchups);
+  
+  console.log('✅ Generated', matchups.length, 'matchups from actual picks data');
+  
+  // Apply stored results to advance teams through rounds
+  restoreAdvancedTeams(matchups);
+  
+  return matchups.sort((a,b) => a.tournamentRound - b.tournamentRound || a.roundOrdinal - b.roundOrdinal);
+}
+
+function generateEmptyRounds(matchups) {
+  console.log('🔄 Generating empty rounds 2-6...');
+  
+  // Round 2 (Round of 32) - 16 games
+  for (let i = 0; i < 16; i++) {
+    matchups.push({
+      tournamentRound: 3,
+      roundOrdinal: i,
+      groupName: i < 4 ? 'East' : i < 8 ? 'South' : i < 12 ? 'West' : 'Midwest',
+      topTeam: { abbrev: 'TBD', seed: '?', cbsTeamId: null },
+      bottomTeam: { abbrev: 'TBD', seed: '?', cbsTeamId: null },
+      topItemSeed: '?',
+      bottomItemSeed: '?',
+      winnerId: null,
+      winnerTeam: null,
+      slotId: `r2_${i}`
+    });
+  }
+  
+  // Round 3 (Sweet 16) - 8 games  
+  for (let i = 0; i < 8; i++) {
+    matchups.push({
+      tournamentRound: 4,
+      roundOrdinal: i,
+      groupName: i < 2 ? 'East' : i < 4 ? 'South' : i < 6 ? 'West' : 'Midwest',
+      topTeam: { abbrev: 'TBD', seed: '?', cbsTeamId: null },
+      bottomTeam: { abbrev: 'TBD', seed: '?', cbsTeamId: null },
+      topItemSeed: '?',
+      bottomItemSeed: '?',
+      winnerId: null,
+      winnerTeam: null,
+      slotId: `r3_${i}`
+    });
+  }
+  
+  // Round 4 (Elite 8) - 4 games
+  for (let i = 0; i < 4; i++) {
+    const regions = ['East', 'South', 'West', 'Midwest'];
+    matchups.push({
+      tournamentRound: 5,
+      roundOrdinal: i,
+      groupName: regions[i],
+      topTeam: { abbrev: 'TBD', seed: '?', cbsTeamId: null },
+      bottomTeam: { abbrev: 'TBD', seed: '?', cbsTeamId: null },
+      topItemSeed: '?',
+      bottomItemSeed: '?',
+      winnerId: null,
+      winnerTeam: null,
+      slotId: `r4_${i}`
+    });
+  }
+  
+  // Round 5 (Final Four) - 2 games
+  for (let i = 0; i < 2; i++) {
+    matchups.push({
+      tournamentRound: 6,
+      roundOrdinal: i,
+      groupName: 'Final Four',
+      topTeam: { abbrev: 'TBD', seed: '?', cbsTeamId: null },
+      bottomTeam: { abbrev: 'TBD', seed: '?', cbsTeamId: null },
+      topItemSeed: '?',
+      bottomItemSeed: '?',
+      winnerId: null,
+      winnerTeam: null,
+      slotId: `r5_${i}`
+    });
+  }
+  
+  // Round 6 (Championship) - 1 game
+  matchups.push({
+    tournamentRound: 7,
+    roundOrdinal: 0,
+    groupName: 'Championship',
+    topTeam: { abbrev: 'TBD', seed: '?', cbsTeamId: null },
+    bottomTeam: { abbrev: 'TBD', seed: '?', cbsTeamId: null },
+    topItemSeed: '?',
+    bottomItemSeed: '?',
+    winnerId: null,
+    winnerTeam: null,
+    slotId: 'r6_0'
+  });
+  
+  console.log('✅ Added empty rounds for tournaments rounds 3-7');
+}
+
+function restoreAdvancedTeams(matchups) {
+  if (!state.results || Object.keys(state.results).length === 0) return;
+  
+  console.log('🔄 Restoring advanced teams from', Object.keys(state.results).length, 'stored results...');
+  
+  // Create a copy to avoid modifying during iteration
+  const storedResults = { ...state.results };
+  
+  // ONLY apply results to Round 1 (CBS slots) - let cascading handle the rest
+  const round1Matchups = matchups.filter(m => m.tournamentRound === 2); // CBS slots
+  
+  console.log(`🔄 Applying results to ${round1Matchups.length} Round 1 games...`);
+  
+  round1Matchups.forEach(matchup => {
+    const slotId = matchup.slotId;
+    const winnerId = storedResults[slotId];
+    
+    if (winnerId && winnerId !== 'null' && winnerId !== 'undefined') {
+      const winningTeam = [matchup.topTeam, matchup.bottomTeam].find(t => t?.cbsTeamId == winnerId);
+      if (winningTeam) {
+        matchup.winnerId = parseInt(winnerId);
+        matchup.winnerTeam = { ...winningTeam };
+        console.log(`✅ Applied winner: ${winningTeam.abbrev} for slot ${slotId} (Round 1)`);
+        
+        // Cascade this winner forward through all rounds
+        cascadeWinnerForward(matchups, matchup, winningTeam);
+      }
+    }
+  });
+  
+  console.log('✅ Advanced teams restoration complete');
+}
+
+function cascadeWinnerForward(matchups, sourceMatchup, winningTeam) {
+  let currentMatchup = sourceMatchup;
+  let currentWinner = winningTeam;
+  
+  // Keep cascading until no more rounds or no stored result
+  while (currentMatchup.tournamentRound < 7) {
+    const nextRoundMatchup = findNextRoundMatchup(matchups, currentMatchup);
+    if (!nextRoundMatchup) break;
+    
+    // Add winner to next round
+    const isTopSeed = (currentMatchup.roundOrdinal % 2) === 0;
+    if (isTopSeed) {
+      nextRoundMatchup.topTeam = { 
+        ...currentWinner, 
+        cbsTeamId: currentWinner.cbsTeamId 
+      };
+      nextRoundMatchup.topItemSeed = currentWinner.seed;
+    } else {
+      nextRoundMatchup.bottomTeam = { 
+        ...currentWinner, 
+        cbsTeamId: currentWinner.cbsTeamId 
+      };
+      nextRoundMatchup.bottomItemSeed = currentWinner.seed;
+    }
+    
+    console.log(`➡️ Advanced: ${currentWinner.abbrev} (ID: ${currentWinner.cbsTeamId}) to round ${nextRoundMatchup.tournamentRound} game ${nextRoundMatchup.roundOrdinal}`);
+    
+    // Check if this next round has a stored result
+    const nextSlotResult = state.results[nextRoundMatchup.slotId];
+    if (nextSlotResult && nextSlotResult !== 'null' && nextSlotResult !== 'undefined') {
+      // Find the winner in this next round matchup
+      const nextWinner = [nextRoundMatchup.topTeam, nextRoundMatchup.bottomTeam].find(t => t?.cbsTeamId == nextSlotResult);
+      if (nextWinner) {
+        nextRoundMatchup.winnerId = parseInt(nextSlotResult);
+        nextRoundMatchup.winnerTeam = { ...nextWinner };
+        console.log(`✅ Applied winner: ${nextWinner.abbrev} for slot ${nextRoundMatchup.slotId} (Round ${nextRoundMatchup.tournamentRound})`);
+        
+        // Continue cascading with this winner
+        currentMatchup = nextRoundMatchup;
+        currentWinner = nextWinner;
+      } else {
+        // No valid winner found, stop cascading
+        break;
+      }
+    } else {
+      // No more results to apply, stop cascading
+      break;
+    }
+  }
+}
+
+function findNextRoundMatchup(matchups, currentMatchup) {
+  const currentRound = currentMatchup.tournamentRound;
+  const ordinal = currentMatchup.roundOrdinal;
+  
+  if (currentRound === 2) {
+    const nextOrdinal = Math.floor(ordinal / 2);
+    return matchups.find(m => m.tournamentRound === 3 && m.roundOrdinal === nextOrdinal);
+  } else if (currentRound === 3) {
+    const nextOrdinal = Math.floor(ordinal / 2);
+    return matchups.find(m => m.tournamentRound === 4 && m.roundOrdinal === nextOrdinal);
+  } else if (currentRound === 4) {
+    const nextOrdinal = Math.floor(ordinal / 2);
+    return matchups.find(m => m.tournamentRound === 5 && m.roundOrdinal === nextOrdinal);
+  } else if (currentRound === 5) {
+    const nextOrdinal = Math.floor(ordinal / 2);
+    return matchups.find(m => m.tournamentRound === 6 && m.roundOrdinal === nextOrdinal);
+  } else if (currentRound === 6) {
+    return matchups.find(m => m.tournamentRound === 7 && m.roundOrdinal === 0);
+  }
+  
+  return null;
+}
+
+function generateBasicBracket() {
+  console.log('🏗️ Generating basic bracket structure...');
+  if (!state.picks?.teamMap) return [];
+  
+  const teamMap = state.picks.teamMap;
+  const matchups = [];
+  
+  // Build R1 matchups (32 games)
+  const regions = ['East', 'South', 'West', 'Midwest'];
+  regions.forEach((region, regionIndex) => {
+    const regionTeams = Object.entries(teamMap)
+      .filter(([id, t]) => t.region === region)
+      .map(([id, t]) => ({ ...t, cbsTeamId: parseInt(id) })) // Add cbsTeamId here too!
+      .sort((a,b) => a.seed - b.seed);
+      
+    for (let i = 0; i < 8; i++) {
+      const roundOrdinal = regionIndex * 8 + i;
+      matchups.push({
+        tournamentRound: 2,
+        roundOrdinal,
+        groupName: region,
+        topTeam: regionTeams[i],
+        bottomTeam: regionTeams[15-i],
+        topItemSeed: regionTeams[i]?.seed,
+        bottomItemSeed: regionTeams[15-i]?.seed,
+        winnerId: null,
+        winnerTeam: null,
+        slotId: `r1_${region.toLowerCase()}_${i}`
+      });
+    }
+  });
+  
+  console.log('✅ Generated', matchups.length, 'basic R1 matchups');
+  return matchups;
+}
+
+async function fetchAll() {
+  setStatus('loading');
+  console.log('🚀 Starting data fetch...');
+  try {
+    const picks = await fetchPicks();
+    state.picks = picks;
+    
+    // Load manual results from localStorage
+    const storedResults = localStorage.getItem('gameResults') || '{}';
+    state.results = JSON.parse(storedResults);
+    console.log('🏆 Manual results loaded:', Object.keys(state.results).length, 'completed');
+    
+    // Generate matchups after picks are loaded
+    state.matchups = await fetchMatchups();
+    
+    // Apply results to matchups
+    if (state.matchups) {
+      state.matchups.forEach(m => {
+        const winner = state.results[m.slotId];
+        if (winner) {
+          m.winnerId = winner;
+          m.winnerTeam = [m.topTeam, m.bottomTeam].find(t => t?.cbsTeamId == winner);
+        }
+      });
+    }
+    
+    state.lastFetch = new Date();
+    console.log('✅ All data loaded successfully');
+    setStatus('live');
+    renderAll();
+  } catch(e) {
+    console.error('❌ Fetch failed:', e);
+    setStatus('error');
+    showError(e.message);
+  }
+}
+
+function getPicksForGame(slotId) {
+  if (!state.picks?.entries) return { team1: [], team2: [], unpicked: [] };
+  
+  const picks = { team1: [], team2: [], unpicked: [] };
+  const matchup = state.matchups?.find(m => m.slotId === slotId);
+  if (!matchup) return picks;
+  
+  state.picks.entries.forEach(entry => {
+    const pick = entry.picks?.find(p => p.slotId === slotId);
+    if (!pick) {
+      picks.unpicked.push(entry.name);
+    } else if (pick.cbsTeamId === matchup.topTeam?.cbsTeamId) {
+      picks.team1.push(entry.name);
+    } else if (pick.cbsTeamId === matchup.bottomTeam?.cbsTeamId) {
+      picks.team2.push(entry.name);
+    }
+  });
+  
+  return picks;
+}
+
+function getPicksForTeamInRound(teamId, round) {
+  if (!state.picks?.entries) return [];
+  
+  const pickers = [];
+  state.picks.entries.forEach(entry => {
+    const picks = entry.picks?.filter(p => 
+      p.cbsTeamId == teamId && p.tournamentRound == round
+    );
+    if (picks?.length > 0) {
+      pickers.push({
+        name: entry.name,
+        picks: picks.length,
+        games: picks.map(p => p.slotId)
+      });
+    }
+  });
+  
+  return pickers;
+}
+
+// ─── STATUS ─────────────────────────────────────────────────────────────────
+function setStatus(s) {
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-txt');
+  dot.className = 'dot';
+  if (s === 'live') {
+    dot.classList.add('live');
+    const t = state.lastFetch;
+    txt.textContent = `updated ${t.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
+  } else if (s === 'error') {
+    dot.classList.add('error');
+    txt.textContent = 'fetch error';
+  } else {
+    txt.textContent = 'loading...';
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-banner');
+  el.style.display = 'block';
+  el.innerHTML = `<strong>Error:</strong> ${msg}<br><small>Check browser console (F12) for details</small>`;
+  setTimeout(() => el.style.display = 'none', 12000);
+}
+
+// ─── RENDER ALL ─────────────────────────────────────────────────────────────
+function renderAll() {
+  console.log('🎨 Rendering all tabs, active:', state.activeTab);
+  renderSidebar();
+  if (state.activeTab === 'standings') renderStandings();
+  else if (state.activeTab === 'picks') renderPickComparison();
+  else if (state.activeTab === 'bracket') renderBracket();
+  else if (state.activeTab === 'results') renderResults();
+}
+
+// ─── SIDEBAR ────────────────────────────────────────────────────────────────
+function renderSidebar() {
+  if (!state.matchups) return;
+
+  // stats
+  const gamesPlayed = state.matchups.filter(m => m.winnerId).length;
+  const totalGames = state.matchups.length;
+  const liveGamesCount = state.liveGames.size;
+  
+  document.getElementById('stat-games').textContent = `${gamesPlayed}/${totalGames}`;
+  document.getElementById('stat-live').textContent = liveGamesCount;
+  
+  // Add pulse animation if there are live games
+  const liveStatBox = document.getElementById('stat-live').parentElement;
+  if (liveGamesCount > 0) {
+    liveStatBox.style.animation = 'live-pulse 2s ease-in-out infinite';
+  } else {
+    liveStatBox.style.animation = 'none';
+  }
+
+  // my summary
+  if (state.picks) {
+    const me = state.picks.entries?.find(e => e.name === CONFIG.myName);
+    if (me) {
+      const standings = computeStandings();
+      const myRank = standings.findIndex(e => e.name === CONFIG.myName) + 1;
+      const myEntry = standings.find(e => e.name === CONFIG.myName);
+      const champTeam = state.picks.teamMap?.[String(me.championCbsTeamId)];
+      const leader = standings[0];
+      const gapToLeader = myRank > 1 ? (leader.total - myEntry.total) : 0;
+      
+      // Count alive picks (picks that are still possible)
+      const alivePicks = me.picks?.filter(p => {
+        const matchup = state.matchups.find(m => m.cbsId === p.cbsMatchupId);
+        if (!matchup) return false;
+        if (matchup.winnerId) {
+          // Game finished - check if pick was correct
+          return matchup.winnerId === p.cbsTeamId;
+        }
+        return true; // Game not played yet
+      }).length || 0;
+      
+      document.getElementById('my-summary').innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="color:var(--muted2);">Rank</span>
+          <span style="color:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:20px;">#${myRank}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:var(--muted2);">Points</span>
+          <span style="color:var(--text);font-weight:600;">${myEntry?.total || 0}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:var(--muted2);">Max Possible</span>
+          <span style="color:var(--text-dim);">${myEntry?.maxPts || 0}</span>
+        </div>
+        ${myRank > 1 ? `<div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:var(--muted2);">Behind Leader</span>
+          <span style="color:var(--red);">-${gapToLeader}</span>
+        </div>` : ''}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+          <span style="color:var(--muted2);">Correct Picks</span>
+          <span style="color:var(--green);">${myEntry?.correct || 0}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:var(--muted2);">Alive Picks</span>
+          <span style="color:var(--accent);">${alivePicks}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+          <span style="color:var(--muted2);">Champion Pick</span>
+          <span style="color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;">${champTeam ? champTeam.name : 'ARK'}</span>
+        </div>
+      `;
+    }
+  }
+  
+  // mini leaderboard (top 3)
+  if (state.picks) {
+    const standings = computeStandings();
+    const top3 = standings.slice(0, 3);
+    let html = '<div style="display:flex;flex-direction:column;gap:6px;">';
+    top3.forEach((entry, idx) => {
+      const isMe = entry.name === CONFIG.myName;
+      html += `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:${isMe ? 'var(--accent-dim)' : 'var(--bg-secondary)'};border-radius:4px;border-left:2px solid ${isMe ? 'var(--accent)' : 'var(--border)'};">
+          <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0;">
+            <span style="color:var(--muted2);font-family:'Bebas Neue',sans-serif;font-size:14px;min-width:18px;">#${idx + 1}</span>
+            <span style="color:${isMe ? 'var(--accent)' : 'var(--text)'};font-weight:${isMe ? '600' : '400'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${entry.name}</span>
+          </div>
+          <span style="color:var(--text);font-weight:600;font-family:'DM Mono',monospace;font-size:11px;">${entry.total} pts</span>
+        </div>
+      `;
+    });
+    html += '</div>';
+    document.getElementById('mini-leaderboard').innerHTML = html;
+  }
+}
+
+// ─── STANDINGS ──────────────────────────────────────────────────────────────
+function renderStandings() {
+  const standings = computeStandings();
+  if (!standings.length) {
+    document.getElementById('tab-standings').innerHTML = `
+      <div class="empty-state"><span class="big">NO DATA</span>Add your jsonbin ID in Settings to load picks.</div>`;
+    return;
+  }
+
+  let html = '<div class="standings-wrap"><table><thead><tr>';
+  html += '<th>Rank</th>';
+  html += '<th>Champion</th>';
+  html += '<th>Bracket Name</th>';
+  html += '<th>Pts</th>';
+  html += '<th>Max</th>';
+  html += '<th>CPK</th>';
+  html += '<th>RD1</th>';
+  html += '<th>RD2</th>';
+  html += '<th>S16</th>';
+  html += '<th>E8</th>';
+  html += '<th>FF</th>';
+  html += '<th>NCG</th>';
+  html += '</tr></thead><tbody>';
+
+  standings.forEach((entry, i) => {
+    // Get champion info
+    const champTeam = state.picks.teamMap?.[String(entry.championCbsTeamId)];
+    const champAbbrev = champTeam ? champTeam.abbrev : '—';
+    
+    // Calculate round-by-round scores
+    const roundScores = calculateRoundScores(entry);
+    
+    const rankClass = i < 3 ? 'top' : '';
+    const rowClass = entry.isMine ? 'mine' : '';
+    
+    html += `<tr class="${rowClass}">
+      <td><span class="rank ${rankClass}">${i+1}</span></td>
+      <td class="champion-cell">
+        <span class="champion-name">${champAbbrev}</span>
+      </td>
+      <td class="name-cell">
+        <div style="display:flex;align-items:center;gap:10px;">
+          ${avatarHtml(entry.name, 24)}
+          <span>${entry.name}</span>
+          ${entry.isMine ? '<span class="you-tag">YOU</span>' : ''}
+        </div>
+      </td>
+      <td class="pts-col"><span class="${entry.total === 0 ? 'pts-cell zero' : 'pts-cell'}">${entry.total}</span></td>
+      <td class="max-col"><span class="max-pts">${entry.maxPts}</span></td>
+      <td class="correct-col"><span class="correct-picks">${entry.correct}</span></td>
+      <td class="round-col">${roundScores.rd1 || '-'}</td>
+      <td class="round-col">${roundScores.rd2 || '-'}</td>
+      <td class="round-col">${roundScores.s16 || '-'}</td>
+      <td class="round-col">${roundScores.e8 || '-'}</td>
+      <td class="round-col">${roundScores.ff || '-'}</td>
+      <td class="round-col">${roundScores.ncg || '-'}</td>
+    </tr>`;
+  });
+
+  html += '</tbody></table></div>';
+  document.getElementById('tab-standings').innerHTML = html;
+}
+
+function calculateRoundScores(entry) {
+  const roundScores = { rd1: 0, rd2: 0, s16: 0, e8: 0, ff: 0, ncg: 0 };
+  
+  if (!entry.scored) return roundScores;
+  
+  entry.scored.forEach(pick => {
+    if (!pick.pts) return; // No points if incorrect or no result yet
+    
+    switch(pick.tournamentRound) {
+      case 2: roundScores.rd1 += pick.pts; break;  // Round 1
+      case 3: roundScores.rd2 += pick.pts; break;  // Round 2
+      case 4: roundScores.s16 += pick.pts; break;  // Sweet 16
+      case 5: roundScores.e8 += pick.pts; break;   // Elite 8
+      case 6: roundScores.ff += pick.pts; break;   // Final Four
+      case 7: roundScores.ncg += pick.pts; break;  // Championship
+    }
+  });
+  
+  // Return 0 values as null to show '-' in table
+  Object.keys(roundScores).forEach(key => {
+    if (roundScores[key] === 0) roundScores[key] = null;
+  });
+  
+  return roundScores;
+}
+
+// ─── PICK COMPARISON ────────────────────────────────────────────────────────
+let compareFilter = { round: 'all', search: '', mode: 'all', personA: '', personB: '' };
+
+function isTeamEliminated(teamId, beforeRound) {
+  // Check if team was eliminated in any round before the given round
+  if (!state.matchups) return false;
+  
+  for (let round = 2; round < beforeRound; round++) {
+    const roundMatchups = state.matchups.filter(m => m.tournamentRound === round);
+    
+    for (const matchup of roundMatchups) {
+      // Check if this team was in this matchup
+      const teamWasInMatchup = matchup.topTeam?.cbsTeamId == teamId || matchup.bottomTeam?.cbsTeamId == teamId;
+      
+      if (teamWasInMatchup && matchup.winnerId) {
+        // Team was in this matchup and there's a winner
+        if (matchup.winnerId != teamId) {
+          // Team lost this matchup - they're eliminated
+          return round;
+        } else {
+          // Team won this round - continue checking next round
+          break; 
+        }
+      }
+    }
+  }
+  
+  return false; // Team not eliminated yet
+}
+
+function renderPickComparison() {
+  if (!state.picks) {
+    document.getElementById('tab-picks').innerHTML = `<div class="empty-state"><span class="big">NO DATA</span>Load picks from Settings first.</div>`;
+    return;
+  }
+
+  const { teamMap, entries } = state.picks;
+  const myEntry = entries.find(e => e.name === CONFIG.myName);
+  const round = compareFilter.round === 'all' ? null : parseInt(compareFilter.round);
+
+  // Preserve focus state before re-rendering
+  const activeEl = document.activeElement;
+  const isSearchFocused = activeEl && activeEl.id === 'compare-search';
+  const cursorPos = isSearchFocused ? activeEl.selectionStart : null;
+
+  // Initialize personA and personB if not set
+  if (!compareFilter.personA && entries.length > 0) compareFilter.personA = entries[0].name;
+  if (!compareFilter.personB && entries.length > 1) compareFilter.personB = entries[1].name;
+
+  let html = `<div class="compare-controls">
+    <select onchange="compareFilter.mode=this.value;renderPickComparison()" style="margin-right:12px;">
+      <option value="all" ${compareFilter.mode==='all'?'selected':''}>All Entries</option>
+      <option value="head-to-head" ${compareFilter.mode==='head-to-head'?'selected':''}>Head-to-Head</option>
+    </select>
+    <select onchange="compareFilter.round=this.value;renderPickComparison()">
+      <option value="all">All rounds</option>
+      ${[2,3,4,5,6,7].map(r=>`<option value="${r}" ${compareFilter.round==r?'selected':''}>${ROUND_INFO[r].name}</option>`).join('')}
+    </select>`;
+
+  if (compareFilter.mode === 'head-to-head') {
+    html += `
+    <select onchange="compareFilter.personA=this.value;renderPickComparison()" style="margin-left:12px;">
+      ${entries.map(e => `<option value="${e.name}" ${compareFilter.personA===e.name?'selected':''}>${e.name}</option>`).join('')}
+    </select>
+    <span style="color:var(--muted);margin:0 6px;">vs</span>
+    <select onchange="compareFilter.personB=this.value;renderPickComparison()">
+      ${entries.map(e => `<option value="${e.name}" ${compareFilter.personB===e.name?'selected':''}>${e.name}</option>`).join('')}
+    </select>`;
+  } else {
+    html += `
+    <input id="compare-search" type="text" placeholder="Search participant..." value="${compareFilter.search}"
+      oninput="compareFilter.search=this.value;renderPickComparison()" style="width:200px;margin-left:12px;">
+    <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;margin-left:12px;">Highlighted = matches your pick</span>`;
+  }
+
+  html += `</div>`;
+
+  // HEAD-TO-HEAD MODE
+  if (compareFilter.mode === 'head-to-head') {
+    const entryA = entries.find(e => e.name === compareFilter.personA);
+    const entryB = entries.find(e => e.name === compareFilter.personB);
+    
+    if (!entryA || !entryB) {
+      html += `<div class="empty-state"><span class="big">SELECT PARTICIPANTS</span>Choose two people to compare.</div>`;
+      document.getElementById('tab-picks').innerHTML = html;
+      return;
+    }
+
+    html += renderHeadToHeadComparison(entryA, entryB, round, teamMap);
+  } else {
+    // ALL ENTRIES MODE
+    html += `<div class="pick-grid">`;
+    const filtered = entries.filter(e => {
+      if (!compareFilter.search) return true;
+      return e.name.toLowerCase().includes(compareFilter.search.toLowerCase());
+    });
+
+  filtered.forEach(entry => {
+    const picks = round ? entry.picks?.filter(p => p.tournamentRound === round) : entry.picks;
+    if (!picks?.length) return;
+
+    // Calculate round-specific stats
+    const roundStats = calculatePickStats(picks, teamMap, round);
+
+    html += `<div class="pick-card">
+      <div class="pick-card-header">
+        ${avatarHtml(entry.name, 24)}
+        <span>${entry.name}</span>
+        ${entry.name === CONFIG.myName ? '<span class="you-tag">YOU</span>' : ''}
+      </div>`;
+
+    // Show round-specific stats if a specific round is selected
+    if (round) {
+      html += `<div class="pick-stats">
+        <div class="pick-stat">
+          <span class="stat-label">Correct</span>
+          <span class="stat-value correct">${roundStats.correct}</span>
+        </div>
+        <div class="pick-stat">
+          <span class="stat-label">Remain</span>
+          <span class="stat-value pending">${roundStats.remaining}</span>
+        </div>
+        <div class="pick-stat">
+          <span class="stat-label">Points</span>
+          <span class="stat-value points">${roundStats.points}</span>
+        </div>
+        <div class="pick-stat">
+          <span class="stat-label">Max Pts</span>
+          <span class="stat-value max">${roundStats.maxPoints}</span>
+        </div>
+      </div>`;
+    }
+
+    html += `<div class="pick-card-body">`;
+
+    picks.forEach(pick => {
+      const team = teamMap[String(pick.cbsTeamId)];
+      const teamName = team ? team.abbrev : `#${pick.cbsTeamId}`;
+      const rInfo = ROUND_INFO[pick.tournamentRound] || {};
+      const matchup = state.matchups?.find(m =>
+        m.tournamentRound === pick.tournamentRound && m.roundOrdinal === pick.roundOrdinal
+      );
+      const correct = matchup?.winnerId ? matchup.winnerId === pick.cbsTeamId : null;
+      const eliminatedInRound = isTeamEliminated(pick.cbsTeamId, pick.tournamentRound);
+      const myPick = myEntry?.picks?.find(p =>
+        p.tournamentRound === pick.tournamentRound && p.roundOrdinal === pick.roundOrdinal
+      );
+      const matchesMe = myPick && myPick.cbsTeamId === pick.cbsTeamId && entry.name !== CONFIG.myName;
+
+      // Get game status
+      const gameStatus = matchup ? getGameStatus(matchup) : { status: 'pending', label: '', class: '' };
+      const statusBadge = gameStatus.label ? `<span class="pick-status ${gameStatus.class}">
+        ${gameStatus.class === 'live' ? '<span class="status-dot"></span>' : ''}${gameStatus.label}
+      </span>` : '';
+
+      let ptsClass = 'pending-pick';
+      let ptsTxt = rInfo.short || '';
+      let teamStyle = matchesMe ? 'color:var(--accent);font-weight:700;' : '';
+      let rowClass = gameStatus.class === 'live' ? 'live' : '';
+      let rowStyle = matchesMe ? 'background:rgba(232,255,71,0.08);border-color:rgba(232,255,71,0.3);' : '';
+      
+      if (eliminatedInRound) {
+        // Team was eliminated in an earlier round - treat same as incorrect
+        ptsClass = 'incorrect';
+        ptsTxt = `✗R${eliminatedInRound - 1}`;
+        teamStyle = matchesMe ? 'color:var(--accent);text-decoration:line-through;opacity:0.7;font-weight:700;' : 'color:var(--red);text-decoration:line-through;opacity:0.7;';
+      } else if (correct === true) { 
+        ptsClass = 'correct'; 
+        const seed = team?.seed||1; 
+        ptsTxt = `+${pick.multiplier*seed}`; 
+      } else if (correct === false) { 
+        ptsClass = 'incorrect'; 
+        ptsTxt = '✗'; 
+        teamStyle = matchesMe ? 'color:var(--accent);text-decoration:line-through;opacity:0.7;font-weight:700;' : 'color:var(--red);text-decoration:line-through;opacity:0.7;';
+      }
+
+      html += `<div class="pick-row ${rowClass}" style="${rowStyle}">
+        <span class="pick-team" style="${teamStyle}">${teamName}</span>
+        <span class="pick-round">${rInfo.short}</span>
+        ${statusBadge}
+        <span class="pick-pts ${ptsClass}">${ptsTxt}</span>
+      </div>`;
+    });
+
+    html += '</div></div>';
+  });
+
+    html += '</div>';
+  }
+
+  document.getElementById('tab-picks').innerHTML = html;
+
+  // Restore focus to search input if it was previously focused
+  if (isSearchFocused) {
+    const searchInput = document.getElementById('compare-search');
+    if (searchInput) {
+      searchInput.focus();
+      if (cursorPos !== null) {
+        searchInput.setSelectionRange(cursorPos, cursorPos);
+      }
+    }
+  }
+}
+
+function renderHeadToHeadComparison(entryA, entryB, round, teamMap) {
+  const picksA = round ? entryA.picks?.filter(p => p.tournamentRound === round) : entryA.picks;
+  const picksB = round ? entryB.picks?.filter(p => p.tournamentRound === round) : entryB.picks;
+
+  // Build a map of all matchups from both entries
+  const matchupMap = new Map();
+  
+  picksA?.forEach(pick => {
+    const key = `${pick.tournamentRound}-${pick.roundOrdinal}`;
+    if (!matchupMap.has(key)) {
+      matchupMap.set(key, { round: pick.tournamentRound, ordinal: pick.roundOrdinal, pickA: pick, pickB: null });
+    } else {
+      matchupMap.get(key).pickA = pick;
+    }
+  });
+  
+  picksB?.forEach(pick => {
+    const key = `${pick.tournamentRound}-${pick.roundOrdinal}`;
+    if (!matchupMap.has(key)) {
+      matchupMap.set(key, { round: pick.tournamentRound, ordinal: pick.roundOrdinal, pickA: null, pickB: pick });
+    } else {
+      matchupMap.get(key).pickB = pick;
+    }
+  });
+
+  // Sort matchups by round and ordinal
+  const matchups = Array.from(matchupMap.values()).sort((a, b) => {
+    if (a.round !== b.round) return a.round - b.round;
+    return a.ordinal - b.ordinal;
+  });
+
+  // Calculate stats
+  const statsA = calculatePickStats(picksA || [], teamMap, round);
+  const statsB = calculatePickStats(picksB || [], teamMap, round);
+  let matches = 0;
+  let differences = 0;
+  matchups.forEach(m => {
+    if (m.pickA && m.pickB) {
+      if (m.pickA.cbsTeamId === m.pickB.cbsTeamId) matches++;
+      else differences++;
+    }
+  });
+
+  let html = `<div style="max-width:900px;margin:20px auto;">
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:20px;margin-bottom:24px;">
+      <div class="pick-card" style="margin:0;">
+        <div class="pick-card-header">
+          ${avatarHtml(entryA.name, 32)}
+          <span style="font-size:16px;font-weight:600;">${entryA.name}</span>
+          ${entryA.name === CONFIG.myName ? '<span class="you-tag">YOU</span>' : ''}
+        </div>
+        <div class="pick-stats" style="margin-top:12px;">
+          <div class="pick-stat">
+            <span class="stat-label">Correct</span>
+            <span class="stat-value correct">${statsA.correct}</span>
+          </div>
+          <div class="pick-stat">
+            <span class="stat-label">Remain</span>
+            <span class="stat-value pending">${statsA.remaining}</span>
+          </div>
+          <div class="pick-stat">
+            <span class="stat-label">Points</span>
+            <span class="stat-value points">${statsA.points}</span>
+          </div>
+          <div class="pick-stat">
+            <span class="stat-label">Max Pts</span>
+            <span class="stat-value max">${statsA.maxPoints}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-width:120px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--muted);">VS</div>
+        <div style="text-align:center;">
+          <div style="color:var(--green);font-family:'DM Mono',monospace;font-size:13px;font-weight:600;">${matches} same</div>
+          <div style="color:var(--red);font-family:'DM Mono',monospace;font-size:13px;font-weight:600;">${differences} diff</div>
+        </div>
+      </div>
+      
+      <div class="pick-card" style="margin:0;">
+        <div class="pick-card-header">
+          ${avatarHtml(entryB.name, 32)}
+          <span style="font-size:16px;font-weight:600;">${entryB.name}</span>
+          ${entryB.name === CONFIG.myName ? '<span class="you-tag">YOU</span>' : ''}
+        </div>
+        <div class="pick-stats" style="margin-top:12px;">
+          <div class="pick-stat">
+            <span class="stat-label">Correct</span>
+            <span class="stat-value correct">${statsB.correct}</span>
+          </div>
+          <div class="pick-stat">
+            <span class="stat-label">Remain</span>
+            <span class="stat-value pending">${statsB.remaining}</span>
+          </div>
+          <div class="pick-stat">
+            <span class="stat-label">Points</span>
+            <span class="stat-value points">${statsB.points}</span>
+          </div>
+          <div class="pick-stat">
+            <span class="stat-label">Max Pts</span>
+            <span class="stat-value max">${statsB.maxPoints}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;background:var(--bg-tertiary);padding:12px;border-bottom:1px solid var(--border);font-weight:600;font-size:13px;">
+        <div style="text-align:center;color:var(--text);">${entryA.name}</div>
+        <div style="text-align:center;color:var(--muted);min-width:100px;">Matchup</div>
+        <div style="text-align:center;color:var(--text);">${entryB.name}</div>
+      </div>`;
+
+  matchups.forEach(m => {
+    const rInfo = ROUND_INFO[m.round] || {};
+    const matchup = state.matchups?.find(mu =>
+      mu.tournamentRound === m.round && mu.roundOrdinal === m.ordinal
+    );
+    
+    const teamA = m.pickA ? teamMap[String(m.pickA.cbsTeamId)] : null;
+    const teamB = m.pickB ? teamMap[String(m.pickB.cbsTeamId)] : null;
+    const teamNameA = teamA ? teamA.abbrev : (m.pickA ? `#${m.pickA.cbsTeamId}` : '-');
+    const teamNameB = teamB ? teamB.abbrev : (m.pickB ? `#${m.pickB.cbsTeamId}` : '-');
+    
+    const sameTeam = m.pickA && m.pickB && m.pickA.cbsTeamId === m.pickB.cbsTeamId;
+    const correctA = m.pickA && matchup?.winnerId ? matchup.winnerId === m.pickA.cbsTeamId : null;
+    const correctB = m.pickB && matchup?.winnerId ? matchup.winnerId === m.pickB.cbsTeamId : null;
+    const eliminatedA = m.pickA ? isTeamEliminated(m.pickA.cbsTeamId, m.round) : false;
+    const eliminatedB = m.pickB ? isTeamEliminated(m.pickB.cbsTeamId, m.round) : false;
+    
+    // Get game status
+    const gameStatus = matchup ? getGameStatus(matchup) : { status: 'pending', label: '', class: '' };
+    const statusBadge = gameStatus.label ? `<div style="font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;display:inline-block;margin-left:6px;background:${gameStatus.class === 'final' ? 'rgba(61,220,132,0.15)' : gameStatus.class === 'live' ? 'rgba(232,255,71,0.2)' : 'var(--surface3)'};color:${gameStatus.class === 'final' ? 'var(--green)' : gameStatus.class === 'live' ? 'var(--accent)' : 'var(--muted2)'};letter-spacing:0.05em;">${gameStatus.label}</div>` : '';
+    
+    let styleA = 'color:var(--text);';
+    let styleB = 'color:var(--text);';
+    let bgColor = 'transparent';
+    
+    if (sameTeam) {
+      bgColor = 'rgba(232,255,71,0.05)';
+      styleA = 'color:var(--accent);font-weight:600;';
+      styleB = 'color:var(--accent);font-weight:600;';
+    }
+    
+    if (eliminatedA || correctA === false) {
+      styleA = 'color:var(--red);text-decoration:line-through;opacity:0.7;';
+    } else if (correctA === true) {
+      styleA += 'color:var(--green);font-weight:600;';
+    }
+    
+    if (eliminatedB || correctB === false) {
+      styleB = 'color:var(--red);text-decoration:line-through;opacity:0.7;';
+    } else if (correctB === true) {
+      styleB += 'color:var(--green);font-weight:600;';
+    }
+
+    html += `
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;padding:10px 12px;border-bottom:1px solid var(--border);background:${bgColor};">
+        <div style="text-align:center;font-family:'DM Mono',monospace;font-size:12px;${styleA}">${teamNameA}</div>
+        <div style="text-align:center;color:var(--muted);font-size:11px;min-width:120px;">${rInfo.short || `R${m.round}`} #${m.ordinal + 1}${statusBadge}</div>
+        <div style="text-align:center;font-family:'DM Mono',monospace;font-size:12px;${styleB}">${teamNameB}</div>
+      </div>`;
+  });
+
+  html += '</div></div>';
+  return html;
+}
+
+function calculatePickStats(picks, teamMap, round) {
+  let correct = 0;
+  let remaining = 0;
+  let points = 0;
+  let potential = 0;
+
+  picks.forEach(pick => {
+    const team = teamMap[String(pick.cbsTeamId)];
+    const seed = team ? team.seed : 1;
+    // ALWAYS use ROUND_INFO multipliers (pick.multiplier from CBS is always 1)
+    const mult = ROUND_INFO[pick.tournamentRound]?.mult || 1;
+    const pickValue = mult * seed;
+
+    const matchup = state.matchups?.find(m =>
+      m.tournamentRound === pick.tournamentRound && m.roundOrdinal === pick.roundOrdinal
+    );
+
+    const pickCorrect = matchup?.winnerId ? matchup.winnerId === pick.cbsTeamId : null;
+    const eliminatedInRound = isTeamEliminated(pick.cbsTeamId, pick.tournamentRound);
+
+    if (eliminatedInRound || pickCorrect === false) {
+      // Pick is wrong - don't count toward max
+    } else if (pickCorrect === true) {
+      correct++;
+      points += pickValue;
+    } else {
+      // Pick is still pending
+      remaining++;
+      potential += pickValue;
+    }
+  });
+
+  // maxPoints = current points + potential from remaining games
+  const maxPoints = points + potential;
+  return { correct, remaining, points, maxPoints };
+}
+
+// ─── ANALYTICS HELPERS ──────────────────────────────────────────────────────
+function saveRankSnapshot() {
+  // Save current standings to rank history
+  if (!state.picks || !state.matchups) return;
+  
+  const standings = computeStandings();
+  const gamesComplete = state.matchups.filter(m => m.winnerId).length;
+  
+  const history = JSON.parse(localStorage.getItem('rankHistory') || '[]');
+  
+  // Only save if games have progressed
+  if (history.length > 0 && history[history.length - 1].gamesComplete === gamesComplete) {
+    return; // No change, don't duplicate
+  }
+  
+  history.push({
+    timestamp: Date.now(),
+    gamesComplete,
+    standings: standings.map((s, i) => ({
+      name: s.name,
+      rank: i + 1,
+      points: s.total,
+      maxPts: s.maxPts
+    }))
+  });
+  
+  localStorage.setItem('rankHistory', JSON.stringify(history));
+  console.log('📊 Rank snapshot saved:', gamesComplete, 'games complete');
+}
+
+function clearRankHistory() {
+  if (confirm('Clear all rank history? This cannot be undone.')) {
+    localStorage.removeItem('rankHistory');
+    renderAnalytics();
+  }
+}
+
+// ─── BRACKET ────────────────────────────────────────────────────────────────
+let bracketFilter = { round: 2 }; // Default to Round 1
+
+function renderBracket() {
+  console.log('🏀 Rendering bracket, matchups:', state.matchups?.length);
+  
+  if (!state.matchups?.length) {
+    document.getElementById('tab-bracket').innerHTML = `<div class="empty-state"><span class="big">NO BRACKET DATA</span>Bracket structure not loaded. Check console for errors.</div>`;
+    return;
+  }
+
+  // Create round selector
+  const availableRounds = [...new Set(state.matchups.map(m => m.tournamentRound))].sort((a,b) => a-b);
+  
+  let html = `<div class="bracket-controls">
+    <div class="round-selector">`;
+  
+  availableRounds.forEach(roundNum => {
+    const roundInfo = ROUND_INFO[roundNum] || { name: `Round ${roundNum}`, short: `R${roundNum}` };
+    const isActive = bracketFilter.round === roundNum;
+    html += `<button class="round-btn ${isActive ? 'active' : ''}" 
+             onclick="bracketFilter.round=${roundNum}; renderBracket()">
+             ${roundInfo.name}
+           </button>`;
+  });
+  
+  html += `</div></div>`;
+
+  // Show the selected round
+  const selectedRound = bracketFilter.round;
+  const roundMatchups = state.matchups.filter(m => m.tournamentRound === selectedRound);
+  const roundInfo = ROUND_INFO[selectedRound] || { name: `Round ${selectedRound}`, short: `R${selectedRound}` };
+
+  html += `<div class="bracket-round-view">
+    <div class="round-title">
+      <h2>${roundInfo.name}</h2>
+      <div class="round-stats">${roundMatchups.length} games</div>
+    </div>`;
+
+  if (selectedRound <= 5) {
+    // Early rounds: Group by region
+    const regions = ['East', 'South', 'West', 'Midwest'];
+    html += '<div class="bracket-regions">';
+    
+    regions.forEach(region => {
+      const regionGames = roundMatchups.filter(m => m.groupName === region)
+        .sort((a, b) => a.roundOrdinal - b.roundOrdinal);
+      
+      if (regionGames.length > 0) {
+        html += `<div class="bracket-region-section">
+          <div class="region-header">${region}</div>
+          <div class="region-games">`;
+        
+        regionGames.forEach(game => {
+          html += renderBracketGame(game);
+        });
+        
+        html += '</div></div>';
+      }
+    });
+    
+    html += '</div>';
+  } else {
+    // Final Four and Championship: Simple list
+    html += '<div class="bracket-finals">';
+    roundMatchups.sort((a, b) => a.roundOrdinal - b.roundOrdinal).forEach(game => {
+      html += renderBracketGame(game);
+    });
+    html += '</div>';
+  }
+
+  html += '</div>';
+
+  document.getElementById('tab-bracket').innerHTML = html;
+  console.log('✅ Bracket rendered successfully');
+}
+
+function isTeamEliminated(cbsTeamId, beforeRound) {
+  // Check if a team has lost any game at any point
+  // (In March Madness, one loss and you're out)
+  const teamLoss = state.matchups.find(m => 
+    m.winnerId && 
+    (m.topTeam?.cbsTeamId === cbsTeamId || m.bottomTeam?.cbsTeamId === cbsTeamId) &&
+    m.winnerId !== cbsTeamId
+  );
+  return !!teamLoss;
+}
+
+function getGameStatus(game) {
+  // If game has a winner, it's final
+  if (game.winnerId) {
+    return { status: 'final', label: 'FINAL', class: 'final' };
+  }
+  
+  // If both teams are TBD, it's not scheduled yet
+  if (game.topTeam?.abbrev === 'TBD' && game.bottomTeam?.abbrev === 'TBD') {
+    return { status: 'pending', label: '', class: '' };
+  }
+  
+  // If one team is TBD, waiting for previous round
+  if (game.topTeam?.abbrev === 'TBD' || game.bottomTeam?.abbrev === 'TBD') {
+    return { status: 'pending', label: '', class: '' };
+  }
+  
+  // Check if manually marked as live
+  if (state.liveGames.has(game.slotId)) {
+    return { status: 'live', label: 'LIVE', class: 'live' };
+  }
+  
+  // Both teams are set but no winner yet
+  return { status: 'upcoming', label: 'UPCOMING', class: 'upcoming' };
+}
+
+function toggleLiveStatus(slotId) {
+  if (state.liveGames.has(slotId)) {
+    state.liveGames.delete(slotId);
+  } else {
+    state.liveGames.add(slotId);
+  }
+  
+  // Persist to localStorage
+  localStorage.setItem('liveGames', JSON.stringify([...state.liveGames]));
+  
+  // Re-render
+  renderResults();
+  if (state.activeTab === 'bracket') renderBracket();
+}
+
+function renderBracketGame(game) {
+  const topWon = game.winnerId && game.topTeam && game.winnerId === game.topTeam.cbsTeamId;
+  const botWon = game.winnerId && game.bottomTeam && game.winnerId === game.bottomTeam.cbsTeamId;
+  
+  const topClass = topWon ? 'winner' : (botWon ? 'eliminated' : (game.topTeam?.abbrev === 'TBD' ? 'tbd' : ''));
+  const botClass = botWon ? 'winner' : (topWon ? 'eliminated' : (game.bottomTeam?.abbrev === 'TBD' ? 'tbd' : ''));
+
+  const gameStatus = getGameStatus(game);
+  const statusBadge = gameStatus.label ? `<div class="game-status-badge ${gameStatus.class}">
+    ${gameStatus.class === 'live' ? '<span class="live-dot"></span>' : ''}${gameStatus.label}
+  </div>` : '';
+
+  return `<div class="bracket-game ${gameStatus.class}">
+    ${statusBadge}
+    <div class="bracket-team ${topClass}">
+      <div class="seed-badge">${game.topItemSeed || '?'}</div>
+      <div class="team-name">${game.topTeam?.abbrev || 'TBD'}</div>
+      <div class="advance-indicator"></div>
+    </div>
+    <div class="bracket-team ${botClass}">
+      <div class="seed-badge">${game.bottomItemSeed || '?'}</div>
+      <div class="team-name">${game.bottomTeam?.abbrev || 'TBD'}</div>
+      <div class="advance-indicator"></div>
+    </div>
+  </div>`;
+}
+
+// ─── RESULTS ────────────────────────────────────────────────────────────────
+let resultsFilter = { round: 2 }; // Default to Round 1
+
+function renderResults() {
+  if (!state.matchups?.length) {
+    document.getElementById('tab-results').innerHTML = `<div class="empty-state"><span class="big">NO DATA</span>Load picks data first.</div>`;
+    return;
+  }
+
+  // Create round selector
+  const rounds = {};
+  state.matchups.forEach(m => {
+    if (!rounds[m.tournamentRound]) rounds[m.tournamentRound] = [];
+    rounds[m.tournamentRound].push(m);
+  });
+
+  const availableRounds = Object.keys(rounds).map(r => parseInt(r)).sort((a,b) => a-b);
+  
+  let html = `<div class="results-controls">
+    <div class="results-header">
+      <h3>Set Game Results</h3>
+      <div class="round-selector">`;
+  
+  availableRounds.forEach(roundNum => {
+    const roundInfo = ROUND_INFO[roundNum] || { name: `Round ${roundNum}`, short: `R${roundNum}` };
+    const isActive = resultsFilter.round === roundNum;
+    html += `<button class="round-btn ${isActive ? 'active' : ''}" 
+             onclick="resultsFilter.round=${roundNum}; renderResults()">
+             ${roundInfo.name}
+           </button>`;
+  });
+  
+  html += `</div></div></div>`;
+
+  // Show the selected round
+  const selectedRound = resultsFilter.round;
+  const roundMatchups = rounds[selectedRound] || [];
+  const roundInfo = ROUND_INFO[selectedRound] || { name: `Round ${selectedRound}`, short: `R${selectedRound}` };
+
+  // Count available games (both teams determined) vs total for round 2+
+  const availableGames = selectedRound > 2 ? roundMatchups.filter(m => m.topTeam?.cbsTeamId && m.bottomTeam?.cbsTeamId) : roundMatchups;
+  const totalGames = roundMatchups.length;
+  const progressText = selectedRound > 2 ? ` (${availableGames.length}/${totalGames} ready)` : '';
+
+  html += `<div class="results-round-view">
+    <div class="round-title">
+      <h2>${roundInfo.name}${progressText}</h2>
+      <div class="round-stats">${availableGames.length} games available</div>
+    </div>`;
+
+  if (selectedRound <= 5) {
+    // Early rounds: Group by region
+    const regions = ['East', 'South', 'West', 'Midwest'];
+    html += '<div class="results-regions">';
+    
+    regions.forEach(region => {
+      const regionGames = availableGames.filter(m => m.groupName === region)
+        .sort((a, b) => a.roundOrdinal - b.roundOrdinal);
+      
+      if (regionGames.length > 0) {
+        html += `<div class="results-region-section">
+          <div class="region-header">${region}</div>
+          <div class="results-grid">`;
+        
+        regionGames.forEach(m => {
+          const topWon = m.winnerId === m.topTeam?.cbsTeamId;
+          const botWon = m.winnerId === m.bottomTeam?.cbsTeamId;
+          const gameStatus = getGameStatus(m);
+          const statusBadge = gameStatus.label ? `<div class="game-status-badge ${gameStatus.class}" style="top:8px;right:8px;">
+            ${gameStatus.class === 'live' ? '<span class="live-dot"></span>' : ''}${gameStatus.label}
+          </div>` : '';
+          
+          const canToggleLive = !m.winnerId && m.topTeam?.abbrev !== 'TBD' && m.bottomTeam?.abbrev !== 'TBD';
+          const isLive = state.liveGames.has(m.slotId);
+          
+          html += `<div class="result-game ${gameStatus.class}">
+            ${statusBadge}
+            <div class="game-teams">
+              <div class="result-team ${topWon ? 'winner' : ''}" onclick="setWinner('${m.slotId}', ${m.topTeam?.cbsTeamId || 'null'})">
+                <span class="seed">${m.topItemSeed}</span>
+                <span class="team">${m.topTeam?.abbrev || '—'}</span>
+                ${topWon ? '<span class="check">✓</span>' : ''}
+              </div>
+              <div class="vs">vs</div>
+              <div class="result-team ${botWon ? 'winner' : ''}" onclick="setWinner('${m.slotId}', ${m.bottomTeam?.cbsTeamId || 'null'})">
+                <span class="seed">${m.bottomItemSeed}</span>
+                <span class="team">${m.bottomTeam?.abbrev || '—'}</span>
+                ${botWon ? '<span class="check">✓</span>' : ''}
+              </div>
+            </div>
+            ${m.winnerId ? `<div class="clear-result" onclick="clearWinner('${m.slotId}')">Clear Result</div>` : ''}
+            ${canToggleLive ? `<div class="live-toggle ${isLive ? 'active' : ''}" onclick="toggleLiveStatus('${m.slotId}')">${isLive ? '🔴 LIVE' : 'Mark as Live'}</div>` : ''}
+          </div>`;
+        });
+        
+        html += '</div></div>';
+      }
+    });
+    
+    html += '</div>';
+  } else {
+    // Final Four and Championship: Simple list
+    html += '<div class="results-finals"><div class="results-grid">';
+    availableGames.sort((a, b) => a.roundOrdinal - b.roundOrdinal).forEach(m => {
+      const topWon = m.winnerId === m.topTeam?.cbsTeamId;
+      const botWon = m.winnerId === m.bottomTeam?.cbsTeamId;
+      const gameStatus = getGameStatus(m);
+      const statusBadge = gameStatus.label ? `<div class="game-status-badge ${gameStatus.class}" style="top:8px;right:8px;">
+        ${gameStatus.class === 'live' ? '<span class="live-dot"></span>' : ''}${gameStatus.label}
+      </div>` : '';
+      
+      const canToggleLive = !m.winnerId && m.topTeam?.abbrev !== 'TBD' && m.bottomTeam?.abbrev !== 'TBD';
+      const isLive = state.liveGames.has(m.slotId);
+      
+      html += `<div class="result-game ${gameStatus.class}">
+        ${statusBadge}
+        <div class="game-teams">
+          <div class="result-team ${topWon ? 'winner' : ''}" onclick="setWinner('${m.slotId}', ${m.topTeam?.cbsTeamId || 'null'})">
+            <span class="seed">${m.topItemSeed}</span>
+            <span class="team">${m.topTeam?.abbrev || '—'}</span>
+            ${topWon ? '<span class="check">✓</span>' : ''}
+          </div>
+          <div class="vs">vs</div>
+          <div class="result-team ${botWon ? 'winner' : ''}" onclick="setWinner('${m.slotId}', ${m.bottomTeam?.cbsTeamId || 'null'})">
+            <span class="seed">${m.bottomItemSeed}</span>
+            <span class="team">${m.bottomTeam?.abbrev || '—'}</span>
+            ${botWon ? '<span class="check">✓</span>' : ''}
+          </div>
+        </div>
+        ${m.winnerId ? `<div class="clear-result" onclick="clearWinner('${m.slotId}')">Clear Result</div>` : ''}
+        ${canToggleLive ? `<div class="live-toggle ${isLive ? 'active' : ''}" onclick="toggleLiveStatus('${m.slotId}')">${isLive ? '🔴 LIVE' : 'Mark as Live'}</div>` : ''}
+      </div>`;
+    });
+    html += '</div></div>';
+  }
+
+  html += '</div>';
+  document.getElementById('tab-results').innerHTML = html;
+}
+
+function setWinner(slotId, teamId) {
+  console.log('🏆 Setting winner for slot:', slotId, 'team:', teamId);
+  
+  // Debug: Show what picks exist for this slot
+  if (state.picks?.entries?.length) {
+    state.picks.entries.forEach(entry => {
+      const pick = entry.picks?.find(p => p.slotId === slotId);
+      if (pick) {
+        const team = state.picks.teamMap[pick.cbsTeamId];
+        console.log(`${entry.name} picked team ${pick.cbsTeamId} (${team?.abbrev}) for slot ${slotId}`);
+      } else {
+        console.log(`${entry.name} has no pick for slot ${slotId}`);
+      }
+    });
+  }
+  
+  if (!state.results) state.results = {};
+  state.results[slotId] = teamId;
+  localStorage.setItem('gameResults', JSON.stringify(state.results));
+  
+  // Remove from live games when winner is set
+  if (state.liveGames.has(slotId)) {
+    state.liveGames.delete(slotId);
+    localStorage.setItem('liveGames', JSON.stringify([...state.liveGames]));
+  }
+  
+  console.log('📊 Current results:', state.results);
+  
+  // Save rank snapshot for timeline tracking
+  saveRankSnapshot();
+  
+  // Update matchup in memory
+  const matchup = state.matchups.find(m => m.slotId === slotId);
+  if (matchup) {
+    matchup.winnerId = teamId;
+    matchup.winnerTeam = [matchup.topTeam, matchup.bottomTeam].find(t => t?.cbsTeamId == teamId);
+    console.log('✅ Updated matchup:', matchup.topTeam?.abbrev, 'vs', matchup.bottomTeam?.abbrev, 'winner:', matchup.winnerTeam?.abbrev);
+    
+    // Advance winner to next round
+    advanceWinnerToNextRound(matchup);
+  } else {
+    console.log('❌ No matchup found for slotId:', slotId);
+  }
+  
+  renderResults();
+  if (state.activeTab === 'standings') renderStandings();
+  if (state.activeTab === 'bracket') renderBracket();
+}
+
+function advanceWinnerToNextRound(completedMatchup) {
+  if (!completedMatchup.winnerTeam?.cbsTeamId) return;
+  
+  const round = completedMatchup.tournamentRound;
+  const ordinal = completedMatchup.roundOrdinal;
+  const winner = completedMatchup.winnerTeam;
+  
+  console.log(`🔄 Advancing ${winner.abbrev} from round ${round} ordinal ${ordinal} to next round`);
+  
+  // Find the next round matchup this winner should advance to
+  let nextRoundMatchup;
+  let isTopSeed;
+  
+  if (round === 2) { // Round 1 -> Round 2
+    const nextOrdinal = Math.floor(ordinal / 2);
+    nextRoundMatchup = state.matchups.find(m => m.tournamentRound === 3 && m.roundOrdinal === nextOrdinal);
+    isTopSeed = (ordinal % 2) === 0; // Even ordinals go to top, odd to bottom
+  } else if (round === 3) { // Round 2 -> Sweet 16
+    const nextOrdinal = Math.floor(ordinal / 2);
+    nextRoundMatchup = state.matchups.find(m => m.tournamentRound === 4 && m.roundOrdinal === nextOrdinal);
+    isTopSeed = (ordinal % 2) === 0;
+  } else if (round === 4) { // Sweet 16 -> Elite 8
+    const nextOrdinal = Math.floor(ordinal / 2);
+    nextRoundMatchup = state.matchups.find(m => m.tournamentRound === 5 && m.roundOrdinal === nextOrdinal);
+    isTopSeed = (ordinal % 2) === 0;
+  } else if (round === 5) { // Elite 8 -> Final Four
+    const nextOrdinal = Math.floor(ordinal / 2);
+    nextRoundMatchup = state.matchups.find(m => m.tournamentRound === 6 && m.roundOrdinal === nextOrdinal);
+    isTopSeed = (ordinal % 2) === 0;
+  } else if (round === 6) { // Final Four -> Championship
+    nextRoundMatchup = state.matchups.find(m => m.tournamentRound === 7 && m.roundOrdinal === 0);
+    isTopSeed = ordinal === 0; // First Final Four game winner goes to top
+  }
+  
+  if (nextRoundMatchup) {
+    if (isTopSeed) {
+      nextRoundMatchup.topTeam = { 
+        ...winner, 
+        cbsTeamId: winner.cbsTeamId || completedMatchup.winnerTeam.cbsTeamId 
+      };
+      nextRoundMatchup.topItemSeed = winner.seed;
+    } else {
+      nextRoundMatchup.bottomTeam = { 
+        ...winner, 
+        cbsTeamId: winner.cbsTeamId || completedMatchup.winnerTeam.cbsTeamId 
+      };
+      nextRoundMatchup.bottomItemSeed = winner.seed;
+    }
+    console.log(`✅ Advanced ${winner.abbrev} to ${isTopSeed ? 'top' : 'bottom'} of round ${nextRoundMatchup.tournamentRound} game ${nextRoundMatchup.roundOrdinal} (ID: ${winner.cbsTeamId || completedMatchup.winnerTeam.cbsTeamId})`);
+  }
+}
+
+function clearWinner(slotId) {
+  if (state.results) delete state.results[slotId];
+  localStorage.setItem('gameResults', JSON.stringify(state.results));
+  
+  const matchup = state.matchups.find(m => m.slotId === slotId);
+  if (matchup) {
+    // Clear winner from this matchup
+    const oldWinner = matchup.winnerTeam;
+    matchup.winnerId = null;
+    matchup.winnerTeam = null;
+    
+    // Remove this team from subsequent rounds
+    if (oldWinner?.cbsTeamId) {
+      clearTeamFromSubsequentRounds(matchup, oldWinner);
+    }
+  }
+  
+  renderResults();
+  if (state.activeTab === 'standings') renderStandings();
+  if (state.activeTab === 'bracket') renderBracket();
+}
+
+function clearTeamFromSubsequentRounds(clearedMatchup, teamToRemove) {
+  const round = clearedMatchup.tournamentRound;
+  const ordinal = clearedMatchup.roundOrdinal;
+  
+  console.log(`🗑️ Removing ${teamToRemove.abbrev} from subsequent rounds after clearing round ${round} game ${ordinal}`);
+  
+  // Find and clear from next round
+  let nextRoundMatchup;
+  let isTopSeed;
+  
+  if (round === 2) { // Round 1 -> Round 2
+    const nextOrdinal = Math.floor(ordinal / 2);
+    nextRoundMatchup = state.matchups.find(m => m.tournamentRound === 3 && m.roundOrdinal === nextOrdinal);
+    isTopSeed = (ordinal % 2) === 0;
+  } else if (round === 3) { // Round 2 -> Sweet 16
+    const nextOrdinal = Math.floor(ordinal / 2);
+    nextRoundMatchup = state.matchups.find(m => m.tournamentRound === 4 && m.roundOrdinal === nextOrdinal);
+    isTopSeed = (ordinal % 2) === 0;
+  } else if (round === 4) { // Sweet 16 -> Elite 8
+    const nextOrdinal = Math.floor(ordinal / 2);
+    nextRoundMatchup = state.matchups.find(m => m.tournamentRound === 5 && m.roundOrdinal === nextOrdinal);
+    isTopSeed = (ordinal % 2) === 0;
+  } else if (round === 5) { // Elite 8 -> Final Four
+    const nextOrdinal = Math.floor(ordinal / 2);
+    nextRoundMatchup = state.matchups.find(m => m.tournamentRound === 6 && m.roundOrdinal === nextOrdinal);
+    isTopSeed = (ordinal % 2) === 0;
+  } else if (round === 6) { // Final Four -> Championship
+    nextRoundMatchup = state.matchups.find(m => m.tournamentRound === 7 && m.roundOrdinal === 0);
+    isTopSeed = ordinal === 0;
+  }
+  
+  if (nextRoundMatchup) {
+    // Clear the team from next round and cascade the clearing
+    if (isTopSeed && nextRoundMatchup.topTeam?.cbsTeamId === teamToRemove.cbsTeamId) {
+      const oldWinner = nextRoundMatchup.winnerTeam;
+      nextRoundMatchup.topTeam = { abbrev: 'TBD', seed: '?', cbsTeamId: null };
+      nextRoundMatchup.topItemSeed = '?';
+      nextRoundMatchup.winnerId = null;
+      nextRoundMatchup.winnerTeam = null;
+      
+      // Clear any result for this next round game
+      if (state.results) delete state.results[nextRoundMatchup.slotId];
+      
+      // Cascade the clearing if this team had won the next round too
+      if (oldWinner?.cbsTeamId === teamToRemove.cbsTeamId) {
+        clearTeamFromSubsequentRounds(nextRoundMatchup, oldWinner);
+      }
+    } else if (!isTopSeed && nextRoundMatchup.bottomTeam?.cbsTeamId === teamToRemove.cbsTeamId) {
+      const oldWinner = nextRoundMatchup.winnerTeam;
+      nextRoundMatchup.bottomTeam = { abbrev: 'TBD', seed: '?', cbsTeamId: null };
+      nextRoundMatchup.bottomItemSeed = '?';
+      nextRoundMatchup.winnerId = null;
+      nextRoundMatchup.winnerTeam = null;
+      
+      // Clear any result for this next round game
+      if (state.results) delete state.results[nextRoundMatchup.slotId];
+      
+      // Cascade the clearing if this team had won the next round too
+      if (oldWinner?.cbsTeamId === teamToRemove.cbsTeamId) {
+        clearTeamFromSubsequentRounds(nextRoundMatchup, oldWinner);
+      }
+    }
+  }
+}
+
+// ─── SETTINGS ───────────────────────────────────────────────────────────────
+function renderSettings() {
+  const picksStatus = state.picks ? '✅ Loaded' : '❌ No data';
+  const matchupsStatus = state.matchups ? `✅ ${state.matchups.length} games` : '❌ No data';
+  const resultsCount = Object.keys(state.results || {}).length;
+  const entriesCount = state.picks?.entries?.length || 0;
+  
+  document.getElementById('tab-settings').innerHTML = `
+    <div class="config-panel">
+      <h3>Configuration</h3>
+      <div class="config-row">
+        <label>jsonbin ID</label>
+        <input type="text" id="cfg-bin-id" value="${CONFIG.jsonbinId}" placeholder="e.g. 6607e0...">
+      </div>
+      <div class="config-row">
+        <label>API Key</label>
+        <input type="password" id="cfg-bin-key" value="${CONFIG.jsonbinKey}" placeholder="$2b$... (leave blank if public bin)">
+      </div>
+      <div class="config-row">
+        <label>Your name</label>
+        <input type="text" id="cfg-my-name" value="${CONFIG.myName}" placeholder="Tyson Tiatia">
+      </div>
+      <div class="config-row" style="margin-top:8px">
+        <button class="save-btn" onclick="saveConfig()">Save & Reload</button>
+      </div>
+    </div>
+    <div class="config-panel" style="margin-top:16px">
+      <h3>Load Participant Picks</h3>
+      <div style="font-size:12px;color:var(--muted2);margin-bottom:8px">
+        After pool locks, get CBS data and paste here:
+      </div>
+      <textarea id="picks-import-data" placeholder="Paste CBS entries JSON array here..." style="width:100%;height:140px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px;font-family:'DM Mono',monospace;font-size:11px;border-radius:4px;resize:vertical"></textarea>
+      <button class="save-btn" onclick="importPicks()" style="margin-top:8px">Import Picks to JSONBin</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4">
+        Get data with this improved script in CBS console:<br>
+        <code style="background:var(--surface2);padding:2px 4px;border-radius:2px;font-size:10px;display:block;margin-top:4px;white-space:pre">
+(async () => {
+  const res = await fetch("https://picks.cbssports.com/graphql", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ 
+      query: \`query EntryQuery($id: ID!) {
+        entry(id: $id) {
+          id name
+          championTeam { abbrev mediumName cbsTeamId }
+          picks { cbsTeamId tournamentRound roundOrdinal slotId multiplier }
+        }
+      }\`,
+      variables: { id: "ivxhi4tzhizdgmrtgi2dkojs" } 
+    })
+  });
+  const data = await res.json();
+  const entry = data.data.entry;
+  console.log("COPY THIS COMPLETE JSON:");
+  console.log(JSON.stringify(entry));
+  copy(JSON.stringify(entry)); // Auto-copies to clipboard
+})();
+        </code>
+        Then paste the complete output here (no ... truncation).
+      </div>
+    </div>
+    <div class="config-panel" style="margin-top:16px">
+      <h3>Data Status</h3>
+      <div style="font-family:'DM Mono',monospace;font-size:12px;line-height:1.6;color:var(--muted2)">
+        <div>📦 Picks data: <span style="color:var(--text)">${picksStatus}</span></div>
+        <div>🏀 Bracket games: <span style="color:var(--text)">${matchupsStatus}</span></div>
+        <div>🏆 Results set: <span style="color:var(--text)">${resultsCount} completed</span></div>
+        <div>👥 Entries: <span style="color:var(--text)">${entriesCount}</span></div>
+        <div style="margin-top:12px;font-size:11px;color:var(--muted)">
+          Use "Set Results" tab to mark game winners manually
+        </div>
+      </div>
+    </div>
+    <div class="config-panel" style="margin-top:0">
+      <h3>Scoring Rules</h3>
+      <table>
+        <thead><tr><th>Round</th><th>CBS Round #</th><th>Multiplier</th><th>Example (1-seed)</th><th>Example (5-seed upset)</th></tr></thead>
+        <tbody>
+          ${[2,3,4,5,6,7].map(r => {
+            const info = ROUND_INFO[r];
+            return `<tr>
+              <td>${info.name}</td>
+              <td><span style="font-family:'DM Mono',monospace;color:var(--muted2)">${r}</span></td>
+              <td><span class="round-pts-badge" style="background:${info.color}22;color:${info.color}">${info.mult}×seed</span></td>
+              <td style="color:var(--muted2)">${info.mult * 1} pts</td>
+              <td style="color:var(--accent)">${info.mult * 5} pts</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="config-panel" style="margin-top:16px;background:var(--surface2);border:1px solid var(--border2)">
+      <h3 style="color:var(--warning)">⚠️ Testing Controls</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+        <button class="save-btn" style="background:var(--orange);border-color:var(--orange)" onclick="clearAllResults()">Clear All Results</button>
+        <button class="save-btn" style="background:var(--red);border-color:var(--red)" onclick="clearRoundResults(2)">Clear Round 1</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+        <button class="save-btn" style="background:var(--red);border-color:var(--red)" onclick="clearRoundResults(3)">Clear Round 2</button>
+        <button class="save-btn" style="background:var(--red);border-color:var(--red)" onclick="clearRoundResults(4)">Clear Sweet 16</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="save-btn" style="background:var(--red);border-color:var(--red)" onclick="clearRoundResults(5)">Clear Elite 8</button>
+        <button class="save-btn" style="background:var(--red);border-color:var(--red)" onclick="clearRoundResults(6)">Clear Final Four</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.4">
+        Use these for testing bracket persistence. Changes are saved to localStorage immediately.
+      </div>
+    </div>`;
+}
+
+function saveConfig() {
+  CONFIG.jsonbinId = document.getElementById('cfg-bin-id').value.trim();
+  CONFIG.jsonbinKey = document.getElementById('cfg-bin-key').value.trim();
+  CONFIG.myName = document.getElementById('cfg-my-name').value.trim();
+  localStorage.setItem('jsonbinId', CONFIG.jsonbinId);
+  localStorage.setItem('jsonbinKey', CONFIG.jsonbinKey);
+  localStorage.setItem('myName', CONFIG.myName);
+  fetchAll();
+}
+
+async function importPicks() {
+  const textarea = document.getElementById('picks-import-data');
+  const rawData = textarea.value.trim();
+  
+  if (!rawData) {
+    alert('Please paste the CBS entries JSON data first');
+    return;
+  }
+  
+  if (!CONFIG.jsonbinId) {
+    alert('Please set your JSONBin ID first in the Configuration section');
+    return;
+  }
+  
+  try {
+    console.log('🔄 Parsing JSON data...');
+    let cbsEntries;
+    
+    // Try to parse as array first, then as single object
+    try {
+      cbsEntries = JSON.parse(rawData);
+      if (!Array.isArray(cbsEntries)) {
+        // If it's a single entry object, wrap it in array
+        cbsEntries = [cbsEntries];
+      }
+    } catch (parseError) {
+      console.error('❌ JSON parse error:', parseError);
+      alert(`Invalid JSON format: ${parseError.message}`);
+      return;
+    }
+    
+    console.log('📥 Processing', cbsEntries.length, 'entries from CBS...');
+    
+    // Transform CBS format to our format
+    const entries = cbsEntries.map(entry => {
+      console.log('Processing entry:', entry.name || entry.id);
+      return {
+        id: entry.id,
+        name: entry.name || 'Unknown',
+        championCbsTeamId: entry.championTeam?.cbsTeamId || null,
+        picks: (entry.picks || []).map(p => ({
+          cbsTeamId: p.cbsTeamId,
+          tournamentRound: p.tournamentRound,
+          roundOrdinal: p.roundOrdinal,
+          slotId: p.slotId,
+          multiplier: p.multiplier
+        }))
+      };
+    });
+    
+    console.log('✅ Transformed entries:', entries);
+    
+    // Merge with existing entries, removing duplicates by ID
+    const existingEntries = state.picks?.entries || [];
+    const newEntryIds = entries.map(e => e.id);
+    const filteredExisting = existingEntries.filter(e => !newEntryIds.includes(e.id));
+    const mergedEntries = [...filteredExisting, ...entries];
+    
+    console.log('📋 Merging entries:');
+    console.log('  - Existing entries:', existingEntries.length);
+    console.log('  - New entries:', entries.length);
+    console.log('  - After merge:', mergedEntries.length);
+    
+    // Update current picks data, preserving teamMap
+    const updatedData = {
+      ...state.picks,
+      entries: mergedEntries,
+      locked: true,
+      lastUpdated: new Date().toISOString()
+    };
+    
+    console.log('🔄 Saving to JSONBin ID:', CONFIG.jsonbinId);
+    
+    // Save to JSONBin
+    const headers = { 
+      'Content-Type': 'application/json'
+    };
+    if (CONFIG.jsonbinKey) {
+      headers['X-Access-Key'] = CONFIG.jsonbinKey;
+    }
+    
+    console.log('📡 Making PUT request to JSONBin...');
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.jsonbinId}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(updatedData)
+    });
+    
+    console.log('📡 JSONBin response:', res.status, res.statusText);
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('❌ JSONBin error response:', errorText);
+      throw new Error(`JSONBin save failed: ${res.status} ${res.statusText}\\n${errorText}`);
+    }
+    
+    const result = await res.json();
+    console.log('✅ JSONBin save successful:', result);
+    
+    // Update local state
+    state.picks = updatedData;
+    
+    console.log('✅ Picks imported and saved to JSONBin');
+    textarea.value = '';
+    alert(`Successfully imported ${entries.length} brackets! Total: ${mergedEntries.length} participants.`);
+    fetchAll();
+    
+  } catch (e) {
+    console.error('❌ Import failed:', e);
+    alert(`Import failed: ${e.message}\\n\\nCheck browser console (F12) for details`);
+  }
+}
+
+// ─── TESTING CONTROLS ───────────────────────────────────────────────────────
+function clearAllResults() {
+  if (!confirm('⚠️ Clear ALL game results? This will reset the entire tournament.')) {
+    return;
+  }
+  
+  console.log('🗑️ Clearing all results...');
+  
+  // Clear localStorage results
+  state.results = {};
+  localStorage.setItem('gameResults', JSON.stringify(state.results));
+  
+  // Reset all matchup winners
+  if (state.matchups) {
+    state.matchups.forEach(matchup => {
+      matchup.winnerId = null;
+      matchup.winnerTeam = null;
+      
+      // Reset generated round teams back to TBD (but keep Round 1 original teams)
+      if (matchup.tournamentRound > 2) {
+        matchup.topTeam = { abbrev: 'TBD', seed: '?', cbsTeamId: null };
+        matchup.bottomTeam = { abbrev: 'TBD', seed: '?', cbsTeamId: null };
+        matchup.topItemSeed = '?';
+        matchup.bottomItemSeed = '?';
+      }
+    });
+  }
+  
+  console.log('✅ All results cleared');
+  alert('✅ All results cleared! Tournament reset to initial state.');
+  renderCurrentView();
+}
+
+function clearRoundResults(tournamentRound) {
+  const roundName = ROUND_INFO[tournamentRound]?.name || `Round ${tournamentRound}`;
+  
+  if (!confirm(`⚠️ Clear all ${roundName} results? This will also clear subsequent rounds.`)) {
+    return;
+  }
+  
+  console.log(`🗑️ Clearing ${roundName} results (tournament round ${tournamentRound})...`);
+  
+  // Find all matchups for this round and later rounds
+  const matchupsToReset = state.matchups?.filter(m => m.tournamentRound >= tournamentRound) || [];
+  
+  matchupsToReset.forEach(matchup => {
+    // Clear winner
+    matchup.winnerId = null;
+    matchup.winnerTeam = null;
+    
+    // Clear from localStorage
+    if (state.results[matchup.slotId]) {
+      delete state.results[matchup.slotId];
+    }
+    
+    // Reset teams to TBD for generated rounds (but keep Round 1 original teams)
+    if (matchup.tournamentRound > 2) {
+      matchup.topTeam = { abbrev: 'TBD', seed: '?', cbsTeamId: null };
+      matchup.bottomTeam = { abbrev: 'TBD', seed: '?', cbsTeamId: null };
+      matchup.topItemSeed = '?';
+      matchup.bottomItemSeed = '?';
+    }
+  });
+  
+  // Save updated results to localStorage
+  localStorage.setItem('gameResults', JSON.stringify(state.results));
+  
+  console.log(`✅ Cleared ${matchupsToReset.length} matchups from ${roundName} onwards`);
+  alert(`✅ ${roundName} and subsequent rounds cleared!`);
+  renderCurrentView();
+}
+
+function renderCurrentView() {
+  // Re-render the current active tab
+  if (state.activeTab === 'standings') renderStandings();
+  else if (state.activeTab === 'picks') renderPickComparison();
+  else if (state.activeTab === 'analytics') renderAnalytics();
+  else if (state.activeTab === 'bracket') renderBracket();
+  else if (state.activeTab === 'results') renderResults();
+  else if (state.activeTab === 'settings') renderSettings();
+}
+
+// ─── ANALYTICS ──────────────────────────────────────────────────────────────
+function renderAnalytics() {
+  if (!state.picks || !state.matchups) {
+    document.getElementById('tab-analytics').innerHTML = `<div class="empty-state"><span class="big">NO DATA</span>Load picks data first.</div>`;
+    return;
+  }
+
+  const { entries, teamMap } = state.picks;
+  
+  let html = `<div style="max-width:1200px;margin:0 auto;padding:20px;">
+    <h1 style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:0.08em;margin:0 0 24px 0;color:var(--text);">📊 Pool Analytics</h1>`;
+
+  // 1. WIN PROBABILITY
+  html += renderWinProbability(entries, teamMap);
+  
+  // 2. RANK TIMELINE
+  html += renderRankTimeline();
+  
+  // 3. CHAMPION DASHBOARD
+  html += renderChampionDashboard(entries, teamMap);
+  
+  // 4. PICK POPULARITY
+  html += renderPickPopularity(entries, teamMap);
+  
+  // 5. LEVERAGE ANALYSIS
+  html += renderLeverageAnalysis(entries, teamMap);
+  
+  html += '</div>';
+  document.getElementById('tab-analytics').innerHTML = html;
+}
+
+function renderWinProbability(entries, teamMap) {
+  const standings = computeStandings();
+  if (!standings.length) return '';
+  
+  const leader = standings[0];
+  const totalGames = state.matchups.length;
+  const finishedGames = state.matchups.filter(m => m.winnerId).length;
+  const tournamentProgress = (finishedGames / totalGames) * 100;
+  
+  // Calculate win probability for each person
+  const probabilities = standings.map((entry, rank) => {
+    const pointsBack = leader.total - entry.total;
+    const canCatchUp = entry.maxPts >= leader.total;
+    const canWin = entry.maxPts > leader.total || (entry.maxPts === leader.total && rank === 0);
+    
+    let winProb = 0;
+    if (rank === 0) {
+      // Leader's probability based on padding
+      const padding = entry.total - (standings[1]?.maxPts || 0);
+      if (padding > 0) winProb = 95; // Already clinched
+      else winProb = 40 + (tournamentProgress / 2); // 40-90% depending on progress
+    } else if (!canCatchUp) {
+      winProb = 0; // Mathematically eliminated
+    } else {
+      // Calculate based on gap and remaining games
+      const gamesRemaining = totalGames - finishedGames;
+      const maxGain = entry.maxPts - entry.total;
+      const needToGain = pointsBack + 1;
+      
+      if (gamesRemaining === 0) {
+        winProb = 0;
+      } else {
+        const gainPercentage = needToGain / maxGain;
+        winProb = Math.max(1, Math.min(35, 35 * (1 - gainPercentage) * (gamesRemaining / 63)));
+      }
+    }
+    
+    return {
+      ...entry,
+      winProb: Math.round(winProb),
+      eliminated: !canWin,
+      rank: rank + 1
+    };
+  });
+  
+  // Sort by probability
+  const sorted = [...probabilities].sort((a, b) => b.winProb - a.winProb);
+  
+  let html = `<div class="analytics-section" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:24px;">
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.06em;margin:0 0 16px 0;color:var(--text);">🎯 Win Probability</h2>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">Estimated chance to win the pool based on current standings and remaining games</div>
+    <div style="display:grid;gap:10px;">`;
+  
+  sorted.forEach(entry => {
+    const isMe = entry.name === CONFIG.myName;
+    const color = entry.winProb > 50 ? 'var(--green)' : entry.winProb > 20 ? 'var(--accent)' : entry.winProb > 0 ? 'var(--blue)' : 'var(--red)';
+    const bgColor = entry.winProb > 50 ? 'rgba(61,220,132,0.1)' : entry.winProb > 20 ? 'rgba(232,255,71,0.1)' : 'rgba(91,156,246,0.1)';
+    
+    html += `<div style="background:${isMe ? 'var(--accent-dim)' : 'var(--surface2)'};border-radius:6px;padding:14px;border${isMe ? ':2px solid var(--accent)' : ':1px solid var(--border)'};">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--muted2);min-width:35px;">#${entry.rank}</span>
+          <span style="font-weight:${isMe ? '700' : '600'};color:${isMe ? 'var(--accent)' : 'var(--text)'};">${entry.name}</span>
+          ${isMe ? '<span class="you-tag">YOU</span>' : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="text-align:right;">
+            <div style="font-size:10px;color:var(--muted2);">Current / Max</div>
+            <div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text);">${entry.total} / ${entry.maxPts}</div>
+          </div>
+          <div style="text-align:right;min-width:60px;">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:${color};line-height:1;">${entry.winProb}%</div>
+            <div style="font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:0.05em;">
+              ${entry.eliminated ? 'Eliminated' : entry.winProb > 50 ? 'Favorite' : entry.winProb > 20 ? 'Contender' : entry.winProb > 0 ? 'Long Shot' : 'Out'}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--surface3);height:8px;border-radius:4px;overflow:hidden;">
+        <div style="background:${color};width:${entry.winProb}%;height:100%;transition:width 0.5s ease;border-radius:4px;"></div>
+      </div>
+    </div>`;
+  });
+  
+  html += `</div></div>`;
+  return html;
+}
+
+function renderRankTimeline() {
+  // Load rank history from localStorage
+  const history = JSON.parse(localStorage.getItem('rankHistory') || '[]');
+  
+  if (history.length === 0) {
+    return `<div class="analytics-section" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:24px;">
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.06em;margin:0 0 16px 0;color:var(--text);">📈 Rank Timeline</h2>
+      <div style="color:var(--muted);text-align:center;padding:40px 20px;">
+        <div style="font-size:48px;margin-bottom:12px;">📊</div>
+        <div>Rank changes will appear here as games are completed.</div>
+        <div style="font-size:12px;margin-top:8px;color:var(--muted2);">History tracking started now!</div>
+      </div>
+    </div>`;
+  }
+  
+  // Get all unique names
+  const allNames = [...new Set(history.flatMap(snapshot => snapshot.standings.map(s => s.name)))];
+  const myName = CONFIG.myName;
+  
+  // Build timeline data for each person
+  const timelineData = allNames.map(name => {
+    return {
+      name,
+      isMe: name === myName,
+      ranks: history.map(snapshot => {
+        const standing = snapshot.standings.find(s => s.name === name);
+        return standing ? standing.rank : null;
+      })
+    };
+  });
+  
+  // Only show top 5 + user if not in top 5
+  let displayData = timelineData.slice(0, 5);
+  if (myName && !displayData.find(d => d.isMe)) {
+    const myData = timelineData.find(d => d.isMe);
+    if (myData) displayData.push(myData);
+  }
+  
+  const maxRank = Math.max(...timelineData.flatMap(d => d.ranks.filter(r => r !== null)));
+  
+  let html = `<div class="analytics-section" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:24px;">
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.06em;margin:0 0 16px 0;color:var(--text);">📈 Rank Timeline</h2>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:20px;">${history.length} snapshots • Showing ${displayData.length} brackets</div>`;
+  
+  // Simple visual timeline
+  displayData.forEach((person, idx) => {
+    const latestRank = person.ranks[person.ranks.length - 1];
+    const firstRank = person.ranks[0];
+    const trend = firstRank && latestRank ? (firstRank > latestRank ? '📈' : firstRank < latestRank ? '📉' : '━') : '━';
+    const trendColor = firstRank > latestRank ? 'var(--green)' : firstRank < latestRank ? 'var(--red)' : 'var(--muted)';
+    
+    html += `<div style="margin-bottom:16px;padding:12px;background:${person.isMe ? 'var(--accent-dim)' : 'var(--surface2)'};border-radius:6px;border:${person.isMe ? '1px solid var(--accent)' : '1px solid var(--border)'};">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-weight:${person.isMe ? '700' : '600'};color:${person.isMe ? 'var(--accent)' : 'var(--text)'};">${person.name}</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:16px;">${trend}</span>
+          <span style="font-size:12px;color:var(--muted2);">Rank ${latestRank || '?'}</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;height:30px;">
+        ${person.ranks.map((rank, i) => {
+          if (rank === null) return `<div style="flex:1;height:8px;background:var(--surface3);border-radius:2px;"></div>`;
+          const positionPct = ((rank - 1) / (maxRank - 1)) * 100;
+          const color = rank === 1 ? 'var(--green)' : rank <= 3 ? 'var(--accent)' : rank <= 5 ? 'var(--blue)' : 'var(--muted)';
+          return `<div style="flex:1;position:relative;height:30px;">
+            <div style="position:absolute;bottom:${100-positionPct}%;left:50%;transform:translateX(-50%);width:8px;height:8px;background:${color};border-radius:50%;border:2px solid var(--bg);"></div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+  
+  html += `<div style="margin-top:16px;padding:12px;background:var(--surface3);border-radius:6px;text-align:center;">
+    <button onclick="clearRankHistory()" style="background:var(--red);color:white;border:none;padding:8px 16px;border-radius:4px;font-size:12px;cursor:pointer;font-weight:600;">Clear History</button>
+  </div></div>`;
+  
+  return html;
+}
+
+function renderChampionDashboard(entries, teamMap) {
+  // Count champion picks
+  const championCounts = {};
+  entries.forEach(entry => {
+    const champId = entry.championCbsTeamId;
+    if (!champId) return;
+    if (!championCounts[champId]) {
+      championCounts[champId] = { count: 0, alive: 0, eliminated: 0, names: [] };
+    }
+    championCounts[champId].count++;
+    championCounts[champId].names.push(entry.name);
+    
+    // Check if champion is still alive
+    const eliminated = isTeamEliminated(champId, 8); // Check if eliminated before championship
+    if (eliminated) championCounts[champId].eliminated++;
+    else championCounts[champId].alive++;
+  });
+
+  // Sort by popularity
+  const champData = Object.entries(championCounts)
+    .map(([cbsId, data]) => ({
+      team: teamMap[cbsId],
+      cbsId: parseInt(cbsId),
+      ...data
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  const totalAlive = champData.reduce((sum, c) => sum + c.alive, 0);
+  const totalEliminated = champData.reduce((sum, c) => sum + c.eliminated, 0);
+
+  let html = `<div class="analytics-section" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:24px;">
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.06em;margin:0 0 16px 0;color:var(--text);">🏆 Champion Pick Analysis</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;">
+      <div style="background:var(--surface2);padding:12px;border-radius:6px;text-align:center;">
+        <div style="font-size:28px;font-weight:700;color:var(--accent);font-family:'Bebas Neue',sans-serif;">${champData.length}</div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;">Different Picks</div>
+      </div>
+      <div style="background:var(--surface2);padding:12px;border-radius:6px;text-align:center;">
+        <div style="font-size:28px;font-weight:700;color:var(--green);font-family:'Bebas Neue',sans-serif;">${totalAlive}</div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;">Still Alive</div>
+      </div>
+      <div style="background:var(--surface2);padding:12px;border-radius:6px;text-align:center;">
+        <div style="font-size:28px;font-weight:700;color:var(--red);font-family:'Bebas Neue',sans-serif;">${totalEliminated}</div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;">Eliminated</div>
+      </div>
+    </div>`;
+
+  champData.forEach(champ => {
+    const isAlive = champ.alive > 0;
+    const percentage = Math.round((champ.count / entries.length) * 100);
+    
+    html += `<div style="margin-bottom:16px;padding:16px;background:var(--surface2);border-radius:6px;border-left:3px solid ${isAlive ? 'var(--green)' : 'var(--red)'};">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:${isAlive ? 'var(--green)' : 'var(--red)'};">${champ.team?.abbrev || '???'}</span>
+          <span style="font-size:13px;color:var(--text);">${champ.team?.name || 'Unknown'}</span>
+          <span style="font-size:11px;color:var(--muted);background:var(--surface3);padding:2px 6px;border-radius:3px;">Seed ${champ.team?.seed || '?'}</span>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:20px;font-weight:700;color:var(--accent);font-family:'Bebas Neue',sans-serif;">${champ.count}</div>
+          <div style="font-size:10px;color:var(--muted);">${percentage}%</div>
+        </div>
+      </div>
+      <div style="background:var(--surface3);height:6px;border-radius:3px;overflow:hidden;margin-bottom:8px;">
+        <div style="background:${isAlive ? 'var(--green)' : 'var(--red)'};height:100%;width:${percentage}%;transition:width 0.3s ease;"></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted2);">Picked by: ${champ.names.join(', ')}</div>
+      <div style="margin-top:6px;font-size:11px;font-weight:600;color:${isAlive ? 'var(--green)' : 'var(--red)'};">
+        ${isAlive ? '✓ Still in contention' : '✗ Eliminated'}
+      </div>
+    </div>`;
+  });
+
+  html += '</div>';
+  return html;
+}
+
+function renderPickPopularity(entries, teamMap) {
+  // Find the earliest round with available games (both teams determined)
+  const availableGames = state.matchups.filter(m => 
+    m.topTeam?.cbsTeamId && m.bottomTeam?.cbsTeamId
+  );
+  
+  if (availableGames.length === 0) {
+    return `<div class="analytics-section" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:24px;">
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.06em;margin:0 0 16px 0;color:var(--text);">📈 Pick Consensus</h2>
+      <div style="color:var(--muted);text-align:center;padding:20px;">No games available yet. Teams are still being determined!</div>
+    </div>`;
+  }
+
+  // Find the earliest round with incomplete games, or show the most recent round
+  const rounds = [...new Set(availableGames.map(g => g.tournamentRound))].sort((a, b) => a - b);
+  let targetRound = rounds[rounds.length - 1]; // Default to latest round
+  
+  for (const round of rounds) {
+    const roundGames = availableGames.filter(g => g.tournamentRound === round);
+    const incompleteInRound = roundGames.filter(g => !g.winnerId).length;
+    if (incompleteInRound > 0) {
+      targetRound = round;
+      break;
+    }
+  }
+  
+  const gamesToShow = availableGames.filter(g => g.tournamentRound === targetRound);
+  const roundInfo = ROUND_INFO[targetRound] || { name: `Round ${targetRound}` };
+  const complete = gamesToShow.filter(g => g.winnerId).length;
+  const total = gamesToShow.length;
+
+  let html = `<div class="analytics-section" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:24px;">
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.06em;margin:0 0 16px 0;color:var(--text);">📈 Pick Consensus: ${roundInfo.name}</h2>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">
+      Showing how many people picked each team to advance • ${complete}/${total} games complete
+    </div>`;
+
+  gamesToShow.forEach(game => {
+    const topTeamId = game.topTeam.cbsTeamId;
+    const bottomTeamId = game.bottomTeam.cbsTeamId;
+    
+    // Count picks for this matchup
+    let topCount = 0;
+    let bottomCount = 0;
+    const topPickers = [];
+    const bottomPickers = [];
+    
+    entries.forEach(entry => {
+      const pick = entry.picks?.find(p => 
+        p.tournamentRound === game.tournamentRound && 
+        p.roundOrdinal === game.roundOrdinal
+      );
+      
+      if (pick) {
+        if (pick.cbsTeamId === topTeamId) {
+          topCount++;
+          topPickers.push(entry.name);
+        } else if (pick.cbsTeamId === bottomTeamId) {
+          bottomCount++;
+          bottomPickers.push(entry.name);
+        }
+      }
+    });
+
+    const total = topCount + bottomCount;
+    const topPct = total > 0 ? Math.round((topCount / total) * 100) : 0;
+    const bottomPct = total > 0 ? Math.round((bottomCount / total) * 100) : 0;
+    
+    // Check if game is finished
+    const isFinished = game.winnerId !== null;
+    const topWon = game.winnerId === topTeamId;
+    const bottomWon = game.winnerId === bottomTeamId;
+    
+    const consensus = Math.max(topCount, bottomCount);
+    const isUnanimous = consensus === entries.length;
+    const isHighConsensus = consensus >= entries.length * 0.75;
+    
+    // Check if user is contrarian
+    const myEntry = entries.find(e => e.name === CONFIG.myName);
+    const myPick = myEntry?.picks?.find(p => 
+      p.tournamentRound === game.tournamentRound && 
+      p.roundOrdinal === game.roundOrdinal
+    );
+    const isContrarian = myPick && (
+      (myPick.cbsTeamId === topTeamId && topCount < bottomCount) ||
+      (myPick.cbsTeamId === bottomTeamId && bottomCount < topCount)
+    );
+
+    html += `<div style="margin-bottom:16px;padding:14px;background:var(--surface2);border-radius:6px;${isUnanimous ? 'border:1px solid var(--accent);' : ''}">
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;">
+        
+        <div style="text-align:right;">
+          <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-bottom:4px;">
+            <span style="font-size:14px;font-weight:600;color:${isFinished ? (topWon ? 'var(--green)' : 'var(--red)') : 'var(--text)'};">${game.topTeam.abbrev}</span>
+            <span style="font-size:10px;color:var(--muted);background:var(--surface3);padding:2px 4px;border-radius:2px;">${game.topItemSeed}</span>
+            ${isFinished && topWon ? '<span style="color:var(--green);font-size:12px;">✓</span>' : ''}
+          </div>
+          <div style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--accent);">${topCount}</div>
+          <div style="font-size:10px;color:var(--muted2);">${topPct}%</div>
+        </div>
+
+        <div style="text-align:center;min-width:40px;">
+          <div style="font-size:11px;color:var(--muted);font-weight:600;">VS</div>
+          ${isUnanimous ? '<div style="font-size:8px;color:var(--accent);margin-top:2px;">100%</div>' : ''}
+          ${isContrarian && !isUnanimous ? '<div style="font-size:8px;color:var(--accent);margin-top:2px;">⚠️</div>' : ''}
+        </div>
+
+        <div style="text-align:left;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+            ${isFinished && bottomWon ? '<span style="color:var(--green);font-size:12px;">✓</span>' : ''}
+            <span style="font-size:10px;color:var(--muted);background:var(--surface3);padding:2px 4px;border-radius:2px;">${game.bottomItemSeed}</span>
+            <span style="font-size:14px;font-weight:600;color:${isFinished ? (bottomWon ? 'var(--green)' : 'var(--red)') : 'var(--text)'};">${game.bottomTeam.abbrev}</span>
+          </div>
+          <div style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--accent);">${bottomCount}</div>
+          <div style="font-size:10px;color:var(--muted2);">${bottomPct}%</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:${topPct}% ${bottomPct}%;height:4px;border-radius:2px;overflow:hidden;margin-top:8px;background:var(--surface3);">
+        <div style="background:${isFinished ? (topWon ? 'var(--green)' : 'var(--red)') : 'var(--accent)'};"></div>
+        <div style="background:${isFinished ? (bottomWon ? 'var(--green)' : 'var(--red)') : 'var(--muted)'};"></div>
+      </div>
+      ${isContrarian ? '<div style="margin-top:6px;font-size:10px;color:var(--accent);font-weight:600;">⚠️ You picked the underdog!</div>' : ''}
+      ${isUnanimous ? '<div style="margin-top:6px;font-size:10px;color:var(--accent);font-weight:600;">🎯 Unanimous pick!</div>' : ''}
+      ${isHighConsensus && !isUnanimous ? '<div style="margin-top:6px;font-size:10px;color:var(--green);font-weight:600;">📍 High consensus (75%+)</div>' : ''}
+    </div>`;
+  });
+
+  html += '</div>';
+  return html;
+}
+
+function renderLeverageAnalysis(entries, teamMap) {
+  // Find games that are live or upcoming (not finished)
+  const activeGames = state.matchups.filter(m => 
+    !m.winnerId && 
+    m.topTeam?.cbsTeamId && 
+    m.bottomTeam?.cbsTeamId
+  ).slice(0, 10); // Top 10 games
+
+  if (activeGames.length === 0) {
+    return `<div class="analytics-section" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:24px;">
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.06em;margin:0 0 16px 0;color:var(--text);">⚡ Game Leverage</h2>
+      <div style="color:var(--muted);text-align:center;padding:20px;">No upcoming games to analyze. All games are complete!</div>
+    </div>`;
+  }
+
+  let html = `<div class="analytics-section" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:24px;">
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.06em;margin:0 0 16px 0;color:var(--text);">⚡ Game Leverage Analysis</h2>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">See who benefits most from each game outcome</div>`;
+
+  activeGames.forEach(game => {
+    const rInfo = ROUND_INFO[game.tournamentRound] || {};
+    const topTeamId = game.topTeam.cbsTeamId;
+    const bottomTeamId = game.bottomTeam.cbsTeamId;
+    
+    // Count who picked each team
+    const topPickers = [];
+    const bottomPickers = [];
+    const noPick = [];
+    
+    entries.forEach(entry => {
+      const pick = entry.picks?.find(p => 
+        p.tournamentRound === game.tournamentRound && 
+        p.roundOrdinal === game.roundOrdinal
+      );
+      
+      if (pick) {
+        if (pick.cbsTeamId === topTeamId) {
+          topPickers.push(entry.name);
+        } else if (pick.cbsTeamId === bottomTeamId) {
+          bottomPickers.push(entry.name);
+        }
+      } else {
+        noPick.push(entry.name);
+      }
+    });
+
+    const affected = topPickers.length + bottomPickers.length;
+    const leverage = Math.round((affected / entries.length) * 100);
+    const isHighLeverage = leverage >= 80;
+    
+    const seed1 = game.topTeam.seed || 1;
+    const seed2 = game.bottomTeam.seed || 1;
+    const mult = ROUND_INFO[game.tournamentRound]?.mult || 1;
+    const potentialPoints1 = mult * seed1;
+    const potentialPoints2 = mult * seed2;
+
+    html += `<div style="margin-bottom:16px;padding:16px;background:var(--surface2);border-radius:6px;${isHighLeverage ? 'border:1px solid var(--accent);' : ''}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div>
+          <div style="font-size:16px;font-weight:600;color:var(--text);">${game.topTeam.abbrev} vs ${game.bottomTeam.abbrev}</div>
+          <div style="font-size:11px;color:var(--muted);">${rInfo.name || `Round ${game.tournamentRound}`} • Game #${game.roundOrdinal + 1}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--accent);">${leverage}%</div>
+          <div style="font-size:9px;color:var(--muted2);text-transform:uppercase;">Pool Impact</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="padding:12px;background:var(--surface3);border-radius:4px;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">${game.topTeam.abbrev} wins</div>
+          <div style="font-size:11px;color:var(--muted2);margin-bottom:4px;">${topPickers.length} people gain ${potentialPoints1} pts</div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.3;">${topPickers.slice(0, 5).join(', ')}${topPickers.length > 5 ? ` +${topPickers.length - 5} more` : ''}</div>
+        </div>
+        <div style="padding:12px;background:var(--surface3);border-radius:4px;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">${game.bottomTeam.abbrev} wins</div>
+          <div style="font-size:11px;color:var(--muted2);margin-bottom:4px;">${bottomPickers.length} people gain ${potentialPoints2} pts</div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.3;">${bottomPickers.slice(0, 5).join(', ')}${bottomPickers.length > 5 ? ` +${bottomPickers.length - 5} more` : ''}</div>
+        </div>
+      </div>
+      ${isHighLeverage ? '<div style="margin-top:8px;font-size:10px;color:var(--accent);font-weight:600;">🔥 High impact game - affects 80%+ of pool!</div>' : ''}
+    </div>`;
+  });
+
+  html += '</div>';
+  return html;
+}
+
+// ─── TAB SWITCHING ──────────────────────────────────────────────────────────
+function showTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['standings','picks','analytics','bracket','results','settings'].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = t === tab ? '' : 'none';
+  });
+  state.activeTab = tab;
+  if (tab === 'settings') renderSettings();
+  else if (tab === 'standings') renderStandings();
+  else if (tab === 'picks') renderPickComparison();
+  else if (tab === 'analytics') renderAnalytics();
+  else if (tab === 'bracket') renderBracket();
+  else if (tab === 'results') renderResults();
+}
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+renderSettings();
+fetchAll();
+
+// Poll every 60s
+setInterval(() => {
+  // Only poll when visible and NOT actively setting results
+  if (document.visibilityState === 'visible' && state.activeTab !== 'results') {
+    console.log('⏰ Polling for updates (skipping during active result entry)');
+    fetchAll();
+  }
+}, CONFIG.pollInterval * 1000);
+</script>
+</body>
+</html>
