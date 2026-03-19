@@ -1510,8 +1510,30 @@ function computeStandings() {
 
 // ─── FETCH ──────────────────────────────────────────────────────────────────
 async function fetchPicks() {
-  console.log('🔄 Loading picks from local files...');
+  console.log('🔄 Loading picks...');
   
+  // Try JSONBin first if configured (better data quality)
+  if (CONFIG.jsonbinId) {
+    console.log('🔄 Trying JSONBin first...');
+    try {
+      const headers = { 'X-Access-Key': CONFIG.jsonbinKey };
+      if (!CONFIG.jsonbinKey) delete headers['X-Access-Key'];
+      const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.jsonbinId}/latest`, { headers });
+      console.log('📦 JSONBin response:', res.status, res.statusText);
+      if (res.ok) {
+        const data = await res.json();
+        console.log('✅ JSONBin picks data loaded:', data.record);
+        return data.record;
+      } else {
+        console.log('❌ JSONBin failed, trying local files...');
+      }
+    } catch (error) {
+      console.log('❌ JSONBin error:', error.message, '- trying local files...');
+    }
+  }
+  
+  // Fallback to local files
+  console.log('🔄 Loading from local files...');
   try {
     const allEntries = [];
     const teamMap = {};
@@ -1634,20 +1656,6 @@ async function fetchPicks() {
     
   } catch (error) {
     console.error('❌ Error loading local picks:', error);
-    
-    // Fallback: try JSONBin if configured
-    if (CONFIG.jsonbinId) {
-      console.log('🔄 Falling back to JSONBin...'); 
-      const headers = { 'X-Access-Key': CONFIG.jsonbinKey };
-      if (!CONFIG.jsonbinKey) delete headers['X-Access-Key'];
-      const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.jsonbinId}/latest`, { headers });
-      console.log('📦 JSONBin response:', res.status, res.statusText);
-      if (!res.ok) throw new Error(`jsonbin ${res.status}: ${res.statusText}`);
-      const data = await res.json();
-      console.log('✅ JSONBin picks data loaded:', data.record);
-      return data.record;
-    }
-    
     return null;
   }
 }
