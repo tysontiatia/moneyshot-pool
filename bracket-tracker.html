@@ -1510,19 +1510,85 @@ function computeStandings() {
 
 // ─── FETCH ──────────────────────────────────────────────────────────────────
 async function fetchPicks() {
-  if (!CONFIG.jsonbinId) {
-    console.log('❌ No bin ID configured');
+  console.log('🔄 Loading picks from local files...');
+  
+  try {
+    // Load all entry files
+    const entryFiles = [];
+    for (let i = 0; i <= 6; i++) {
+      try {
+        const response = await fetch(`./entry-${i}.json`);
+        if (response.ok) {
+          const entryData = await response.json();
+          entryFiles.push(entryData);
+        }
+      } catch (e) {
+        console.log(`Entry ${i} not found, skipping`);
+      }
+    }
+    
+    // Load remaining entries
+    let remainingEntries = [];
+    try {
+      const response = await fetch('./remaining-entries.json');
+      if (response.ok) {
+        remainingEntries = await response.json();
+      }
+    } catch (e) {
+      console.log('No remaining-entries.json found');
+    }
+    
+    // Combine all entries
+    const allEntries = [...entryFiles, ...remainingEntries];
+    
+    if (allEntries.length === 0) {
+      console.log('❌ No entry data found');
+      return null;
+    }
+    
+    // Build the picks structure with teamMap
+    const teamMap = {};
+    const entries = [];
+    
+    allEntries.forEach(entry => {
+      if (entry.teams) {
+        // Add teams to teamMap
+        entry.teams.forEach(team => {
+          teamMap[team.cbsTeamId] = team;
+        });
+      }
+      
+      if (entry.picks) {
+        entries.push({
+          name: entry.name || entry.entryName || `Entry ${entries.length + 1}`,
+          picks: entry.picks,
+          championCbsTeamId: entry.championCbsTeamId || null
+        });
+      }
+    });
+    
+    const picksData = { teamMap, entries };
+    console.log('✅ Local picks data loaded:', entries.length, 'entries with', Object.keys(teamMap).length, 'teams');
+    return picksData;
+    
+  } catch (error) {
+    console.error('❌ Error loading local picks:', error);
+    
+    // Fallback: try JSONBin if configured
+    if (CONFIG.jsonbinId) {
+      console.log('🔄 Falling back to JSONBin...'); 
+      const headers = { 'X-Access-Key': CONFIG.jsonbinKey };
+      if (!CONFIG.jsonbinKey) delete headers['X-Access-Key'];
+      const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.jsonbinId}/latest`, { headers });
+      console.log('📦 JSONBin response:', res.status, res.statusText);
+      if (!res.ok) throw new Error(`jsonbin ${res.status}: ${res.statusText}`);
+      const data = await res.json();
+      console.log('✅ JSONBin picks data loaded:', data.record);
+      return data.record;
+    }
+    
     return null;
   }
-  console.log('🔄 Fetching picks from bin:', CONFIG.jsonbinId);
-  const headers = { 'X-Access-Key': CONFIG.jsonbinKey };
-  if (!CONFIG.jsonbinKey) delete headers['X-Access-Key'];
-  const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.jsonbinId}/latest`, { headers });
-  console.log('📦 JSONBin response:', res.status, res.statusText);
-  if (!res.ok) throw new Error(`jsonbin ${res.status}: ${res.statusText}`);
-  const data = await res.json();
-  console.log('✅ Picks data loaded:', data.record);
-  return data.record;
 }
 
 async function fetchMatchups() {
