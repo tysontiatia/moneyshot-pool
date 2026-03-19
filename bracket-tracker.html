@@ -1972,7 +1972,12 @@ async function fetchAll() {
     state.results = JSON.parse(storedResults);
     console.log('🏆 Manual results loaded from localStorage:', Object.keys(state.results).length, 'completed');
     
-    // Also check for results in JSONBin data
+    // Load live games from localStorage
+    const storedLiveGames = localStorage.getItem('liveGames') || '[]';
+    state.liveGames = new Set(JSON.parse(storedLiveGames));
+    console.log('🔴 Live games loaded from localStorage:', state.liveGames.size, 'active');
+
+    // Also check for results and live games in JSONBin data
     if (state.picks && state.picks.results && Object.keys(state.picks.results).length > 0) {
       console.log('🏆 Found results in JSONBin data:', Object.keys(state.picks.results).length, 'completed');
       // Merge JSONBin results with localStorage results (localStorage takes priority)
@@ -1980,8 +1985,13 @@ async function fetchAll() {
       console.log('🏆 Total results after merge:', Object.keys(state.results).length, 'completed');
     }
     
-    // Generate matchups after picks are loaded
-    state.matchups = await fetchMatchups();
+    // Also load live games from JSONBin
+    if (state.picks && state.picks.liveGames && Array.isArray(state.picks.liveGames)) {
+      console.log('🔴 Found live games in JSONBin data:', state.picks.liveGames.length, 'active');
+      // Merge JSONBin live games with localStorage (localStorage takes priority)
+      const jsonBinLiveGames = new Set(state.picks.liveGames);
+      state.liveGames = new Set([...jsonBinLiveGames, ...state.liveGames]);
+      console.log('🔴 Total live games after merge:', state.liveGames.size, 'active');
     
     // Apply results to matchups
     if (state.matchups) {
@@ -2677,14 +2687,14 @@ function calculatePickStats(picks, teamMap, round) {
 
 // ─── ANALYTICS HELPERS ──────────────────────────────────────────────────────
 async function syncResultsToJsonBin() {
-  // Sync current results to JSONBin for cross-device persistence
+  // Sync current results and live games to JSONBin for cross-device persistence
   if (!CONFIG.jsonbinId || !CONFIG.jsonbinKey) {
-    console.log('⚠️ JSONBin not configured, results only saved locally');
+    console.log('⚠️ JSONBin not configured, results and live games only saved locally');
     return;
   }
 
   try {
-    console.log('☁️ Syncing results to JSONBin...');
+    console.log('☁️ Syncing results and live games to JSONBin...');
     
     // Get current JSONBin data first
     const getResponse = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.jsonbinId}/latest`, {
@@ -2697,8 +2707,12 @@ async function syncResultsToJsonBin() {
     
     const currentData = await getResponse.json();
     
-    // Update the results in the data
-    const updatedData = { ...currentData.record, results: state.results || {} };
+    // Update the results and live games in the data
+    const updatedData = { 
+      ...currentData.record, 
+      results: state.results || {},
+      liveGames: [...(state.liveGames || [])]
+    };
     
     // Save updated data back to JSONBin
     const putResponse = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.jsonbinId}`, {
@@ -2711,13 +2725,13 @@ async function syncResultsToJsonBin() {
     });
     
     if (putResponse.ok) {
-      console.log('✅ Results synced to JSONBin successfully');
+      console.log('✅ Results and live games synced to JSONBin successfully');
     } else {
       throw new Error(`Failed to update JSONBin: ${putResponse.status}`);
     }
     
   } catch (error) {
-    console.error('❌ Failed to sync results to JSONBin:', error.message);
+    console.error('❌ Failed to sync to JSONBin:', error.message);
   }
 }
 
@@ -2870,7 +2884,7 @@ function getGameStatus(game) {
   return { status: 'upcoming', label: 'UPCOMING', class: 'upcoming' };
 }
 
-function toggleLiveStatus(slotId) {
+async function toggleLiveStatus(slotId) {
   if (state.liveGames.has(slotId)) {
     state.liveGames.delete(slotId);
   } else {
@@ -2879,6 +2893,13 @@ function toggleLiveStatus(slotId) {
   
   // Persist to localStorage
   localStorage.setItem('liveGames', JSON.stringify([...state.liveGames]));
+  
+  // Sync to JSONBin for cross-device persistence
+  try {
+    await syncResultsToJsonBin();
+  } catch (error) {
+    console.warn('⚠️ Live game sync failed, but saved locally:', error.message);
+  }
   
   // Re-render
   renderResults();
