@@ -2003,6 +2003,10 @@ async function fetchAll() {
       const jsonBinLiveGames = new Set(state.picks.liveGames);
       state.liveGames = new Set([...jsonBinLiveGames, ...state.liveGames]);
       console.log('🔴 Total live games after merge:', state.liveGames.size, 'active');
+      
+      // Save merged live games back to localStorage for persistence
+      localStorage.setItem('liveGames', JSON.stringify([...state.liveGames]));
+      console.log('💾 Merged live games saved to localStorage');
     }
     
     // Load and merge rank history
