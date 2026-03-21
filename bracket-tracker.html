@@ -429,14 +429,23 @@ body {
 .sheet.open { transform: translateY(0); }
 
 .sheet-handle {
-  width: 36px;
-  height: 4px;
-  background: var(--border2);
-  border-radius: 2px;
-  margin: 0 auto;
-  padding: 14px 20px;
-  box-sizing: content-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 20px 10px;
   cursor: grab;
+  user-select: none;
+}
+.sheet-handle::after {
+  content: '';
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-right: 2.5px solid var(--muted);
+  border-bottom: 2.5px solid var(--muted);
+  transform: rotate(45deg);
+  margin-top: -7px;
+  border-radius: 1px;
 }
 
 .sheet-header {
