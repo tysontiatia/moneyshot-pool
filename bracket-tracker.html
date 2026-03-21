@@ -653,6 +653,24 @@ body {
   gap: 4px;
 }
 
+.setup-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.setup-banner:active { opacity: 0.75; }
+.setup-banner-body { flex: 1; min-width: 0; }
+.setup-banner-title { font-size: 14px; font-weight: 600; color: var(--accent); }
+.setup-banner-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.setup-banner-chevron { color: var(--accent); font-size: 20px; flex-shrink: 0; }
+
 .standing-row {
   display: flex;
   align-items: center;
@@ -661,12 +679,18 @@ body {
   background: var(--surface);
   border-radius: var(--radius);
   border: 1px solid transparent;
-  transition: background 0.15s;
+  cursor: pointer;
+  transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
 }
+.standing-row:active { background: var(--surface2); }
+@media (hover: hover) { .standing-row:hover { background: var(--surface2); } }
 .standing-row.is-me {
   border-color: rgba(232, 255, 71, 0.2);
   background: rgba(232, 255, 71, 0.04);
 }
+.standing-row.is-me:active { background: rgba(232, 255, 71, 0.08); }
+.standing-chevron { color: var(--border2); font-size: 18px; flex-shrink: 0; line-height: 1; }
 
 .standing-rank-col {
   display: flex;
@@ -2018,6 +2042,7 @@ function renderGames() {
       const highConsensus = !isUnanimous && (t1Pct >= 75 || t2Pct >= 75);
       
       html += `<div class="consensus-inline">`;
+      html += `<div style="font-size:9px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:5px">Pool picks</div>`;
       html += `<div class="consensus-inline-labels">`;
       html += `<span class="cl-team" style="color:${t1Pct >= t2Pct ? t1Color : 'var(--muted)'}">${t1Pct}% <span style="font-weight:400;font-size:10px;color:var(--muted)">(${t1Count})</span></span>`;
       if (isUnanimous) html += `<span class="cl-tag">unanimous</span>`;
@@ -2303,8 +2328,18 @@ function renderStandings() {
   
   let html = '';
   
-  // My rank card
+  // My rank card — or setup prompt if no name selected
   const me = state.standings.find(s => s.isMe);
+  if (!me) {
+    html += `<div class="setup-banner" onclick="switchTab('settings')">
+      <span style="font-size:28px">👤</span>
+      <div class="setup-banner-body">
+        <div class="setup-banner-title">Select your name to get started</div>
+        <div class="setup-banner-sub">Tap here → Settings → choose your name to track your picks and see Road to Victory</div>
+      </div>
+      <span class="setup-banner-chevron">›</span>
+    </div>`;
+  }
   if (me) {
     const ordinal = me.rank === 1 ? 'st' : me.rank === 2 ? 'nd' : me.rank === 3 ? 'rd' : 'th';
     html += `<div class="my-rank-card">`;
@@ -2320,7 +2355,7 @@ function renderStandings() {
     html += `<div class="my-rank-stats">`;
     html += `<div class="my-stat"><div class="my-stat-value">${me.points}</div><div class="my-stat-label">Points</div></div>`;
     html += `<div class="my-stat"><div class="my-stat-value">${me.correct}</div><div class="my-stat-label">Correct</div></div>`;
-    html += `<div class="my-stat"><div class="my-stat-value">${me.maxPts}</div><div class="my-stat-label">Max Pts</div></div>`;
+    html += `<div class="my-stat"><div class="my-stat-value">${me.maxPts}</div><div class="my-stat-label">Possible</div></div>`;
     html += `</div></div>`;
   }
   
@@ -2335,7 +2370,7 @@ function renderStandings() {
       else if (diff < 0) movement = `<span class="movement-down">▼${Math.abs(diff)}</span>`;
     }
     
-    html += `<div class="standing-row ${s.isMe ? 'is-me' : ''}" onclick="openPlayerSheet('${s.name.replace(/'/g, "\\'")}')" style="cursor:pointer">`;
+    html += `<div class="standing-row ${s.isMe ? 'is-me' : ''}" onclick="openPlayerSheet('${s.name.replace(/'/g, "\\'")}')">`;
     html += `<div class="standing-rank-col"><span class="standing-rank">${s.rank}</span><span class="standing-movement">${movement}</span></div>`;
     html += `<div class="standing-info">`;
     html += `<div class="standing-name">${s.name}</div>`;
@@ -2345,6 +2380,7 @@ function renderStandings() {
     html += `<div class="standing-detail">${s.correct} correct · ${champImg}</div>`;
     html += `</div>`;
     html += `<div class="standing-pts-col"><span class="standing-pts">${s.points}</span><span class="standing-max">max ${s.maxPts}</span></div>`;
+    html += `<span class="standing-chevron">›</span>`;
     html += `</div>`;
   });
   html += `</div>`;
@@ -2389,7 +2425,7 @@ function renderAnalytics() {
   const container = document.getElementById('tab-analytics');
   
   if (!state.picks?.entries?.length || !state.games.length) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">📊</div><p>Load picks and games to see analytics</p></div>`;
+    container.innerHTML = `<div class="empty-state"><div class="icon">📊</div><p>Loading data…</p></div>`;
     return;
   }
   
@@ -2419,7 +2455,17 @@ function setRtvTarget(name) {
 
 function renderRoadToVictory() {
   if (!CONFIG.myName) {
-    return `<div class="analytics-section"><div class="analytics-title"><span class="icon">🏁</span> Road to Victory</div><div style="color:var(--muted);font-size:13px;text-align:center;padding:8px 0">Set your name in Settings to see your path to the top.</div></div>`;
+    return `<div class="analytics-section">
+      <div class="analytics-title"><span class="icon">🏁</span> Road to Victory</div>
+      <div class="setup-banner" onclick="switchTab('settings')" style="margin-bottom:0;margin-top:4px">
+        <span style="font-size:24px">👤</span>
+        <div class="setup-banner-body">
+          <div class="setup-banner-title">Select your name first</div>
+          <div class="setup-banner-sub">Tap here to go to Settings and pick your name</div>
+        </div>
+        <span class="setup-banner-chevron">›</span>
+      </div>
+    </div>`;
   }
 
   const standings = state.standings;
@@ -2427,7 +2473,17 @@ function renderRoadToVictory() {
 
   const myStanding = standings.find(s => s.isMe);
   if (!myStanding) {
-    return `<div class="analytics-section"><div class="analytics-title"><span class="icon">🏁</span> Road to Victory</div><div style="color:var(--muted);font-size:13px;text-align:center;padding:8px 0">Your name doesn't match any entry. Check Settings.</div></div>`;
+    return `<div class="analytics-section">
+      <div class="analytics-title"><span class="icon">🏁</span> Road to Victory</div>
+      <div class="setup-banner" onclick="switchTab('settings')" style="margin-bottom:0;margin-top:4px">
+        <span style="font-size:24px">⚠️</span>
+        <div class="setup-banner-body">
+          <div class="setup-banner-title">Name not found in pool</div>
+          <div class="setup-banner-sub">Tap here to update your name in Settings</div>
+        </div>
+        <span class="setup-banner-chevron">›</span>
+      </div>
+    </div>`;
   }
 
   const myEntry = state.picks.entries.find(e => e.name.trim().toLowerCase() === CONFIG.myName.trim().toLowerCase());
@@ -2786,8 +2842,9 @@ function renderSettings() {
   } else {
     html += `<input type="hidden" id="cfg-bin-key" value="${CONFIG.jsonbinKey}">`;
   }
-  html += `<div class="setting-row">`;
-  html += `<div class="setting-label">Your Name</div>`;
+  const nameNotSet = !CONFIG.myName;
+  html += `<div class="setting-row" style="${nameNotSet ? 'background:rgba(232,255,71,0.05);border:1px solid rgba(232,255,71,0.25);border-radius:var(--radius);padding:10px;margin:-2px' : ''}">`;
+  html += `<div class="setting-label">Your Name${nameNotSet ? ' <span style="color:var(--accent);font-size:10px">← start here</span>' : ''}</div>`;
   if (state.picks?.entries?.length) {
     html += `<select class="setting-input" id="cfg-my-name">`;
     html += `<option value="">— Select your name —</option>`;
