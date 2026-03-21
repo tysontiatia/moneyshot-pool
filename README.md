@@ -1,59 +1,32 @@
-# 🏀 The MoneyShot Pool — 2026 March Madness Dashboard
+# The MoneyShot Pool — 2026 March Madness Dashboard
 
 Live bracket tracking dashboard for the Tiatia family pool.
 
-## Setup
-
-### Step 1 — Deploy to GitHub Pages
-
-1. Create a new GitHub repository called `moneyshot-pool`
-2. Upload all files from this folder to the repo
-3. Go to **Settings → Pages**
-4. Set source to **main branch, root folder**
-5. Your dashboard will be live at `https://yourusername.github.io/moneyshot-pool`
-
-### Step 2 — Connect Google Sheets
-
-1. Open your March Madness Google Sheet
-2. Go to **File → Share → Publish to web**
-3. Select **"Player Picks"** sheet, format **"CSV"**
-4. Click **Publish** and copy the URL
-5. Open `config.js` and paste the URL as `PICKS_URL`
-6. Do the same for **"Master Bracket"** sheet as `MASTER_URL`
-7. Commit and push the updated `config.js` to GitHub
-
-### Step 3 — During the Tournament
-
-- Update **Master Bracket** tab in Google Sheets as games finish
-- The dashboard auto-refreshes every 5 minutes
-- Share the GitHub Pages URL with anyone in the pool
-
 ## Files
 
-- `index.html` — Main dashboard (4 views: Standings, Root For, Bracket, Player Profile)
-- `config.js` — Your Google Sheets URLs and pool settings
-- `README.md` — This file
+- `bracket-tracker.html` — Main dashboard (Standings, Root For, Bracket, Player Profile, My Stats)
+- `admin.html` — Admin panel for managing picks and bracket data
+- `config.js` — Pool settings (name, season, JSONBin IDs, scoring rules)
 
-## Views
+## Setup
 
-### 🏆 Standings
-Live leaderboard sorted by max points possible. Shows earned points, max possible, and gap to first place.
+### Deploy to GitHub Pages
 
-### 📺 Who To Root For
-Every game sorted by how much it affects Tyson and Kristin's chances. Highest stakes games at top. Shows exactly who picked each team.
+1. Create a GitHub repository and upload all files
+2. Go to **Settings → Pages**, set source to **main branch, root folder**
+3. Dashboard will be live at `https://yourusername.github.io/repo-name/bracket-tracker.html`
 
-### 🗂 Bracket
-Full bracket comparison showing pick distribution for every game. See who picked what for every matchup.
+### Configure JSONBin
 
-### 👤 Player Profile
-Click any player to see their full bracket, path to win, and which picks they need to close the gap.
+1. Create a free account at [jsonbin.io](https://jsonbin.io)
+2. Update `config.js` with your `BIN_ID`, `MASTER_KEY`, and `ACCESS_KEY`
+3. Open the dashboard and enter your JSONBin Master Key in Settings to enable data imports
 
-## Updating During Games
+### During the Tournament
 
-1. Open Google Sheet
-2. Go to **Master Bracket** tab
-3. Type the winner in the appropriate round column (format: `4 Arkansas`)
-4. Dashboard updates automatically within 5 minutes for everyone
+- Use `admin.html` to update game results and manage picks
+- The dashboard auto-refreshes every 3 minutes
+- Share the GitHub Pages URL with pool participants
 
 ## Scoring Rules
 
