@@ -2182,6 +2182,110 @@ function closeSheet() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// PLAYER SHEET
+// ═══════════════════════════════════════════════════════════════════════════
+function openPlayerSheet(name) {
+  const standing = state.standings.find(s => s.name === name);
+  const entry = state.picks?.entries?.find(e => e.name.trim() === name.trim());
+  if (!standing || !entry) return;
+
+  const ordinal = s => s === 1 ? 'st' : s === 2 ? 'nd' : s === 3 ? 'rd' : 'th';
+
+  // Helper: get team name from cbsTeamId
+  function teamName(cbsTeamId) {
+    const t = state.teamMap?.teams?.find(t => String(t.cbsTeamId) === String(cbsTeamId));
+    return t?.abbrev || t?.mediumName || `#${cbsTeamId}`;
+  }
+  function teamSeed(cbsTeamId) {
+    return CBS_SEED[String(cbsTeamId)] || null;
+  }
+
+  // Header
+  let html = `<div class="sheet-header">`;
+  html += `<div style="display:flex;align-items:center;justify-content:space-between">`;
+  html += `<div>`;
+  html += `<div style="font-size:18px;font-weight:600">${name}</div>`;
+  html += `<div style="font-size:12px;color:var(--muted);margin-top:2px">${standing.rank}<sup>${ordinal(standing.rank)}</sup> · ${standing.points} pts · max ${standing.maxPts}</div>`;
+  html += `</div>`;
+  html += `<div style="text-align:right">`;
+  html += `<div style="font-size:10px;color:var(--muted)">Champion</div>`;
+  html += `<div style="font-size:13px;font-weight:500;color:${standing.champAlive ? 'var(--green)' : 'var(--red)'}">${standing.champTeam} ${standing.champAlive ? '✓' : '✗'}</div>`;
+  html += `</div></div></div>`;
+
+  // Group scored picks by round, show future rounds only (pending/alive)
+  const { scored } = standing;
+  const roundNames = CONFIG.scoring;
+
+  // Group by round
+  const byRound = {};
+  scored.forEach(pick => {
+    const r = CONFIG.cbsRoundMap[pick.tournamentRound];
+    if (!r) return;
+    if (!byRound[r]) byRound[r] = [];
+    byRound[r].push(pick);
+  });
+
+  const rounds = Object.keys(byRound).map(Number).sort((a, b) => a - b);
+
+  rounds.forEach(r => {
+    const picks = byRound[r];
+    const roundCfg = roundNames[r];
+    if (!roundCfg) return;
+
+    html += `<div class="sheet-section">`;
+    html += `<div class="sheet-section-title">${roundCfg.name} <span style="color:var(--muted);font-size:10px;font-weight:400">· ${roundCfg.mult}× seed</span></div>`;
+    html += `<div style="display:flex;flex-direction:column;gap:6px">`;
+
+    picks.forEach(pick => {
+      const name = teamName(pick.cbsTeamId);
+      const seed = teamSeed(pick.cbsTeamId);
+      const seedStr = seed ? `(${seed})` : '';
+      const pts = pick.pickValue;
+
+      let statusColor, statusIcon, statusLabel;
+      if (pick.correct === true) {
+        statusColor = 'var(--green)'; statusIcon = '✓'; statusLabel = `+${pick.pts} pts`;
+      } else if (pick.correct === false || pick.eliminated) {
+        statusColor = 'var(--red)'; statusIcon = '✗'; statusLabel = 'eliminated';
+      } else if (pick.pending) {
+        statusColor = 'var(--text)'; statusIcon = ''; statusLabel = `${pts} pts`;
+      } else {
+        statusColor = 'var(--muted)'; statusIcon = '–'; statusLabel = 'TBD';
+      }
+
+      // Live game score if in progress
+      let liveInfo = '';
+      if (pick.game && pick.game.state === 'live') {
+        const g = pick.game;
+        const espnId = CBS_ESPN_MAP[String(pick.cbsTeamId)];
+        const isT1 = g.team1.id === espnId;
+        const myScore = isT1 ? g.team1.score : g.team2.score;
+        const oppScore = isT1 ? g.team2.score : g.team1.score;
+        liveInfo = `<span style="color:var(--orange);font-size:10px;margin-left:6px">LIVE ${myScore}-${oppScore}</span>`;
+      }
+
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface2);border-radius:var(--radius)">`;
+      html += `<div style="display:flex;align-items:center;gap:6px">`;
+      html += `<span style="font-size:10px;color:var(--muted);width:18px;text-align:center">${seedStr}</span>`;
+      html += `<span style="font-size:14px;font-weight:500;color:${statusColor}">${name}</span>`;
+      html += liveInfo;
+      html += `</div>`;
+      html += `<div style="display:flex;align-items:center;gap:4px">`;
+      if (statusIcon) html += `<span style="color:${statusColor};font-size:13px">${statusIcon}</span>`;
+      html += `<span style="font-family:'DM Mono',monospace;font-size:13px;color:${statusColor}">${statusLabel}</span>`;
+      html += `</div></div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  document.getElementById('sheet-content').innerHTML = html;
+  document.getElementById('sheet-overlay').classList.add('open');
+  document.getElementById('sheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // RENDER — STANDINGS TAB
 // ═══════════════════════════════════════════════════════════════════════════
 function renderStandings() {
@@ -2223,7 +2327,7 @@ function renderStandings() {
       else if (diff < 0) movement = `<span class="movement-down">▼${Math.abs(diff)}</span>`;
     }
     
-    html += `<div class="standing-row ${s.isMe ? 'is-me' : ''}">`;
+    html += `<div class="standing-row ${s.isMe ? 'is-me' : ''}" onclick="openPlayerSheet('${s.name.replace(/'/g, "\\'")}')" style="cursor:pointer">`;
     html += `<div class="standing-rank-col"><span class="standing-rank">${s.rank}</span><span class="standing-movement">${movement}</span></div>`;
     html += `<div class="standing-info">`;
     html += `<div class="standing-name">${s.name}</div>`;
