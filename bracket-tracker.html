@@ -2376,8 +2376,11 @@ function renderRoadToVictory() {
   const myPickMap = getPendingPickMap(myEntry);
   const leaderPickMap = leaderEntry ? getPendingPickMap(leaderEntry) : {};
 
-  // Analyze each pending game — categorize relative to leader
-  const pendingGames = state.games.filter(g => g.state !== 'final' && g.team1.id && g.team2.id);
+  // Analyze each pending game in the active round (lowest round with non-final games)
+  const allPending = state.games.filter(g => g.state !== 'final' && g.team1.id && g.team2.id);
+  const activeRound = allPending.length ? Math.min(...allPending.map(g => g.roundNum)) : null;
+  const activeRoundName = activeRound ? (CONFIG.scoring[activeRound]?.name || `Round ${activeRound}`) : null;
+  const pendingGames = allPending.filter(g => g.roundNum === activeRound);
   const gameAnalysis = [];
 
   for (const game of pendingGames) {
@@ -2426,7 +2429,9 @@ function renderRoadToVictory() {
   const leaderFirst = leader.name.split(' ')[0];
 
   let html = `<div class="analytics-section">`;
-  html += `<div class="analytics-title"><span class="icon">🏁</span> Road to Victory</div>`;
+  html += `<div class="analytics-title"><span class="icon">🏁</span> Road to Victory`;
+  if (activeRoundName) html += `<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:8px">${activeRoundName}</span>`;
+  html += `</div>`;
 
   // Status card
   if (isWinning) {
