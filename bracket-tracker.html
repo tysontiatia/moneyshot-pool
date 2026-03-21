@@ -1436,11 +1436,14 @@ function parseEspnGame(event) {
   const eastern = localDate.toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // YYYY-MM-DD
   const dateStr = eastern.replace(/-/g, '');
 
+  const dateLabel = new Date(event.date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+
   return {
     id: event.id,
     espnId: event.id,
     date: event.date,
     dateStr,
+    dateLabel,
     name: event.name,
     shortName: event.shortName,
     region,
@@ -1963,14 +1966,15 @@ function renderGames() {
     html += `<div class="game-card ${game.state}" onclick="openGameSheet('${game.id}')">`;
     
     // Meta
+    const regionStr = game.region || game.roundName;
     html += `<div class="game-meta">`;
-    html += `<span class="game-region">${game.region}${game.region ? ' · ' : ''}${game.broadcast}</span>`;
+    html += `<span class="game-region">${regionStr}${game.broadcast ? ' · ' + game.broadcast : ''}</span>`;
     if (game.state === 'live') {
       html += `<span class="game-status live">● ${game.statusDetail}</span>`;
     } else if (game.state === 'final') {
       html += `<span class="game-status final">${game.statusDetail}</span>`;
     } else {
-      html += `<span class="game-status upcoming">${game.statusDetail}</span>`;
+      html += `<span class="game-status upcoming">${game.dateLabel} · ${game.statusDetail}</span>`;
     }
     html += `</div>`;
     
@@ -2067,7 +2071,9 @@ function openGameSheet(gameId) {
   html += `</div>`;
   
   // Status line
-  html += `<div class="sheet-status">${game.statusDetail} · ${game.region} · ${game.roundName}</div>`;
+  const sheetRegion = game.region || game.roundName;
+  const sheetDay = game.state === 'scheduled' ? `${game.dateLabel} · ` : '';
+  html += `<div class="sheet-status">${sheetDay}${game.statusDetail}${sheetRegion ? ' · ' + sheetRegion : ''} · ${game.roundName}</div>`;
   html += `</div></div>`;
   
   // Pick value for this round
@@ -2570,7 +2576,9 @@ function renderRoadToVictory() {
       html += `<div class="rtv-game-row" style="border-color:${border};background:${bg}" onclick="openGameSheet('${game.id}')">`;
       html += `<div class="rtv-game-matchup">`;
       html += `<div style="font-size:13px;font-weight:500">${game.team1.abbreviation || '?'} vs ${game.team2.abbreviation || '?'}</div>`;
-      html += `<div style="font-size:11px;color:var(--muted);margin-top:1px">${roundName}${game.statusDetail ? ' · ' + game.statusDetail : ''}</div>`;
+      const rtvRegion = game.region || roundName;
+      const rtvDay = game.state === 'scheduled' ? game.dateLabel + ' · ' : '';
+      html += `<div style="font-size:11px;color:var(--muted);margin-top:1px">${rtvRegion} · ${rtvDay}${game.statusDetail || ''}</div>`;
       html += `</div>`;
       html += `<div class="rtv-game-pts">`;
       if (category === 'mine') {
@@ -2686,10 +2694,13 @@ function renderLeverage() {
   leverageData.forEach(({ game, leverage, affected, t1Pts, t2Pts, picks }) => {
     const isHigh = leverage >= 80;
     html += `<div class="consensus-card" onclick="openGameSheet('${game.id}')">`;
-    html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">`;
+    const levRegion = game.region || game.roundName;
+    const levDay = game.state === 'scheduled' ? ` · ${game.dateLabel}` : '';
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">`;
     html += `<span style="font-size:13px;font-weight:500">${game.team1.abbreviation} vs ${game.team2.abbreviation}</span>`;
     html += `<span class="leverage-badge ${isHigh ? 'high' : ''}" style="${!isHigh ? 'color:var(--muted2)' : ''}">${isHigh ? '🔥 ' : ''}${leverage}% affected</span>`;
     html += `</div>`;
+    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:4px">${levRegion}${levDay}</div>`;
     html += `<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)">`;
     html += `<span>${picks.team1.length}× ${game.team1.abbreviation} (${t1Pts}pts)</span>`;
     html += `<span>${picks.team2.length}× ${game.team2.abbreviation} (${t2Pts}pts)</span>`;
