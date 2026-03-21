@@ -873,6 +873,8 @@ body {
 .setting-input:focus { border-color: var(--accent); }
 
 .setting-input::placeholder { color: var(--muted); }
+select.setting-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; cursor: pointer; }
+select.setting-input option { background: var(--surface2); }
 
 .btn {
   display: inline-flex;
@@ -2546,9 +2548,16 @@ function renderSettings() {
   html += `</div>`;
   html += `<div class="setting-row">`;
   html += `<div class="setting-label">Your Name</div>`;
-  html += `<input class="setting-input" id="cfg-my-name" value="${CONFIG.myName}" placeholder="Exactly as it appears in picks">`;
   if (state.picks?.entries?.length) {
-    html += `<div style="font-size:10px;color:var(--muted);margin-top:4px">Available: ${state.picks.entries.slice(0,5).map(e => e.name).join(', ')}${state.picks.entries.length > 5 ? '...' : ''}</div>`;
+    html += `<select class="setting-input" id="cfg-my-name">`;
+    html += `<option value="">— Select your name —</option>`;
+    state.picks.entries.forEach(e => {
+      const selected = e.name.trim().toLowerCase() === CONFIG.myName.trim().toLowerCase() ? 'selected' : '';
+      html += `<option value="${e.name}" ${selected}>${e.name}</option>`;
+    });
+    html += `</select>`;
+  } else {
+    html += `<input class="setting-input" id="cfg-my-name" value="${CONFIG.myName}" placeholder="Picks not loaded yet">`;
   }
   html += `</div>`;
   html += `<button class="btn btn-primary btn-block" onclick="saveSettings()" style="margin-top:8px">Save & Reload</button>`;
