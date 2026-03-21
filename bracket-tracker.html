@@ -433,7 +433,10 @@ body {
   height: 4px;
   background: var(--border2);
   border-radius: 2px;
-  margin: 10px auto 16px;
+  margin: 0 auto;
+  padding: 14px 20px;
+  box-sizing: content-box;
+  cursor: grab;
 }
 
 .sheet-header {
@@ -2653,47 +2656,39 @@ async function refreshPicks() {
 // ═══════════════════════════════════════════════════════════════════════════
 (function enableSheetSwipeClose() {
   const sheet = document.getElementById('sheet');
-  if (!sheet) return;
-  let startY = null, lastY = null, dragging = false, swiping = false;
+  const handle = sheet ? sheet.querySelector('.sheet-handle') : null;
+  if (!sheet || !handle) return;
+  let startY = null, lastY = null, dragging = false;
 
-  sheet.addEventListener('touchstart', function(e) {
+  // Only start swipe-to-close when touch begins on the handle
+  handle.addEventListener('touchstart', function(e) {
     if (e.touches.length !== 1) return;
     startY = lastY = e.touches[0].clientY;
     dragging = true;
-    swiping = false;
   }, {passive: true});
 
-  sheet.addEventListener('touchmove', function(e) {
+  handle.addEventListener('touchmove', function(e) {
     if (!dragging || e.touches.length !== 1) return;
     const y = e.touches[0].clientY;
     const dy = y - startY;
-    const content = document.getElementById('sheet-content');
-    const atTop = !content || content.scrollTop === 0;
-
-    if (!swiping && dy > 0 && atTop) {
-      // User is swiping down from the top — take over for swipe-to-close
-      swiping = true;
-    }
-
-    if (swiping) {
-      sheet.style.transform = `translateY(${Math.max(0, dy)}px)`;
+    if (dy > 0) {
+      sheet.style.transform = `translateY(${dy}px)`;
       e.preventDefault();
     }
     lastY = y;
   }, {passive: false});
 
-  sheet.addEventListener('touchend', function(e) {
+  handle.addEventListener('touchend', function(e) {
     if (!dragging) return;
     const dy = lastY - startY;
-    if (swiping && dy > 60) {
+    if (dy > 60) {
       closeSheet();
-    } else if (swiping) {
+    } else {
       sheet.style.transition = 'transform 0.2s';
       sheet.style.transform = '';
       setTimeout(() => { sheet.style.transition = ''; }, 200);
     }
     dragging = false;
-    swiping = false;
     startY = lastY = null;
   });
 
