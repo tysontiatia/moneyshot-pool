@@ -2191,10 +2191,20 @@ function openPlayerSheet(name) {
 
   const ordinal = s => s === 1 ? 'st' : s === 2 ? 'nd' : s === 3 ? 'rd' : 'th';
 
-  // Helper: get team name from cbsTeamId
+  // Helper: get team name from cbsTeamId via CBS→ESPN map + game data
   function teamName(cbsTeamId) {
-    const t = state.teamMap?.teams?.find(t => String(t.cbsTeamId) === String(cbsTeamId));
-    return t?.abbrev || t?.mediumName || `#${cbsTeamId}`;
+    // Try picks teamMap first (has champion team names)
+    const fromPicks = state.picks.teamMap[cbsTeamId];
+    if (fromPicks?.abbrev || fromPicks?.mediumName) return fromPicks.abbrev || fromPicks.mediumName;
+    // Fall back to ESPN game data
+    const espnId = CBS_ESPN_MAP[String(cbsTeamId)];
+    if (espnId) {
+      for (const g of state.games) {
+        if (g.team1.id === espnId) return g.team1.abbreviation || g.team1.name || espnId;
+        if (g.team2.id === espnId) return g.team2.abbreviation || g.team2.name || espnId;
+      }
+    }
+    return `#${cbsTeamId}`;
   }
   function teamSeed(cbsTeamId) {
     return CBS_SEED[String(cbsTeamId)] || null;
