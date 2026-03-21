@@ -2643,31 +2643,53 @@ async function refreshPicks() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// INIT
+// MOBILE SWIPE-TO-CLOSE FOR GAME SHEET
 // ═══════════════════════════════════════════════════════════════════════════
-fetchAll();
+(function enableSheetSwipeClose() {
+  const sheet = document.getElementById('sheet');
+  if (!sheet) return;
+  let startY = null, lastY = null, dragging = false;
 
-// Poll based on game state
-setInterval(() => {
-  if (document.visibilityState !== 'visible') return;
-  
-  const hasLive = state.games.some(g => g.state === 'live');
-  const interval = hasLive ? 30 : CONFIG.pollInterval;
-  const elapsed = (Date.now() - (state.lastFetch?.getTime() || 0)) / 1000;
-  
-  if (elapsed >= interval) {
-    console.log(`⏰ Polling (${hasLive ? 'live games' : 'idle'})...`);
-    fetchAll();
-  }
-}, 10000); // Check every 10s if it's time to poll
+  sheet.addEventListener('touchstart', function(e) {
+    if (e.touches.length !== 1) return;
+    startY = lastY = e.touches[0].clientY;
+    dragging = true;
+  }, {passive: true});
 
-// Close sheet on back button
-window.addEventListener('popstate', closeSheet);
+  sheet.addEventListener('touchmove', function(e) {
+    if (!dragging || e.touches.length !== 1) return;
+    const y = e.touches[0].clientY;
+    const dy = y - startY;
+    if (dy > 0) {
+      sheet.style.transform = `translateY(${dy}px)`;
+      e.preventDefault(); // Prevent pull-to-refresh
+    }
+    lastY = y;
+  }, {passive: false});
 
-// Keyboard shortcut to close sheet
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeSheet();
-});
+  sheet.addEventListener('touchend', function(e) {
+    if (!dragging) return;
+    const dy = lastY - startY;
+    // If dragged down >60px, close; else snap back
+    if (dy > 60) {
+      closeSheet();
+    } else {
+      sheet.style.transition = 'transform 0.2s';
+      sheet.style.transform = '';
+      setTimeout(() => { sheet.style.transition = ''; }, 200);
+    }
+    dragging = false;
+    startY = lastY = null;
+  });
+
+  // Reset transform on close
+  const origCloseSheet = window.closeSheet;
+  window.closeSheet = function() {
+    sheet.style.transform = '';
+    if (origCloseSheet) origCloseSheet();
+  };
+})();
+// ...existing code...
 </script>
 </body>
 </html>
