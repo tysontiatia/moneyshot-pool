@@ -1037,9 +1037,9 @@ body {
 const CONFIG = {
   year: 2026,
   poolName: 'The Money Shot',
-  jsonbinId: localStorage.getItem('ms_jsonbinId') || '69bddb09b7ec241ddc89c0b1',   // CBS picks bin
+  jsonbinId: '69bddb09b7ec241ddc89c0b1',       // CBS picks bin (hardcoded — public read)
   jsonbinKey: localStorage.getItem('ms_jsonbinKey') || '',
-  teamMapBinId: '69bdf9b3aa77b81da903ff97', // Static CBS→ESPN team map (ground truth)
+  teamMapBinId: '69bdf9b3aa77b81da903ff97',    // Static CBS→ESPN team map (ground truth)
   myName: localStorage.getItem('ms_myName') || '',
   pollInterval: 45, // seconds
   // Scoring: points = round_multiplier × seed
@@ -1070,11 +1070,10 @@ const CONFIG = {
 // Load from URL params (for bookmark persistence)
 (function loadFromURL() {
   const p = new URLSearchParams(window.location.search);
-  if (p.get('id')) { CONFIG.jsonbinId = p.get('id'); localStorage.setItem('ms_jsonbinId', p.get('id')); }
   if (p.get('key')) { CONFIG.jsonbinKey = p.get('key'); localStorage.setItem('ms_jsonbinKey', p.get('key')); }
   if (p.get('name')) { CONFIG.myName = p.get('name'); localStorage.setItem('ms_myName', p.get('name')); }
   // Clean URL
-  if (p.has('id') || p.has('key') || p.has('name')) {
+  if (p.has('key') || p.has('name')) {
     window.history.replaceState({}, '', window.location.pathname);
   }
 })();
@@ -2449,13 +2448,9 @@ function renderSettings() {
   html += `<div class="settings-section">`;
   html += `<div class="settings-title">🔧 Configuration</div>`;
   html += `<div class="setting-row">`;
-  html += `<div class="setting-label">JSONBin ID</div>`;
-  html += `<input class="setting-input" id="cfg-bin-id" value="${CONFIG.jsonbinId}" placeholder="Paste JSONBin ID">`;
-  html += `</div>`;
-  html += `<div class="setting-row">`;
   html += `<div class="setting-label">Master Key</div>`;
-  html += `<input class="setting-input" id="cfg-bin-key" type="password" value="${CONFIG.jsonbinKey}" placeholder="JSONBin Master Key">`;
-  html += `<div style="font-size:10px;color:var(--muted);margin-top:2px">Found at jsonbin.io → Dashboard → API Keys</div>`;
+  html += `<input class="setting-input" id="cfg-bin-key" type="password" value="${CONFIG.jsonbinKey}" placeholder="JSONBin Master Key (for imports only)">`;
+  html += `<div style="font-size:10px;color:var(--muted);margin-top:2px">Only needed to import/update picks. Found at jsonbin.io → Dashboard → API Keys</div>`;
   html += `</div>`;
   html += `<div class="setting-row">`;
   html += `<div class="setting-label">Your Name</div>`;
@@ -2525,15 +2520,12 @@ function renderSettings() {
 }
 
 function saveSettings() {
-  const binId = document.getElementById('cfg-bin-id').value.trim();
   const binKey = document.getElementById('cfg-bin-key').value.trim();
   const myName = document.getElementById('cfg-my-name').value.trim();
   
-  localStorage.setItem('ms_jsonbinId', binId);
   localStorage.setItem('ms_jsonbinKey', binKey);
   localStorage.setItem('ms_myName', myName);
   
-  CONFIG.jsonbinId = binId;
   CONFIG.jsonbinKey = binKey;
   CONFIG.myName = myName;
   
@@ -2543,7 +2535,6 @@ function saveSettings() {
 
 function generateBookmark() {
   const params = new URLSearchParams();
-  if (CONFIG.jsonbinId) params.set('id', CONFIG.jsonbinId);
   if (CONFIG.jsonbinKey) params.set('key', CONFIG.jsonbinKey);
   if (CONFIG.myName) params.set('name', CONFIG.myName);
   
