@@ -2414,10 +2414,13 @@ function renderRoadToVictory() {
 
   const gapNow = leader.points - myStanding.points;
 
-  // Best-case swing: max I gain minus max they gain (if everything goes my way)
-  const maxMyGain  = gameAnalysis.reduce((s, g) => s + (g.category === 'mine' || g.category === 'split' ? g.myPts  : 0), 0);
-  const maxLdrGain = gameAnalysis.reduce((s, g) => s + (g.category === 'theirs' || g.category === 'split' ? g.ldrPts : 0), 0);
-  const bestSwing  = maxMyGain - maxLdrGain;
+  // Best-case swing: points I can gain on the leader if all my picks win and all their exclusive picks lose.
+  // 'mine'   → I gain myPts, they gain 0
+  // 'split'  → best case: my team wins, I gain myPts, they gain 0
+  // 'theirs' → best case: their team loses, they gain 0 (no change)
+  // 'shared' → both gain equally, gap neutral
+  const bestSwing = gameAnalysis.reduce((s, g) =>
+    (g.category === 'mine' || g.category === 'split') ? s + g.myPts : s, 0);
   const canWin     = isWinning || bestSwing >= gapNow;
 
   const leaderFirst = leader.name.split(' ')[0];
