@@ -1397,7 +1397,9 @@ function parseEspnGame(event) {
     team1,
     team2,
     state: gameState,
-    statusDetail: status.type.shortDetail || status.type.detail || '',
+    statusDetail: gameState === 'scheduled'
+      ? new Date(event.date).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+      : (status.type.shortDetail || status.type.detail || ''),
     clock: status.displayClock || '',
     period: status.period || 0,
     venue: comp.venue?.fullName || '',
