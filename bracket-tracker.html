@@ -645,26 +645,28 @@ body {
   background: rgba(232, 255, 71, 0.04);
 }
 
+.standing-rank-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 28px;
+}
 .standing-rank {
   font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  color: var(--muted);
-  width: 24px;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.standing-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 600;
-  flex-shrink: 0;
+  color: var(--text);
+  line-height: 1;
 }
+.standing-movement {
+  font-size: 10px;
+  line-height: 1;
+  margin-top: 2px;
+  height: 12px;
+}
+.movement-up { color: var(--green); }
+.movement-down { color: var(--red); }
 
 .standing-info {
   flex: 1;
@@ -672,7 +674,7 @@ body {
 }
 
 .standing-name {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -683,31 +685,27 @@ body {
   font-size: 10px;
   color: var(--muted);
   font-family: 'DM Mono', monospace;
+  margin-top: 2px;
 }
 
+.standing-pts-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
 .standing-pts {
   font-family: 'DM Mono', monospace;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
-  text-align: right;
-  min-width: 36px;
+  line-height: 1;
 }
-
 .standing-max {
   font-family: 'DM Mono', monospace;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--muted);
-  text-align: right;
-  min-width: 40px;
+  margin-top: 2px;
 }
-
-.standing-movement {
-  font-size: 11px;
-  min-width: 20px;
-  text-align: center;
-}
-.movement-up { color: var(--green); }
-.movement-down { color: var(--red); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ANALYTICS TAB
@@ -2226,15 +2224,12 @@ function renderStandings() {
     }
     
     html += `<div class="standing-row ${s.isMe ? 'is-me' : ''}">`;
-    html += `<span class="standing-rank">${s.rank}</span>`;
-    html += avatarHtml(s.name, 32);
+    html += `<div class="standing-rank-col"><span class="standing-rank">${s.rank}</span><span class="standing-movement">${movement}</span></div>`;
     html += `<div class="standing-info">`;
     html += `<div class="standing-name">${s.name}</div>`;
-    html += `<div class="standing-detail">${s.correct}W · Champ: <span style="color:${s.champAlive ? 'var(--green)' : 'var(--red)'}">${s.champTeam}</span></div>`;
+    html += `<div class="standing-detail">${s.correct}W · <span style="color:${s.champAlive ? 'var(--green)' : 'var(--red)'}">${s.champTeam} ${s.champAlive ? '✓' : '✗'}</span></div>`;
     html += `</div>`;
-    html += `<span class="standing-max">max ${s.maxPts}</span>`;
-    html += `<span class="standing-pts">${s.points}</span>`;
-    html += `<span class="standing-movement">${movement}</span>`;
+    html += `<div class="standing-pts-col"><span class="standing-pts">${s.points}</span><span class="standing-max">max ${s.maxPts}</span></div>`;
     html += `</div>`;
   });
   html += `</div>`;
