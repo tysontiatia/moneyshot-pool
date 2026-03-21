@@ -895,6 +895,7 @@ body {
 }
 .rtv-pill.rtv-mine   { background: rgba(61,220,132,0.12); color: var(--green); }
 .rtv-pill.rtv-theirs { background: rgba(255,95,87,0.12);  color: var(--red); }
+.rtv-pill.rtv-danger { background: rgba(255,170,0,0.12);  color: var(--orange); }
 .rtv-pill.rtv-split  { background: rgba(91,156,246,0.12); color: var(--blue); }
 .rtv-pill.rtv-shared { background: rgba(110,110,120,0.12); color: var(--muted2); }
 .rtv-game-row {
@@ -2468,10 +2469,15 @@ function renderRoadToVictory() {
   const gapNow = leader.points - myStanding.points; // negative means I'm ahead
   const iAhead = gapNow < 0;
 
-  // Best-case swing: points I can gain on the target if all my picks win and their exclusive picks lose.
+  // Best-case swing (catching up): points I can gain on them if all my picks win and their exclusive picks lose.
   const bestSwing = gameAnalysis.reduce((s, g) =>
     (g.category === 'mine' || g.category === 'split') ? s + g.myPts : s, 0);
   const canWin = iAhead || bestSwing >= gapNow;
+
+  // Their best-case swing (catching me): points they can gain on me — danger when I'm ahead.
+  const theirBestSwing = gameAnalysis.reduce((s, g) =>
+    (g.category === 'theirs' || g.category === 'split') ? s + g.ldrPts : s, 0);
+  const theyCatch = !iAhead || theirBestSwing >= Math.abs(gapNow);
 
   const leaderFirst = leader.name.split(' ')[0];
 
@@ -2492,9 +2498,20 @@ function renderRoadToVictory() {
 
   // Status card
   if (iAhead) {
-    html += `<div class="rtv-status-card rtv-leading">`;
-    html += `<div style="font-size:18px;font-weight:700;color:var(--green)">You're ahead of ${leaderFirst} 🏆</div>`;
-    html += `<div style="font-size:12px;color:var(--muted);margin-top:6px">You: ${myStanding.points} pts · ${leaderFirst}: ${leader.points} pts</div>`;
+    const leadBy = Math.abs(gapNow);
+    html += `<div class="rtv-status-card">`;
+    html += `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">`;
+    html += `<div>`;
+    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:2px">Your lead over ${leaderFirst} (#${leader.rank})</div>`;
+    html += `<div style="font-size:26px;font-weight:700;line-height:1;color:var(--green)">+${leadBy} pts</div>`;
+    html += `<div style="font-size:11px;color:var(--muted);margin-top:4px">You: ${myStanding.points} · ${leaderFirst}: ${leader.points}</div>`;
+    html += `</div>`;
+    html += `<div style="text-align:right">`;
+    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:2px">Their best-case swing</div>`;
+    html += `<div style="font-size:26px;font-weight:700;line-height:1;color:${theyCatch ? 'var(--orange)' : 'var(--green)'}">+${theirBestSwing}</div>`;
+    html += `<div style="font-size:11px;color:${theyCatch ? 'var(--orange)' : 'var(--green)'};margin-top:4px">${theyCatch ? '⚠ They can catch you' : '✓ Safe lead'}</div>`;
+    html += `</div>`;
+    html += `</div>`;
     html += `</div>`;
   } else {
     html += `<div class="rtv-status-card">`;
@@ -2523,18 +2540,18 @@ function renderRoadToVictory() {
   const counts = { mine: 0, theirs: 0, split: 0, shared: 0 };
   gameAnalysis.forEach(g => counts[g.category]++);
   html += `<div class="rtv-pills">`;
-  if (counts.mine)   html += `<span class="rtv-pill rtv-mine">🟢 ${counts.mine} only yours</span>`;
-  if (counts.theirs) html += `<span class="rtv-pill rtv-theirs">🔴 ${counts.theirs} only theirs</span>`;
+  if (counts.mine)   html += `<span class="rtv-pill rtv-mine">${iAhead ? '🟢' : '🟢'} ${counts.mine} ${iAhead ? 'extends lead' : 'only yours'}</span>`;
+  if (counts.theirs) html += `<span class="rtv-pill ${iAhead ? 'rtv-danger' : 'rtv-theirs'}">${iAhead ? '⚠️' : '🔴'} ${counts.theirs} ${iAhead ? 'danger' : 'only theirs'}</span>`;
   if (counts.split)  html += `<span class="rtv-pill rtv-split">⚡ ${counts.split} split</span>`;
   if (counts.shared) html += `<span class="rtv-pill rtv-shared">⚪ ${counts.shared} shared</span>`;
   html += `</div>`;
 
-  // Games grouped by category
+  // Games grouped by category — labels flip based on whether I'm ahead or behind
   const groups = [
-    { key: 'mine',   label: 'Your Advantage',  color: 'var(--green)', border: 'rgba(61,220,132,0.25)',  bg: 'rgba(61,220,132,0.04)' },
-    { key: 'theirs', label: 'Their Advantage',  color: 'var(--red)',   border: 'rgba(255,95,87,0.25)',   bg: 'rgba(255,95,87,0.04)' },
-    { key: 'split',  label: 'Split Picks',      color: 'var(--blue)',  border: 'rgba(91,156,246,0.25)',  bg: 'rgba(91,156,246,0.04)' },
-    { key: 'shared', label: 'Shared Picks',     color: 'var(--muted2)', border: 'var(--border)',         bg: 'transparent' },
+    { key: 'mine',   label: iAhead ? 'Extends Your Lead'  : 'Your Advantage',  color: 'var(--green)', border: 'rgba(61,220,132,0.25)',  bg: 'rgba(61,220,132,0.04)' },
+    { key: 'theirs', label: iAhead ? 'Danger — Closes Gap' : 'Their Advantage', color: iAhead ? 'var(--orange)' : 'var(--red)', border: iAhead ? 'rgba(255,170,0,0.25)' : 'rgba(255,95,87,0.25)', bg: iAhead ? 'rgba(255,170,0,0.04)' : 'rgba(255,95,87,0.04)' },
+    { key: 'split',  label: 'Split Picks',                                       color: 'var(--blue)',  border: 'rgba(91,156,246,0.25)',  bg: 'rgba(91,156,246,0.04)' },
+    { key: 'shared', label: 'Shared Picks',                                      color: 'var(--muted2)', border: 'var(--border)',         bg: 'transparent' },
   ];
 
   groups.forEach(({ key, label, color, border, bg }) => {
