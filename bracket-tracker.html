@@ -2311,8 +2311,11 @@ function renderStandings() {
     html += `<div class="my-rank-top">`;
     html += `<div class="my-rank-pos">${me.rank}<span>${ordinal}</span></div>`;
     html += `<div style="text-align:right">`;
-    html += `<div style="font-size:11px;color:var(--muted)">Champion</div>`;
-    html += `<div style="font-size:13px;font-weight:500;color:${me.champAlive ? 'var(--green)' : 'var(--red)'}">${me.champTeam} ${me.champAlive ? '✓' : '✗'}</div>`;
+    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:4px">Champion</div>`;
+    html += `<div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">`;
+    if (me.champLogo) html += `<img src="${me.champLogo}" style="width:24px;height:24px;object-fit:contain;border-radius:3px;${me.champAlive ? '' : 'opacity:0.35;filter:grayscale(1)'}" onerror="this.style.display='none'">`;
+    html += `<span style="font-size:13px;font-weight:500;color:${me.champAlive ? 'var(--text)' : 'var(--muted)'}">${me.champTeam}</span>`;
+    html += `</div>`;
     html += `</div></div>`;
     html += `<div class="my-rank-stats">`;
     html += `<div class="my-stat"><div class="my-stat-value">${me.points}</div><div class="my-stat-label">Points</div></div>`;
