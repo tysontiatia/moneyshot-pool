@@ -2554,8 +2554,9 @@ function renderSettings() {
   const teamsTotal = allCbsTeams.size || (state.picks?.teamMap ? Object.keys(state.picks.teamMap).length : 0);
   const unpickedCount = Object.values(ESPN_COVERAGE).filter(t => !t.picked).length;
   
+  const isAdmin = CONFIG.myName.trim().toLowerCase() === 'tyson tiatia';
   let html = '';
-  
+
   // Status
   html += `<div class="settings-section">`;
   html += `<div class="settings-title">📡 Status</div>`;
@@ -2578,11 +2579,15 @@ function renderSettings() {
   // Config
   html += `<div class="settings-section">`;
   html += `<div class="settings-title">🔧 Configuration</div>`;
-  html += `<div class="setting-row">`;
-  html += `<div class="setting-label">Master Key</div>`;
-  html += `<input class="setting-input" id="cfg-bin-key" type="password" value="${CONFIG.jsonbinKey}" placeholder="JSONBin Master Key (for imports only)">`;
-  html += `<div style="font-size:10px;color:var(--muted);margin-top:2px">Only needed to import/update picks. Found at jsonbin.io → Dashboard → API Keys</div>`;
-  html += `</div>`;
+  if (isAdmin) {
+    html += `<div class="setting-row">`;
+    html += `<div class="setting-label">Master Key</div>`;
+    html += `<input class="setting-input" id="cfg-bin-key" type="password" value="${CONFIG.jsonbinKey}" placeholder="JSONBin Master Key (for imports only)">`;
+    html += `<div style="font-size:10px;color:var(--muted);margin-top:2px">Only needed to import/update picks. Found at jsonbin.io → Dashboard → API Keys</div>`;
+    html += `</div>`;
+  } else {
+    html += `<input type="hidden" id="cfg-bin-key" value="${CONFIG.jsonbinKey}">`;
+  }
   html += `<div class="setting-row">`;
   html += `<div class="setting-label">Your Name</div>`;
   if (state.picks?.entries?.length) {
@@ -2598,19 +2603,23 @@ function renderSettings() {
   }
   html += `</div>`;
   html += `<button class="btn btn-primary btn-block" onclick="saveSettings()" style="margin-top:8px">Save & Reload</button>`;
-  html += `<button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="generateBookmark()">📎 Generate Bookmark URL</button>`;
+  if (isAdmin) {
+    html += `<button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="generateBookmark()">📎 Generate Bookmark URL</button>`;
+  }
   html += `</div>`;
+
+  if (isAdmin) {
+    // Import
+    html += `<div class="settings-section">`;
+    html += `<div class="settings-title">📥 Import CBS Picks to JSONBin</div>`;
+    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Paste CBS bracket JSON data (array of entries)</div>`;
+    html += `<textarea class="import-area" id="import-data" placeholder='[{"name":"...", "picks":[...], "championTeam":{...}}]'></textarea>`;
+    html += `<button class="btn btn-primary btn-block" style="margin-top:8px" onclick="importPicks()">Import to JSONBin</button>`;
+    html += `</div>`;
+  }
   
-  // Import
-  html += `<div class="settings-section">`;
-  html += `<div class="settings-title">📥 Import CBS Picks to JSONBin</div>`;
-  html += `<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Paste CBS bracket JSON data (array of entries)</div>`;
-  html += `<textarea class="import-area" id="import-data" placeholder='[{"name":"...", "picks":[...], "championTeam":{...}}]'></textarea>`;
-  html += `<button class="btn btn-primary btn-block" style="margin-top:8px" onclick="importPicks()">Import to JSONBin</button>`;
-  html += `</div>`;
-  
-  // Team coverage details
-  if (espnCovered > 0) {
+  // Team coverage details (admin only)
+  if (isAdmin && espnCovered > 0) {
     html += `<div class="settings-section">`;
     // Show mapping summary
     html += `<div class="settings-title">🏀 Team Coverage (${espnCovered}/64)</div>`;
