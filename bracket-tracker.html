@@ -833,34 +833,49 @@ body {
   transition: width 0.5s;
 }
 
-/* Win probability */
-.prob-row {
+/* Road to Victory */
+.rtv-status-card {
+  background: var(--surface2);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.rtv-status-card.rtv-leading {
+  background: rgba(61,220,132,0.06);
+  border: 1px solid rgba(61,220,132,0.25);
+  text-align: center;
+  padding: 16px;
+}
+.rtv-pills {
   display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.rtv-pill {
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.rtv-pill.rtv-mine   { background: rgba(61,220,132,0.12); color: var(--green); }
+.rtv-pill.rtv-theirs { background: rgba(255,95,87,0.12);  color: var(--red); }
+.rtv-pill.rtv-split  { background: rgba(91,156,246,0.12); color: var(--blue); }
+.rtv-pill.rtv-shared { background: rgba(110,110,120,0.12); color: var(--muted2); }
+.rtv-game-row {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  padding: 8px 0;
+  gap: 12px;
 }
-.prob-name { flex: 1; font-size: 13px; }
-.prob-pct {
-  font-family: 'DM Mono', monospace;
-  font-size: 14px;
-  font-weight: 600;
-  min-width: 44px;
-  text-align: right;
-}
-.prob-bar-track {
-  flex: 2;
-  height: 6px;
-  background: var(--surface3);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.prob-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  background: var(--accent);
-  transition: width 0.5s;
-}
+.rtv-game-row:active { opacity: 0.7; }
+.rtv-game-matchup { flex: 1; min-width: 0; }
+.rtv-game-pts { display: flex; flex-direction: column; align-items: flex-end; text-align: right; white-space: nowrap; gap: 2px; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SETTINGS TAB
@@ -1779,96 +1794,8 @@ function getPicksForGame(game) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// WIN PROBABILITY — Monte Carlo Simulation
+// ROAD TO VICTORY
 // ═══════════════════════════════════════════════════════════════════════════
-function simulateWinProbability(iterations = 2000) {
-  if (!state.picks?.entries?.length || !state.games.length) return [];
-  
-  const standings = state.standings;
-  if (!standings.length) return [];
-  
-  // Find all pending games (not yet final)
-  const pendingGames = state.games.filter(g => g.state !== 'final' && g.team1.id && g.team2.id);
-  
-  if (pendingGames.length === 0) {
-    // Tournament is over — whoever is #1 wins
-    return standings.map(s => ({
-      name: s.name,
-      winPct: s.rank === 1 ? 100 : 0,
-      isMe: s.isMe,
-    }));
-  }
-  
-  // For each pending game, compute upset probability based on seeds
-  // Higher seed = more likely to win. P(higher_seed) ≈ seed_lower / (seed_higher + seed_lower)
-  const gameProbs = pendingGames.map(g => {
-    const s1 = g.team1.seed || 8;
-    const s2 = g.team2.seed || 8;
-    // Probability team1 (higher seed) wins
-    const p1 = s2 / (s1 + s2);
-    return { game: g, p1 };
-  });
-  
-  const wins = {};
-  standings.forEach(s => { wins[s.name] = 0; });
-  
-  for (let i = 0; i < iterations; i++) {
-    // Simulate all pending games
-    const simResults = {};
-    gameProbs.forEach(({ game, p1 }) => {
-      simResults[game.id] = Math.random() < p1 ? game.team1.id : game.team2.id;
-    });
-    
-    // Score each entry with simulated results
-    let bestScore = -1;
-    let bestNames = [];
-    
-    standings.forEach(s => {
-      let simTotal = s.points; // Start with current real points
-      
-      const entry = state.picks.entries.find(e => e.name === s.name);
-      if (!entry) return;
-      
-      // Score pending picks against simulated results
-      entry.picks.forEach(pick => {
-        const ourRound = CONFIG.cbsRoundMap[pick.tournamentRound];
-        if (!ourRound) return;
-        
-        const game = findGameForPick(pick);
-        if (!game || game.state === 'final') return; // Already scored
-        
-        const espnId = CBS_ESPN_MAP[String(pick.cbsTeamId)];
-        const simWinner = simResults[game.id];
-        if (espnId && simWinner === espnId) {
-          const seed = CBS_SEED[String(pick.cbsTeamId)] || 1;
-          const mult = CONFIG.scoring[ourRound]?.mult || 1;
-          simTotal += mult * seed;
-        }
-      });
-      
-      if (simTotal > bestScore) {
-        bestScore = simTotal;
-        bestNames = [s.name];
-      } else if (simTotal === bestScore) {
-        bestNames.push(s.name);
-      }
-    });
-    
-    // Credit fractional wins for ties
-    bestNames.forEach(name => {
-      wins[name] += 1 / bestNames.length;
-    });
-  }
-  
-  const results = standings.map(s => ({
-    name: s.name,
-    winPct: Math.round((wins[s.name] / iterations) * 1000) / 10,
-    isMe: s.isMe,
-  }));
-  
-  results.sort((a, b) => b.winPct - a.winPct);
-  return results;
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // STATUS & TOAST
@@ -2401,8 +2328,8 @@ function renderAnalytics() {
   
   let html = '';
   
-  // 1. Win Probability
-  html += renderWinProbability();
+  // 1. Road to Victory
+  html += renderRoadToVictory();
   
   // 2. Champion Analysis
   html += renderChampionAnalysis();
@@ -2413,25 +2340,172 @@ function renderAnalytics() {
   container.innerHTML = html;
 }
 
-function renderWinProbability() {
-  const probs = simulateWinProbability(1500);
-  if (!probs.length) return '';
-  
-  let html = `<div class="analytics-section">`;
-  html += `<div class="analytics-title"><span class="icon">🎯</span> Win Probability</div>`;
-  
-  const top = probs.filter(p => p.winPct > 0).slice(0, 10);
-  if (top.length === 0) {
-    html += `<div style="color:var(--muted);font-size:12px">Not enough data to calculate</div>`;
-  } else {
-    top.forEach(p => {
-      html += `<div class="prob-row" style="${p.isMe ? 'background:rgba(232,255,71,0.04);border-radius:var(--radius);padding:8px 10px;margin:0 -10px' : ''}">`;
-      html += `<span class="prob-name" style="${p.isMe ? 'font-weight:600;color:var(--accent)' : ''}">${p.name}${p.isMe ? ' ★' : ''}</span>`;
-      html += `<div class="prob-bar-track"><div class="prob-bar-fill" style="width:${p.winPct}%;background:${p.isMe ? 'var(--accent)' : 'var(--blue)'}"></div></div>`;
-      html += `<span class="prob-pct">${p.winPct}%</span>`;
-      html += `</div>`;
+function renderRoadToVictory() {
+  if (!CONFIG.myName) {
+    return `<div class="analytics-section"><div class="analytics-title"><span class="icon">🏁</span> Road to Victory</div><div style="color:var(--muted);font-size:13px;text-align:center;padding:8px 0">Set your name in Settings to see your path to the top.</div></div>`;
+  }
+
+  const standings = state.standings;
+  if (!standings.length) return '';
+
+  const myStanding = standings.find(s => s.isMe);
+  if (!myStanding) {
+    return `<div class="analytics-section"><div class="analytics-title"><span class="icon">🏁</span> Road to Victory</div><div style="color:var(--muted);font-size:13px;text-align:center;padding:8px 0">Your name doesn't match any entry. Check Settings.</div></div>`;
+  }
+
+  const myEntry = state.picks.entries.find(e => e.name.trim().toLowerCase() === CONFIG.myName.trim().toLowerCase());
+  if (!myEntry) return '';
+
+  const isWinning = myStanding.rank === 1;
+  const leader = standings[0];
+  const leaderEntry = isWinning ? null : state.picks.entries.find(e => e.name === leader.name);
+
+  // Build a map of espnId → true for each player's alive pending picks
+  function getPendingPickMap(entry) {
+    const map = {};
+    entry.picks.forEach(pick => {
+      const result = scorePick(pick);
+      if (!result.pending || result.eliminated) return;
+      const espnId = CBS_ESPN_MAP[String(pick.cbsTeamId)];
+      if (!espnId) return;
+      map[espnId] = true;
+    });
+    return map;
+  }
+
+  const myPickMap = getPendingPickMap(myEntry);
+  const leaderPickMap = leaderEntry ? getPendingPickMap(leaderEntry) : {};
+
+  // Analyze each pending game — categorize relative to leader
+  const pendingGames = state.games.filter(g => g.state !== 'final' && g.team1.id && g.team2.id);
+  const gameAnalysis = [];
+
+  for (const game of pendingGames) {
+    const myEspnId   = [game.team1.id, game.team2.id].find(id => myPickMap[id]);
+    const ldrEspnId  = [game.team1.id, game.team2.id].find(id => leaderPickMap[id]);
+
+    if (!myEspnId && !ldrEspnId) continue; // Neither has a stake — skip
+
+    const myTeam  = myEspnId  ? (game.team1.id === myEspnId  ? game.team1 : game.team2) : null;
+    const ldrTeam = ldrEspnId ? (game.team1.id === ldrEspnId ? game.team1 : game.team2) : null;
+    const roundMult = CONFIG.scoring[game.roundNum]?.mult || 1;
+    const myPts  = myTeam  ? roundMult * (myTeam.seed  || 1) : 0;
+    const ldrPts = ldrTeam ? roundMult * (ldrTeam.seed || 1) : 0;
+
+    let category;
+    if (myEspnId && ldrEspnId) {
+      category = myEspnId === ldrEspnId ? 'shared' : 'split';
+    } else if (myEspnId) {
+      category = 'mine';
+    } else {
+      category = 'theirs';
+    }
+
+    gameAnalysis.push({
+      game, category,
+      myTeam:  myTeam  ? (myTeam.abbreviation  || myTeam.name  || '?') : null,
+      ldrTeam: ldrTeam ? (ldrTeam.abbreviation || ldrTeam.name || '?') : null,
+      myPts, ldrPts,
+      roundName: CONFIG.scoring[game.roundNum]?.name || `Round ${game.roundNum}`,
     });
   }
+
+  gameAnalysis.sort((a, b) => a.game.roundNum - b.game.roundNum);
+
+  const gapNow = leader.points - myStanding.points;
+
+  // Best-case swing: max I gain minus max they gain (if everything goes my way)
+  const maxMyGain  = gameAnalysis.reduce((s, g) => s + (g.category === 'mine' || g.category === 'split' ? g.myPts  : 0), 0);
+  const maxLdrGain = gameAnalysis.reduce((s, g) => s + (g.category === 'theirs' || g.category === 'split' ? g.ldrPts : 0), 0);
+  const bestSwing  = maxMyGain - maxLdrGain;
+  const canWin     = isWinning || bestSwing >= gapNow;
+
+  const leaderFirst = leader.name.split(' ')[0];
+
+  let html = `<div class="analytics-section">`;
+  html += `<div class="analytics-title"><span class="icon">🏁</span> Road to Victory</div>`;
+
+  // Status card
+  if (isWinning) {
+    html += `<div class="rtv-status-card rtv-leading">`;
+    html += `<div style="font-size:18px;font-weight:700;color:var(--green)">You're in 1st place 🏆</div>`;
+    html += `<div style="font-size:12px;color:var(--muted);margin-top:6px">${myStanding.points} pts · ${myStanding.pending} picks still alive</div>`;
+    html += `</div>`;
+  } else {
+    html += `<div class="rtv-status-card">`;
+    html += `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">`;
+    html += `<div>`;
+    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:2px">Gap to ${leaderFirst} (#1)</div>`;
+    html += `<div style="font-size:26px;font-weight:700;line-height:1">-${gapNow} pts</div>`;
+    html += `<div style="font-size:11px;color:var(--muted);margin-top:4px">You: ${myStanding.points} · ${leaderFirst}: ${leader.points}</div>`;
+    html += `</div>`;
+    html += `<div style="text-align:right">`;
+    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:2px">Best-case swing</div>`;
+    html += `<div style="font-size:26px;font-weight:700;line-height:1;color:${canWin ? 'var(--green)' : 'var(--red)'}">${bestSwing >= 0 ? '+' : ''}${bestSwing}</div>`;
+    html += `<div style="font-size:11px;color:${canWin ? 'var(--green)' : 'var(--red)'};margin-top:4px">${canWin ? '✓ Can catch up' : '✗ Can\'t catch up'}</div>`;
+    html += `</div>`;
+    html += `</div>`;
+    html += `</div>`;
+  }
+
+  if (gameAnalysis.length === 0) {
+    html += `<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0">No pending picks to analyze.</div>`;
+    html += `</div>`;
+    return html;
+  }
+
+  // Summary pills
+  const counts = { mine: 0, theirs: 0, split: 0, shared: 0 };
+  gameAnalysis.forEach(g => counts[g.category]++);
+  html += `<div class="rtv-pills">`;
+  if (counts.mine)   html += `<span class="rtv-pill rtv-mine">🟢 ${counts.mine} only yours</span>`;
+  if (counts.theirs) html += `<span class="rtv-pill rtv-theirs">🔴 ${counts.theirs} only theirs</span>`;
+  if (counts.split)  html += `<span class="rtv-pill rtv-split">⚡ ${counts.split} split</span>`;
+  if (counts.shared) html += `<span class="rtv-pill rtv-shared">⚪ ${counts.shared} shared</span>`;
+  html += `</div>`;
+
+  // Games grouped by category
+  const groups = [
+    { key: 'mine',   label: 'Your Advantage',  color: 'var(--green)', border: 'rgba(61,220,132,0.25)',  bg: 'rgba(61,220,132,0.04)' },
+    { key: 'theirs', label: 'Their Advantage',  color: 'var(--red)',   border: 'rgba(255,95,87,0.25)',   bg: 'rgba(255,95,87,0.04)' },
+    { key: 'split',  label: 'Split Picks',      color: 'var(--blue)',  border: 'rgba(91,156,246,0.25)',  bg: 'rgba(91,156,246,0.04)' },
+    { key: 'shared', label: 'Shared Picks',     color: 'var(--muted2)', border: 'var(--border)',         bg: 'transparent' },
+  ];
+
+  groups.forEach(({ key, label, color, border, bg }) => {
+    const games = gameAnalysis.filter(g => g.category === key);
+    if (!games.length) return;
+
+    html += `<div style="margin-bottom:12px">`;
+    html += `<div style="font-size:10px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">${label}</div>`;
+
+    games.forEach(({ game, myTeam, ldrTeam, myPts, ldrPts, roundName, category }) => {
+      html += `<div class="rtv-game-row" style="border-color:${border};background:${bg}" onclick="openGameSheet('${game.id}')">`;
+      html += `<div class="rtv-game-matchup">`;
+      html += `<div style="font-size:13px;font-weight:500">${game.team1.abbreviation || '?'} vs ${game.team2.abbreviation || '?'}</div>`;
+      html += `<div style="font-size:11px;color:var(--muted);margin-top:1px">${roundName}${game.statusDetail ? ' · ' + game.statusDetail : ''}</div>`;
+      html += `</div>`;
+      html += `<div class="rtv-game-pts">`;
+      if (category === 'mine') {
+        html += `<span style="color:var(--green);font-weight:600;font-size:13px">+${myPts} pts</span>`;
+        html += `<span style="color:var(--muted);font-size:10px">if ${myTeam} wins</span>`;
+      } else if (category === 'theirs') {
+        html += `<span style="color:var(--red);font-weight:600;font-size:13px">+${ldrPts} pts</span>`;
+        html += `<span style="color:var(--muted);font-size:10px">if ${ldrTeam} wins</span>`;
+      } else if (category === 'split') {
+        html += `<span style="color:var(--blue);font-size:12px;font-weight:500">You: ${myTeam} +${myPts}</span>`;
+        html += `<span style="color:var(--muted);font-size:11px">Them: ${ldrTeam} +${ldrPts}</span>`;
+      } else {
+        html += `<span style="color:var(--muted2);font-size:12px">Both +${myPts}</span>`;
+        html += `<span style="color:var(--muted);font-size:10px">${myTeam}</span>`;
+      }
+      html += `</div>`;
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+  });
+
   html += `</div>`;
   return html;
 }
