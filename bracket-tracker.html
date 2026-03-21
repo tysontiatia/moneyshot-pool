@@ -834,6 +834,41 @@ body {
 }
 
 /* Road to Victory */
+.rtv-selector {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  margin-bottom: 10px;
+  padding-bottom: 2px;
+}
+.rtv-selector::-webkit-scrollbar { display: none; }
+.rtv-target-btn {
+  flex-shrink: 0;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text2);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.rtv-target-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+}
+.rtv-target-rank {
+  font-size: 10px;
+  opacity: 0.7;
+}
 .rtv-status-card {
   background: var(--surface2);
   border-radius: var(--radius);
@@ -1142,6 +1177,7 @@ const state = {
   activeTab: 'games',
   selectedRound: null,
   selectedDay: null,
+  rtvTarget: null,    // name of player to compare against in Road to Victory (null = #1)
   lastFetch: null,
   loading: true,
   fetchDone: false,
@@ -2340,6 +2376,11 @@ function renderAnalytics() {
   container.innerHTML = html;
 }
 
+function setRtvTarget(name) {
+  state.rtvTarget = name;
+  renderAnalytics();
+}
+
 function renderRoadToVictory() {
   if (!CONFIG.myName) {
     return `<div class="analytics-section"><div class="analytics-title"><span class="icon">🏁</span> Road to Victory</div><div style="color:var(--muted);font-size:13px;text-align:center;padding:8px 0">Set your name in Settings to see your path to the top.</div></div>`;
@@ -2356,9 +2397,16 @@ function renderRoadToVictory() {
   const myEntry = state.picks.entries.find(e => e.name.trim().toLowerCase() === CONFIG.myName.trim().toLowerCase());
   if (!myEntry) return '';
 
-  const isWinning = myStanding.rank === 1;
-  const leader = standings[0];
-  const leaderEntry = isWinning ? null : state.picks.entries.find(e => e.name === leader.name);
+  // Resolve comparison target — default to #1, skip self
+  const others = standings.filter(s => !s.isMe);
+  const defaultTarget = others[0];
+  const targetStanding = (state.rtvTarget && state.rtvTarget !== myStanding.name)
+    ? standings.find(s => s.name === state.rtvTarget) || defaultTarget
+    : defaultTarget;
+
+  const isWinning = myStanding.rank === 1 && !state.rtvTarget;
+  const leader = targetStanding;
+  const leaderEntry = leader ? state.picks.entries.find(e => e.name === leader.name) : null;
 
   // Build a map of espnId → true for each player's alive pending picks
   function getPendingPickMap(entry) {
@@ -2372,6 +2420,8 @@ function renderRoadToVictory() {
     });
     return map;
   }
+
+  if (!leader) return '';
 
   const myPickMap = getPendingPickMap(myEntry);
   const leaderPickMap = leaderEntry ? getPendingPickMap(leaderEntry) : {};
@@ -2415,16 +2465,13 @@ function renderRoadToVictory() {
 
   gameAnalysis.sort((a, b) => a.game.roundNum - b.game.roundNum);
 
-  const gapNow = leader.points - myStanding.points;
+  const gapNow = leader.points - myStanding.points; // negative means I'm ahead
+  const iAhead = gapNow < 0;
 
-  // Best-case swing: points I can gain on the leader if all my picks win and all their exclusive picks lose.
-  // 'mine'   → I gain myPts, they gain 0
-  // 'split'  → best case: my team wins, I gain myPts, they gain 0
-  // 'theirs' → best case: their team loses, they gain 0 (no change)
-  // 'shared' → both gain equally, gap neutral
+  // Best-case swing: points I can gain on the target if all my picks win and their exclusive picks lose.
   const bestSwing = gameAnalysis.reduce((s, g) =>
     (g.category === 'mine' || g.category === 'split') ? s + g.myPts : s, 0);
-  const canWin     = isWinning || bestSwing >= gapNow;
+  const canWin = iAhead || bestSwing >= gapNow;
 
   const leaderFirst = leader.name.split(' ')[0];
 
@@ -2433,17 +2480,27 @@ function renderRoadToVictory() {
   if (activeRoundName) html += `<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:8px">${activeRoundName}</span>`;
   html += `</div>`;
 
+  // Compare-against selector
+  html += `<div class="rtv-selector">`;
+  others.forEach(s => {
+    const isActive = s.name === leader.name;
+    html += `<button class="rtv-target-btn${isActive ? ' active' : ''}" onclick="setRtvTarget('${s.name.replace(/'/g, "\\'")}')">`;
+    html += `<span class="rtv-target-rank">#${s.rank}</span> ${s.name.split(' ')[0]}`;
+    html += `</button>`;
+  });
+  html += `</div>`;
+
   // Status card
-  if (isWinning) {
+  if (iAhead) {
     html += `<div class="rtv-status-card rtv-leading">`;
-    html += `<div style="font-size:18px;font-weight:700;color:var(--green)">You're in 1st place 🏆</div>`;
-    html += `<div style="font-size:12px;color:var(--muted);margin-top:6px">${myStanding.points} pts · ${myStanding.pending} picks still alive</div>`;
+    html += `<div style="font-size:18px;font-weight:700;color:var(--green)">You're ahead of ${leaderFirst} 🏆</div>`;
+    html += `<div style="font-size:12px;color:var(--muted);margin-top:6px">You: ${myStanding.points} pts · ${leaderFirst}: ${leader.points} pts</div>`;
     html += `</div>`;
   } else {
     html += `<div class="rtv-status-card">`;
     html += `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">`;
     html += `<div>`;
-    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:2px">Gap to ${leaderFirst} (#1)</div>`;
+    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:2px">Gap to ${leaderFirst} (#${leader.rank})</div>`;
     html += `<div style="font-size:26px;font-weight:700;line-height:1">-${gapNow} pts</div>`;
     html += `<div style="font-size:11px;color:var(--muted);margin-top:4px">You: ${myStanding.points} · ${leaderFirst}: ${leader.points}</div>`;
     html += `</div>`;
