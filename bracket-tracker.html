@@ -2380,6 +2380,11 @@ function renderAnalytics() {
 function setRtvTarget(name) {
   state.rtvTarget = name;
   renderAnalytics();
+  // Scroll the active pill into view after render
+  requestAnimationFrame(() => {
+    const active = document.querySelector('.rtv-target-btn.active');
+    if (active) active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  });
 }
 
 function renderRoadToVictory() {
