@@ -1718,6 +1718,18 @@ function computeStandings() {
       }
     }
 
+    // Look up champion logo from ESPN game data
+    let champLogo = '';
+    if (entry.championCbsTeamId) {
+      const espnId = CBS_ESPN_MAP[String(entry.championCbsTeamId)];
+      if (espnId) {
+        for (const g of state.games) {
+          if (g.team1.id === espnId && g.team1.logo) { champLogo = g.team1.logo; break; }
+          if (g.team2.id === espnId && g.team2.logo) { champLogo = g.team2.logo; break; }
+        }
+      }
+    }
+
     return {
       name: entry.name,
       points: total + champBonus,
@@ -1727,6 +1739,7 @@ function computeStandings() {
       maxPts: maxPts,
       scored,
       champTeam: champTeam?.mediumName || champTeam?.abbrev || '?',
+      champLogo,
       champAlive,
       isMe: entry.name.trim().toLowerCase() === CONFIG.myName.trim().toLowerCase(),
     };
@@ -2318,7 +2331,10 @@ function renderStandings() {
     html += `<div class="standing-rank-col"><span class="standing-rank">${s.rank}</span><span class="standing-movement">${movement}</span></div>`;
     html += `<div class="standing-info">`;
     html += `<div class="standing-name">${s.name}</div>`;
-    html += `<div class="standing-detail">${s.correct}W · <span style="color:${s.champAlive ? 'var(--green)' : 'var(--red)'}">${s.champTeam} ${s.champAlive ? '✓' : '✗'}</span></div>`;
+    const champImg = s.champLogo
+      ? `<img src="${s.champLogo}" style="width:16px;height:16px;object-fit:contain;border-radius:2px;vertical-align:middle;${s.champAlive ? '' : 'opacity:0.3;filter:grayscale(1)'}" onerror="this.style.display='none'">`
+      : `<span style="color:${s.champAlive ? 'var(--text2)' : 'var(--muted)'}">${s.champTeam}</span>`;
+    html += `<div class="standing-detail">${s.correct} correct · ${champImg}</div>`;
     html += `</div>`;
     html += `<div class="standing-pts-col"><span class="standing-pts">${s.points}</span><span class="standing-max">max ${s.maxPts}</span></div>`;
     html += `</div>`;
