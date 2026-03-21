@@ -882,6 +882,19 @@ body {
   padding-bottom: 2px;
 }
 .rtv-selector::-webkit-scrollbar { display: none; }
+.rtv-selector-wrap {
+  position: relative;
+}
+.rtv-selector-wrap::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 2px;
+  width: 40px;
+  background: linear-gradient(to right, transparent, var(--bg));
+  pointer-events: none;
+}
 .rtv-target-btn {
   flex-shrink: 0;
   background: var(--surface2);
@@ -1804,6 +1817,16 @@ function computeStandings() {
   return standings;
 }
 
+function getTeamLogoForCbs(cbsTeamId) {
+  const espnId = CBS_ESPN_MAP[String(cbsTeamId)];
+  if (!espnId) return null;
+  for (const g of state.games) {
+    if (g.team1.id === espnId && g.team1.logo) return g.team1.logo;
+    if (g.team2.id === espnId && g.team2.logo) return g.team2.logo;
+  }
+  return null;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // WHO PICKED WHAT — for a given game
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2056,7 +2079,6 @@ function renderGames() {
       const highConsensus = !isUnanimous && (t1Pct >= 75 || t2Pct >= 75);
       
       html += `<div class="consensus-inline">`;
-      html += `<div style="font-size:var(--fs-2xs);text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:5px">Pool picks</div>`;
       html += `<div class="consensus-inline-labels">`;
       html += `<span class="cl-team" style="color:${t1Pct >= t2Pct ? t1Color : 'var(--muted)'}">${t1Pct}% <span style="font-weight:400;font-size:var(--fs-2xs);color:var(--muted)">(${t1Count})</span></span>`;
       if (isUnanimous) html += `<span class="cl-tag">unanimous</span>`;
@@ -2292,7 +2314,7 @@ function openPlayerSheet(name) {
       } else if (pick.correct === false || pick.eliminated) {
         statusColor = 'var(--red)'; statusIcon = '✗'; statusLabel = 'eliminated';
       } else if (pick.pending) {
-        statusColor = 'var(--text)'; statusIcon = ''; statusLabel = `${pts} pts`;
+        statusColor = 'var(--text2)'; statusIcon = '○'; statusLabel = `${pts} pts`;
       } else {
         statusColor = 'var(--muted)'; statusIcon = '–'; statusLabel = 'TBD';
       }
@@ -2308,9 +2330,11 @@ function openPlayerSheet(name) {
         liveInfo = `<span style="color:var(--orange);font-size:var(--fs-2xs);margin-left:6px">LIVE ${myScore}-${oppScore}</span>`;
       }
 
+      const pickLogo = getTeamLogoForCbs(pick.cbsTeamId);
       html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface2);border-radius:var(--radius)">`;
       html += `<div style="display:flex;align-items:center;gap:6px">`;
       html += `<span style="font-size:var(--fs-2xs);color:var(--muted);width:18px;text-align:center">${seedStr}</span>`;
+      if (pickLogo) html += `<img src="${pickLogo}" style="width:18px;height:18px;object-fit:contain;border-radius:2px;opacity:${pick.correct === false || pick.eliminated ? '0.35' : '1'};${pick.correct === false || pick.eliminated ? 'filter:grayscale(1)' : ''}" onerror="this.style.display='none'">`;
       html += `<span style="font-size:var(--fs-md);font-weight:500;color:${statusColor}">${name}</span>`;
       html += liveInfo;
       html += `</div>`;
@@ -2375,6 +2399,8 @@ function renderStandings() {
   
   // Standings list
   html += `<div class="standings-list">`;
+  const leaderPts = state.standings[0]?.points || 0;
+  let eliminatedDividerAdded = false;
   state.standings.forEach(s => {
     const prevRank = getPreviousRank(s.name);
     let movement = '';
@@ -2384,6 +2410,10 @@ function renderStandings() {
       else if (diff < 0) movement = `<span class="movement-down">▼${Math.abs(diff)}</span>`;
     }
     
+    if (!eliminatedDividerAdded && leaderPts > 0 && s.maxPts < leaderPts) {
+      eliminatedDividerAdded = true;
+      html += `<div style="font-size:var(--fs-2xs);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:12px 4px 6px">Out of contention</div>`;
+    }
     html += `<div class="standing-row ${s.isMe ? 'is-me' : ''}" onclick="openPlayerSheet('${s.name.replace(/'/g, "\\'")}')">`;
     html += `<div class="standing-rank-col"><span class="standing-rank">${s.rank}</span><span class="standing-movement">${movement}</span></div>`;
     html += `<div class="standing-info">`;
@@ -2563,7 +2593,9 @@ function renderRoadToVictory() {
     gameAnalysis.push({
       game, category,
       myTeam:  myTeam  ? (myTeam.abbreviation  || myTeam.name  || '?') : null,
+      myLogo:  myTeam?.logo || null,
       ldrTeam: ldrTeam ? (ldrTeam.abbreviation || ldrTeam.name || '?') : null,
+      ldrLogo: ldrTeam?.logo || null,
       myPts, ldrPts,
       roundName: CONFIG.scoring[game.roundNum]?.name || `Round ${game.roundNum}`,
     });
@@ -2592,14 +2624,14 @@ function renderRoadToVictory() {
   html += `</div>`;
 
   // Compare-against selector
-  html += `<div class="rtv-selector">`;
+  html += `<div class="rtv-selector-wrap"><div class="rtv-selector">`;
   others.forEach(s => {
     const isActive = s.name === leader.name;
     html += `<button class="rtv-target-btn${isActive ? ' active' : ''}" onclick="setRtvTarget('${s.name.replace(/'/g, "\\'")}')">`;
     html += `<span class="rtv-target-rank">#${s.rank}</span> ${s.name.split(' ')[0]}`;
     html += `</button>`;
   });
-  html += `</div>`;
+  html += `</div></div>`;
 
   // Status card
   if (iAhead) {
@@ -2666,10 +2698,14 @@ function renderRoadToVictory() {
     html += `<div style="margin-bottom:12px">`;
     html += `<div style="font-size:var(--fs-2xs);font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">${label}</div>`;
 
-    games.forEach(({ game, myTeam, ldrTeam, myPts, ldrPts, roundName, category }) => {
+    games.forEach(({ game, myTeam, myLogo, ldrTeam, ldrLogo, myPts, ldrPts, roundName, category }) => {
+      const rtv1Logo = game.team1.logo ? `<img src="${game.team1.logo}" style="width:13px;height:13px;object-fit:contain;border-radius:2px;vertical-align:middle;margin-right:2px" onerror="this.style.display='none'">` : '';
+      const rtv2Logo = game.team2.logo ? `<img src="${game.team2.logo}" style="width:13px;height:13px;object-fit:contain;border-radius:2px;vertical-align:middle;margin-right:2px" onerror="this.style.display='none'">` : '';
+      const myLogoHtml = myLogo ? `<img src="${myLogo}" style="width:11px;height:11px;object-fit:contain;border-radius:2px;vertical-align:middle;margin-right:2px" onerror="this.style.display='none'">` : '';
+      const ldrLogoHtml = ldrLogo ? `<img src="${ldrLogo}" style="width:11px;height:11px;object-fit:contain;border-radius:2px;vertical-align:middle;margin-right:2px" onerror="this.style.display='none'">` : '';
       html += `<div class="rtv-game-row" style="border-color:${border};background:${bg}" onclick="openGameSheet('${game.id}')">`;
       html += `<div class="rtv-game-matchup">`;
-      html += `<div style="font-size:var(--fs-base);font-weight:500">${game.team1.abbreviation || '?'} vs ${game.team2.abbreviation || '?'}</div>`;
+      html += `<div style="font-size:var(--fs-base);font-weight:500">${rtv1Logo}${game.team1.abbreviation || '?'} vs ${rtv2Logo}${game.team2.abbreviation || '?'}</div>`;
       const rtvRegion = game.region || roundName;
       const rtvDay = game.state === 'scheduled' ? game.dateLabel + ' · ' : '';
       html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:1px">${rtvRegion} · ${rtvDay}${game.statusDetail || ''}</div>`;
@@ -2682,11 +2718,11 @@ function renderRoadToVictory() {
         html += `<span style="color:var(--red);font-weight:600;font-size:var(--fs-base)">+${ldrPts} pts</span>`;
         html += `<span style="color:var(--muted);font-size:var(--fs-2xs)">if ${ldrTeam} wins</span>`;
       } else if (category === 'split') {
-        html += `<span style="color:var(--blue);font-size:var(--fs-sm);font-weight:500">You: ${myTeam} +${myPts}</span>`;
-        html += `<span style="color:var(--muted);font-size:var(--fs-xs)">Them: ${ldrTeam} +${ldrPts}</span>`;
+        html += `<span style="color:var(--blue);font-size:var(--fs-sm);font-weight:500">You: ${myLogoHtml}${myTeam} +${myPts}</span>`;
+        html += `<span style="color:var(--muted);font-size:var(--fs-xs)">Them: ${ldrLogoHtml}${ldrTeam} +${ldrPts}</span>`;
       } else {
         html += `<span style="color:var(--muted2);font-size:var(--fs-sm)">Both +${myPts}</span>`;
-        html += `<span style="color:var(--muted);font-size:var(--fs-2xs)">${myTeam}</span>`;
+        html += `<span style="color:var(--muted);font-size:var(--fs-2xs)">${myLogoHtml}${myTeam}</span>`;
       }
       html += `</div>`;
       html += `</div>`;
@@ -2717,7 +2753,7 @@ function renderChampionAnalysis() {
   const champData = Object.entries(champCounts)
     .map(([cid, data]) => {
       const team = teamMap[cid];
-      return { cbsId: cid, team: team?.mediumName || team?.abbrev || '?', ...data };
+      return { cbsId: cid, team: team?.mediumName || team?.abbrev || '?', logo: getTeamLogoForCbs(cid), ...data };
     })
     .sort((a, b) => b.count - a.count);
   
@@ -2745,7 +2781,11 @@ function renderChampionAnalysis() {
     const alive = c.alive > 0;
     const pct = Math.round((c.count / entries.length) * 100);
     html += `<div class="champ-card">`;
-    html += `<span class="${alive ? 'champ-alive' : 'champ-eliminated'}" style="font-size:var(--fs-sm)">${alive ? '●' : '○'}</span>`;
+    if (c.logo) {
+      html += `<img src="${c.logo}" style="width:18px;height:18px;object-fit:contain;border-radius:2px;${alive ? '' : 'opacity:0.3;filter:grayscale(1)'}" onerror="this.style.display='none'">`;
+    } else {
+      html += `<span class="${alive ? 'champ-alive' : 'champ-eliminated'}" style="font-size:var(--fs-sm)">${alive ? '●' : '○'}</span>`;
+    }
     html += `<span class="champ-team ${alive ? '' : 'champ-eliminated'}">${c.team}</span>`;
     html += `<div class="champ-bar"><div class="champ-bar-fill" style="width:${pct}%;background:${alive ? 'var(--green)' : 'var(--red)'}"></div></div>`;
     html += `<span class="champ-count">${c.count} (${pct}%)</span>`;
@@ -2755,7 +2795,8 @@ function renderChampionAnalysis() {
   
   // Names per champion
   champData.forEach(c => {
-    html += `<div style="margin-top:8px;font-size:var(--fs-xs);color:var(--muted)"><strong style="color:var(--muted2)">${c.team}:</strong> ${c.names.join(', ')}</div>`;
+    const champNameLogo = c.logo ? `<img src="${c.logo}" style="width:12px;height:12px;object-fit:contain;border-radius:2px;vertical-align:middle;margin-right:3px" onerror="this.style.display='none'">` : '';
+    html += `<div style="margin-top:8px;font-size:var(--fs-xs);color:var(--muted)">${champNameLogo}<strong style="color:var(--muted2)">${c.team}:</strong> ${c.names.join(', ')}</div>`;
   });
   
   html += `</div>`;
@@ -2790,14 +2831,16 @@ function renderLeverage() {
     html += `<div class="consensus-card" onclick="openGameSheet('${game.id}')">`;
     const levRegion = game.region || game.roundName;
     const levDay = game.state === 'scheduled' ? ` · ${game.dateLabel}` : '';
+    const lev1Logo = game.team1.logo ? `<img src="${game.team1.logo}" style="width:14px;height:14px;object-fit:contain;border-radius:2px;vertical-align:middle;margin-right:3px" onerror="this.style.display='none'">` : '';
+    const lev2Logo = game.team2.logo ? `<img src="${game.team2.logo}" style="width:14px;height:14px;object-fit:contain;border-radius:2px;vertical-align:middle;margin-right:3px" onerror="this.style.display='none'">` : '';
     html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">`;
-    html += `<span style="font-size:var(--fs-base);font-weight:500">${game.team1.abbreviation} vs ${game.team2.abbreviation}</span>`;
+    html += `<span style="font-size:var(--fs-base);font-weight:500">${lev1Logo}${game.team1.abbreviation} vs ${lev2Logo}${game.team2.abbreviation}</span>`;
     html += `<span class="leverage-badge ${isHigh ? 'high' : ''}" style="${!isHigh ? 'color:var(--muted2)' : ''}">${isHigh ? '🔥 ' : ''}${leverage}% affected</span>`;
     html += `</div>`;
     html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:4px">${levRegion}${levDay}</div>`;
     html += `<div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--muted)">`;
-    html += `<span>${picks.team1.length}× ${game.team1.abbreviation} (${t1Pts}pts)</span>`;
-    html += `<span>${picks.team2.length}× ${game.team2.abbreviation} (${t2Pts}pts)</span>`;
+    html += `<span style="${picks.team1.length === 0 ? 'color:var(--muted);opacity:0.5' : ''}">${picks.team1.length}× ${lev1Logo}${game.team1.abbreviation} (${t1Pts}pts)</span>`;
+    html += `<span style="${picks.team2.length === 0 ? 'color:var(--muted);opacity:0.5' : ''}">${picks.team2.length}× ${lev2Logo}${game.team2.abbreviation} (${t2Pts}pts)</span>`;
     html += `</div>`;
     html += `</div>`;
   });
