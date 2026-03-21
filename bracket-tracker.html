@@ -1091,6 +1091,7 @@ const state = {
   selectedDay: null,
   lastFetch: null,
   loading: true,
+  fetchDone: false,
   rankHistory: JSON.parse(localStorage.getItem('ms_rankHistory') || '[]'),
 };
 
@@ -1899,7 +1900,11 @@ function renderGames() {
   const container = document.getElementById('tab-games');
   
   if (!state.games.length) {
-    container.innerHTML = `<div class="loading"><div class="spinner"></div><span>Loading games...</span></div>`;
+    if (!state.fetchDone) {
+      container.innerHTML = `<div class="loading"><div class="spinner"></div><span>Loading games...</span></div>`;
+    } else {
+      container.innerHTML = `<div class="loading"><span>No tournament games found. ESPN may be unavailable — try refreshing.</span></div>`;
+    }
     return;
   }
   
@@ -2620,13 +2625,14 @@ async function fetchAll() {
       setStatus('live');
     }
     
+    state.fetchDone = true;
+    console.log(`✅ Loaded: ${games.length} games, ${state.picks?.entries?.length || 0} entries, ${Object.keys(CBS_ESPN_MAP).length} team mappings`);
+
     // Re-render current tab
     if (state.activeTab === 'games') renderGames();
     else if (state.activeTab === 'standings') renderStandings();
     else if (state.activeTab === 'analytics') renderAnalytics();
     else if (state.activeTab === 'settings') renderSettings();
-    
-    console.log(`✅ Loaded: ${games.length} games, ${state.picks?.entries?.length || 0} entries, ${Object.keys(CBS_ESPN_MAP).length} team mappings`);
     
   } catch (err) {
     console.error('❌ Fetch error:', err);
@@ -2689,7 +2695,14 @@ async function refreshPicks() {
     if (origCloseSheet) origCloseSheet();
   };
 })();
-// ...existing code...
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  fetchAll();
+  setInterval(fetchAll, CONFIG.pollInterval * 1000);
+});
 </script>
 </body>
 </html>
