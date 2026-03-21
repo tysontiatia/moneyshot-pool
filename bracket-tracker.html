@@ -43,6 +43,20 @@
   --radius-lg: 12px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --nav-height: 56px;
+  /* Typography scale */
+  --fs-2xs: 10px;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-base: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 18px;
+  --fs-2xl: 20px;
+  --fs-3xl: 24px;
+  --fs-4xl: 26px;
+  --fs-5xl: 28px;
+  --fs-6xl: 32px;
+  --fs-7xl: 42px;
 }
 
 [data-theme="light"] {
@@ -75,7 +89,7 @@ body {
   font-family: 'DM Sans', -apple-system, sans-serif;
   min-height: 100vh;
   min-height: 100dvh;
-  font-size: 14px;
+  font-size: var(--fs-md);
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
   padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 8px);
@@ -101,14 +115,14 @@ body {
 
 .logo {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 20px;
+  font-size: var(--fs-2xl);
   letter-spacing: 0.06em;
   color: var(--accent);
   white-space: nowrap;
 }
 .logo .year {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--fs-base);
   font-family: 'DM Mono', monospace;
   font-weight: 400;
   margin-left: 8px;
@@ -120,7 +134,7 @@ body {
   border-radius: 20px;
   padding: 4px 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--fs-md);
   line-height: 1;
   color: var(--muted2);
   transition: border-color 0.15s;
@@ -152,7 +166,7 @@ body {
 
 .status-text {
   font-family: 'DM Mono', monospace;
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   color: var(--muted);
 }
 
@@ -183,7 +197,7 @@ body {
   border: none;
   color: var(--muted);
   font-family: 'DM Sans', sans-serif;
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   font-weight: 500;
   padding: 6px 12px;
   cursor: pointer;
@@ -191,7 +205,7 @@ body {
   -webkit-tap-highlight-color: transparent;
   min-width: 56px;
 }
-.nav-btn .icon { font-size: 20px; }
+.nav-btn .icon { font-size: var(--fs-2xl); }
 .nav-btn.active { color: var(--accent); }
 .nav-btn:active { transform: scale(0.92); }
 
@@ -226,7 +240,7 @@ body {
   padding: 6px 14px;
   border-radius: 20px;
   font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
@@ -254,7 +268,7 @@ body {
   border: 1px solid var(--border);
   padding: 5px 12px;
   border-radius: 16px;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
@@ -288,7 +302,7 @@ body {
 }
 
 .game-region {
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   font-family: 'DM Mono', monospace;
   color: var(--muted);
   text-transform: uppercase;
@@ -296,7 +310,7 @@ body {
 }
 
 .game-status {
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   font-family: 'DM Mono', monospace;
   font-weight: 600;
   padding: 2px 8px;
@@ -332,7 +346,7 @@ body {
 
 .team-seed {
   font-family: 'DM Mono', monospace;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--muted);
   width: 18px;
   text-align: center;
@@ -349,7 +363,7 @@ body {
 
 .team-name {
   flex: 1;
-  font-size: 14px;
+  font-size: var(--fs-md);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -357,7 +371,7 @@ body {
 
 .team-score {
   font-family: 'DM Mono', monospace;
-  font-size: 16px;
+  font-size: var(--fs-lg);
   font-weight: 600;
   min-width: 32px;
   text-align: right;
@@ -370,7 +384,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--muted2);
 }
 
@@ -405,7 +419,7 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 5px;
-  font-size: 11px;
+  font-size: var(--fs-xs);
 }
 .consensus-inline-labels .cl-team {
   display: flex;
@@ -414,7 +428,7 @@ body {
   font-weight: 600;
 }
 .consensus-inline-labels .cl-tag {
-  font-size: 9px;
+  font-size: var(--fs-2xs);
   font-weight: 500;
   color: var(--orange);
   letter-spacing: 0.02em;
@@ -510,29 +524,29 @@ body {
 
 .sheet-team-name {
   font-weight: 600;
-  font-size: 16px;
+  font-size: var(--fs-lg);
 }
 
 .sheet-team-seed {
   font-family: 'DM Mono', monospace;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--muted);
 }
 
 .sheet-team-score {
   font-family: 'DM Mono', monospace;
-  font-size: 28px;
+  font-size: var(--fs-5xl);
   font-weight: 700;
 }
 
 .sheet-vs {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--muted);
   font-weight: 500;
 }
 
 .sheet-status {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--muted2);
   text-align: center;
   margin-top: 4px;
@@ -544,7 +558,7 @@ body {
 }
 
 .sheet-section-title {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-family: 'DM Mono', monospace;
   color: var(--muted);
   text-transform: uppercase;
@@ -565,7 +579,7 @@ body {
   padding: 8px 10px;
   background: var(--surface2);
   border-radius: var(--radius);
-  font-size: 13px;
+  font-size: var(--fs-base);
 }
 
 
@@ -575,7 +589,7 @@ body {
 
 .pick-entry .entry-points {
   font-family: 'DM Mono', monospace;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--muted2);
 }
 
@@ -585,7 +599,7 @@ body {
 }
 
 .leverage-badge {
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   padding: 2px 8px;
   border-radius: 10px;
   font-weight: 600;
@@ -615,12 +629,12 @@ body {
 
 .my-rank-pos {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 42px;
+  font-size: var(--fs-7xl);
   color: var(--accent);
   line-height: 1;
 }
 .my-rank-pos span {
-  font-size: 18px;
+  font-size: var(--fs-xl);
   color: var(--muted);
   font-family: 'DM Sans', sans-serif;
 }
@@ -636,12 +650,12 @@ body {
 }
 .my-stat-value {
   font-family: 'DM Mono', monospace;
-  font-size: 18px;
+  font-size: var(--fs-xl);
   font-weight: 600;
   color: var(--text);
 }
 .my-stat-label {
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -667,9 +681,9 @@ body {
 }
 .setup-banner:active { opacity: 0.75; }
 .setup-banner-body { flex: 1; min-width: 0; }
-.setup-banner-title { font-size: 14px; font-weight: 600; color: var(--accent); }
-.setup-banner-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-.setup-banner-chevron { color: var(--accent); font-size: 20px; flex-shrink: 0; }
+.setup-banner-title { font-size: var(--fs-md); font-weight: 600; color: var(--accent); }
+.setup-banner-sub { font-size: var(--fs-sm); color: var(--muted); margin-top: 2px; }
+.setup-banner-chevron { color: var(--accent); font-size: var(--fs-2xl); flex-shrink: 0; }
 
 .standing-row {
   display: flex;
@@ -690,7 +704,7 @@ body {
   background: rgba(232, 255, 71, 0.04);
 }
 .standing-row.is-me:active { background: rgba(232, 255, 71, 0.08); }
-.standing-chevron { color: var(--border2); font-size: 18px; flex-shrink: 0; line-height: 1; }
+.standing-chevron { color: var(--border2); font-size: var(--fs-xl); flex-shrink: 0; line-height: 1; }
 
 .standing-rank-col {
   display: flex;
@@ -701,13 +715,13 @@ body {
 }
 .standing-rank {
   font-family: 'DM Mono', monospace;
-  font-size: 15px;
+  font-size: var(--fs-md);
   font-weight: 600;
   color: var(--text);
   line-height: 1;
 }
 .standing-movement {
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   line-height: 1;
   margin-top: 2px;
   height: 12px;
@@ -721,7 +735,7 @@ body {
 }
 
 .standing-name {
-  font-size: 14px;
+  font-size: var(--fs-md);
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -729,7 +743,7 @@ body {
 }
 
 .standing-detail {
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   color: var(--muted);
   font-family: 'DM Mono', monospace;
   margin-top: 2px;
@@ -743,13 +757,13 @@ body {
 }
 .standing-pts {
   font-family: 'DM Mono', monospace;
-  font-size: 17px;
+  font-size: var(--fs-xl);
   font-weight: 600;
   line-height: 1;
 }
 .standing-max {
   font-family: 'DM Mono', monospace;
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   color: var(--muted);
   margin-top: 2px;
 }
@@ -766,7 +780,7 @@ body {
 }
 
 .analytics-title {
-  font-size: 14px;
+  font-size: var(--fs-md);
   font-weight: 600;
   margin-bottom: 12px;
   display: flex;
@@ -774,7 +788,7 @@ body {
   gap: 8px;
 }
 
-.analytics-title .icon { font-size: 16px; }
+.analytics-title .icon { font-size: var(--fs-lg); }
 
 /* Champion cards */
 .champ-grid {
@@ -794,13 +808,13 @@ body {
 
 .champ-team {
   font-weight: 600;
-  font-size: 13px;
+  font-size: var(--fs-base);
   flex: 1;
 }
 
 .champ-count {
   font-family: 'DM Mono', monospace;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--muted2);
 }
 
@@ -835,7 +849,7 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 6px;
-  font-size: 13px;
+  font-size: var(--fs-base);
 }
 
 .consensus-bar-track {
@@ -875,7 +889,7 @@ body {
   border-radius: 20px;
   color: var(--text2);
   font-family: inherit;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   font-weight: 500;
   padding: 5px 12px;
   cursor: pointer;
@@ -890,7 +904,7 @@ body {
   color: #000;
 }
 .rtv-target-rank {
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   opacity: 0.7;
 }
 .rtv-status-card {
@@ -914,7 +928,7 @@ body {
 .rtv-pill {
   border-radius: 20px;
   padding: 4px 10px;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 500;
 }
 .rtv-pill.rtv-mine   { background: rgba(61,220,132,0.12); color: var(--green); }
@@ -949,7 +963,7 @@ body {
 }
 
 .settings-title {
-  font-size: 14px;
+  font-size: var(--fs-md);
   font-weight: 600;
   margin-bottom: 12px;
 }
@@ -959,7 +973,7 @@ body {
 }
 
 .setting-label {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--muted);
   font-family: 'DM Mono', monospace;
   text-transform: uppercase;
@@ -975,7 +989,7 @@ body {
   padding: 10px 12px;
   border-radius: var(--radius);
   font-family: 'DM Mono', monospace;
-  font-size: 13px;
+  font-size: var(--fs-base);
   outline: none;
   transition: border-color 0.15s;
 }
@@ -994,7 +1008,7 @@ select.setting-input option { background: var(--surface2); }
   border: none;
   border-radius: var(--radius);
   font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
+  font-size: var(--fs-base);
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.15s, transform 0.1s;
@@ -1025,7 +1039,7 @@ select.setting-input option { background: var(--surface2); }
   padding: 12px;
   border-radius: var(--radius);
   font-family: 'DM Mono', monospace;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   resize: vertical;
   outline: none;
 }
@@ -1042,7 +1056,7 @@ select.setting-input option { background: var(--surface2); }
   color: var(--text);
   padding: 10px 20px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: var(--fs-base);
   font-weight: 500;
   z-index: 500;
   opacity: 0;
@@ -1081,8 +1095,8 @@ select.setting-input option { background: var(--surface2); }
   padding: 40px 20px;
   color: var(--muted);
 }
-.empty-state .icon { font-size: 32px; margin-bottom: 8px; }
-.empty-state p { font-size: 13px; }
+.empty-state .icon { font-size: var(--fs-6xl); margin-bottom: 8px; }
+.empty-state p { font-size: var(--fs-base); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    RESPONSIVE — larger screens
@@ -2042,13 +2056,13 @@ function renderGames() {
       const highConsensus = !isUnanimous && (t1Pct >= 75 || t2Pct >= 75);
       
       html += `<div class="consensus-inline">`;
-      html += `<div style="font-size:9px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:5px">Pool picks</div>`;
+      html += `<div style="font-size:var(--fs-2xs);text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:5px">Pool picks</div>`;
       html += `<div class="consensus-inline-labels">`;
-      html += `<span class="cl-team" style="color:${t1Pct >= t2Pct ? t1Color : 'var(--muted)'}">${t1Pct}% <span style="font-weight:400;font-size:10px;color:var(--muted)">(${t1Count})</span></span>`;
+      html += `<span class="cl-team" style="color:${t1Pct >= t2Pct ? t1Color : 'var(--muted)'}">${t1Pct}% <span style="font-weight:400;font-size:var(--fs-2xs);color:var(--muted)">(${t1Count})</span></span>`;
       if (isUnanimous) html += `<span class="cl-tag">unanimous</span>`;
       else if (highConsensus) html += `<span class="cl-tag" style="color:var(--muted)">high consensus</span>`;
-      else html += `<span style="font-size:9px;color:var(--muted)">${allPicks} picks${elimCount > 0 ? ` · ${elimCount} elim` : ''}</span>`;
-      html += `<span class="cl-team" style="color:${t2Pct > t1Pct ? t2Color : 'var(--muted)'}">${t2Pct}% <span style="font-weight:400;font-size:10px;color:var(--muted)">(${t2Count})</span></span>`;
+      else html += `<span style="font-size:var(--fs-2xs);color:var(--muted)">${allPicks} picks${elimCount > 0 ? ` · ${elimCount} elim` : ''}</span>`;
+      html += `<span class="cl-team" style="color:${t2Pct > t1Pct ? t2Color : 'var(--muted)'}">${t2Pct}% <span style="font-weight:400;font-size:var(--fs-2xs);color:var(--muted)">(${t2Count})</span></span>`;
       html += `</div>`;
       html += `<div class="consensus-bar-inline">`;
       html += `<div class="cb-fill" style="width:${t1Pct}%;background:${t1Color};border-radius:3px 0 0 3px"></div>`;
@@ -2124,7 +2138,7 @@ function openGameSheet(gameId) {
   html += `<div class="sheet-section-title">${game.team1.name} — ${t1Count} pick${t1Count !== 1 ? 's' : ''} (${t1Value} pts)</div>`;
   html += `<div class="picks-list">`;
   if (picks.team1.length === 0) {
-    html += `<div style="padding:8px;color:var(--muted);font-size:12px">No one picked ${game.team1.name}</div>`;
+    html += `<div style="padding:8px;color:var(--muted);font-size:var(--fs-sm)">No one picked ${game.team1.name}</div>`;
   }
   picks.team1.sort((a,b) => a.rank - b.rank).forEach(p => {
     html += `<div class="pick-entry ${p.isMe ? 'is-me' : ''}">`;
@@ -2139,7 +2153,7 @@ function openGameSheet(gameId) {
   html += `<div class="sheet-section-title">${game.team2.name} — ${t2Count} pick${t2Count !== 1 ? 's' : ''} (${t2Value} pts)</div>`;
   html += `<div class="picks-list">`;
   if (picks.team2.length === 0) {
-    html += `<div style="padding:8px;color:var(--muted);font-size:12px">No one picked ${game.team2.name}</div>`;
+    html += `<div style="padding:8px;color:var(--muted);font-size:var(--fs-sm)">No one picked ${game.team2.name}</div>`;
   }
   picks.team2.sort((a,b) => a.rank - b.rank).forEach(p => {
     html += `<div class="pick-entry ${p.isMe ? 'is-me' : ''}">`;
@@ -2153,11 +2167,11 @@ function openGameSheet(gameId) {
   if (elimCount > 0) {
     html += `<div class="sheet-section">`;
     html += `<div class="sheet-section-title" style="color:var(--muted)">✖ Eliminated — ${elimCount} entr${elimCount !== 1 ? 'ies' : 'y'}</div>`;
-    html += `<div style="font-size:10px;color:var(--muted);margin-bottom:6px;padding:0 4px">These entries picked a team that was already knocked out in a prior round</div>`;
+    html += `<div style="font-size:var(--fs-2xs);color:var(--muted);margin-bottom:6px;padding:0 4px">These entries picked a team that was already knocked out in a prior round</div>`;
     html += `<div class="picks-list">`;
     picks.eliminated.sort((a,b) => a.rank - b.rank).forEach(p => {
       html += `<div class="pick-entry ${p.isMe ? 'is-me' : ''}" style="opacity:0.6">`;
-      html += `<span class="entry-name">${p.name}${p.isMe ? ' (you)' : ''} <span style="font-size:10px;color:var(--red)">picked ${p.pickedTeam}</span></span>`;
+      html += `<span class="entry-name">${p.name}${p.isMe ? ' (you)' : ''} <span style="font-size:var(--fs-2xs);color:var(--red)">picked ${p.pickedTeam}</span></span>`;
       html += `<span class="entry-points">#${p.rank} · ${p.points}pts</span>`;
       html += `</div>`;
     });
@@ -2174,12 +2188,12 @@ function openGameSheet(gameId) {
     html += `<div class="sheet-section-title">⚡ Impact</div>`;
     html += `<div style="display:flex;gap:12px;flex-wrap:wrap">`;
     html += `<div style="flex:1;background:var(--surface2);padding:12px;border-radius:var(--radius);text-align:center">`;
-    html += `<div style="font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:${leverage >= 80 ? 'var(--orange)' : 'var(--text)'}">${leverage}%</div>`;
-    html += `<div style="font-size:10px;color:var(--muted)">pool affected</div>`;
+    html += `<div style="font-family:'DM Mono',monospace;font-size:var(--fs-2xl);font-weight:700;color:${leverage >= 80 ? 'var(--orange)' : 'var(--text)'}">${leverage}%</div>`;
+    html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">pool affected</div>`;
     html += `</div>`;
     html += `<div style="flex:1;background:var(--surface2);padding:12px;border-radius:var(--radius);text-align:center">`;
-    html += `<div style="font-family:'DM Mono',monospace;font-size:20px;font-weight:700">${swing}</div>`;
-    html += `<div style="font-size:10px;color:var(--muted)">pick differential</div>`;
+    html += `<div style="font-family:'DM Mono',monospace;font-size:var(--fs-2xl);font-weight:700">${swing}</div>`;
+    html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">pick differential</div>`;
     html += `</div>`;
     html += `</div></div>`;
   }
@@ -2229,16 +2243,16 @@ function openPlayerSheet(name) {
   let html = `<div class="sheet-header">`;
   html += `<div style="display:flex;align-items:center;justify-content:space-between">`;
   html += `<div>`;
-  html += `<div style="font-size:18px;font-weight:600">${name}</div>`;
-  html += `<div style="font-size:12px;color:var(--muted);margin-top:2px">${standing.rank}<sup>${ordinal(standing.rank)}</sup> · ${standing.points} pts · max ${standing.maxPts}</div>`;
+  html += `<div style="font-size:var(--fs-xl);font-weight:600">${name}</div>`;
+  html += `<div style="font-size:var(--fs-sm);color:var(--muted);margin-top:2px">${standing.rank}<sup>${ordinal(standing.rank)}</sup> · ${standing.points} pts · max ${standing.maxPts}</div>`;
   html += `</div>`;
   html += `<div style="text-align:right">`;
-  html += `<div style="font-size:10px;color:var(--muted);margin-bottom:4px">Champion</div>`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted);margin-bottom:4px">Champion</div>`;
   html += `<div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">`;
   if (standing.champLogo) {
     html += `<img src="${standing.champLogo}" style="width:24px;height:24px;object-fit:contain;border-radius:3px;${standing.champAlive ? '' : 'opacity:0.35;filter:grayscale(1)'}" onerror="this.style.display='none'">`;
   }
-  html += `<span style="font-size:13px;font-weight:500;color:${standing.champAlive ? 'var(--text)' : 'var(--muted)'}">${standing.champTeam}</span>`;
+  html += `<span style="font-size:var(--fs-base);font-weight:500;color:${standing.champAlive ? 'var(--text)' : 'var(--muted)'}">${standing.champTeam}</span>`;
   html += `</div>`;
   html += `</div></div></div>`;
 
@@ -2263,7 +2277,7 @@ function openPlayerSheet(name) {
     if (!roundCfg) return;
 
     html += `<div class="sheet-section">`;
-    html += `<div class="sheet-section-title">${roundCfg.name} <span style="color:var(--muted);font-size:10px;font-weight:400">· ${roundCfg.mult}× seed</span></div>`;
+    html += `<div class="sheet-section-title">${roundCfg.name} <span style="color:var(--muted);font-size:var(--fs-2xs);font-weight:400">· ${roundCfg.mult}× seed</span></div>`;
     html += `<div style="display:flex;flex-direction:column;gap:6px">`;
 
     picks.forEach(pick => {
@@ -2291,18 +2305,18 @@ function openPlayerSheet(name) {
         const isT1 = g.team1.id === espnId;
         const myScore = isT1 ? g.team1.score : g.team2.score;
         const oppScore = isT1 ? g.team2.score : g.team1.score;
-        liveInfo = `<span style="color:var(--orange);font-size:10px;margin-left:6px">LIVE ${myScore}-${oppScore}</span>`;
+        liveInfo = `<span style="color:var(--orange);font-size:var(--fs-2xs);margin-left:6px">LIVE ${myScore}-${oppScore}</span>`;
       }
 
       html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface2);border-radius:var(--radius)">`;
       html += `<div style="display:flex;align-items:center;gap:6px">`;
-      html += `<span style="font-size:10px;color:var(--muted);width:18px;text-align:center">${seedStr}</span>`;
-      html += `<span style="font-size:14px;font-weight:500;color:${statusColor}">${name}</span>`;
+      html += `<span style="font-size:var(--fs-2xs);color:var(--muted);width:18px;text-align:center">${seedStr}</span>`;
+      html += `<span style="font-size:var(--fs-md);font-weight:500;color:${statusColor}">${name}</span>`;
       html += liveInfo;
       html += `</div>`;
       html += `<div style="display:flex;align-items:center;gap:4px">`;
-      if (statusIcon) html += `<span style="color:${statusColor};font-size:13px">${statusIcon}</span>`;
-      html += `<span style="font-family:'DM Mono',monospace;font-size:13px;color:${statusColor}">${statusLabel}</span>`;
+      if (statusIcon) html += `<span style="color:${statusColor};font-size:var(--fs-base)">${statusIcon}</span>`;
+      html += `<span style="font-family:'DM Mono',monospace;font-size:var(--fs-base);color:${statusColor}">${statusLabel}</span>`;
       html += `</div></div>`;
     });
 
@@ -2332,7 +2346,7 @@ function renderStandings() {
   const me = state.standings.find(s => s.isMe);
   if (!me) {
     html += `<div class="setup-banner" onclick="switchTab('settings')">
-      <span style="font-size:28px">👤</span>
+      <span style="font-size:var(--fs-5xl)">👤</span>
       <div class="setup-banner-body">
         <div class="setup-banner-title">Select your name to get started</div>
         <div class="setup-banner-sub">Tap here → Settings → choose your name to track your picks and see Road to Victory</div>
@@ -2346,10 +2360,10 @@ function renderStandings() {
     html += `<div class="my-rank-top">`;
     html += `<div class="my-rank-pos">${me.rank}<span>${ordinal}</span></div>`;
     html += `<div style="text-align:right">`;
-    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:4px">Champion</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:4px">Champion</div>`;
     html += `<div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">`;
     if (me.champLogo) html += `<img src="${me.champLogo}" style="width:24px;height:24px;object-fit:contain;border-radius:3px;${me.champAlive ? '' : 'opacity:0.35;filter:grayscale(1)'}" onerror="this.style.display='none'">`;
-    html += `<span style="font-size:13px;font-weight:500;color:${me.champAlive ? 'var(--text)' : 'var(--muted)'}">${me.champTeam}</span>`;
+    html += `<span style="font-size:var(--fs-base);font-weight:500;color:${me.champAlive ? 'var(--text)' : 'var(--muted)'}">${me.champTeam}</span>`;
     html += `</div>`;
     html += `</div></div>`;
     html += `<div class="my-rank-stats">`;
@@ -2458,7 +2472,7 @@ function renderRoadToVictory() {
     return `<div class="analytics-section">
       <div class="analytics-title"><span class="icon">🏁</span> Road to Victory</div>
       <div class="setup-banner" onclick="switchTab('settings')" style="margin-bottom:0;margin-top:4px">
-        <span style="font-size:24px">👤</span>
+        <span style="font-size:var(--fs-3xl)">👤</span>
         <div class="setup-banner-body">
           <div class="setup-banner-title">Select your name first</div>
           <div class="setup-banner-sub">Tap here to go to Settings and pick your name</div>
@@ -2476,7 +2490,7 @@ function renderRoadToVictory() {
     return `<div class="analytics-section">
       <div class="analytics-title"><span class="icon">🏁</span> Road to Victory</div>
       <div class="setup-banner" onclick="switchTab('settings')" style="margin-bottom:0;margin-top:4px">
-        <span style="font-size:24px">⚠️</span>
+        <span style="font-size:var(--fs-3xl)">⚠️</span>
         <div class="setup-banner-body">
           <div class="setup-banner-title">Name not found in pool</div>
           <div class="setup-banner-sub">Tap here to update your name in Settings</div>
@@ -2574,7 +2588,7 @@ function renderRoadToVictory() {
 
   let html = `<div class="analytics-section">`;
   html += `<div class="analytics-title"><span class="icon">🏁</span> Road to Victory`;
-  if (activeRoundName) html += `<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:8px">${activeRoundName}</span>`;
+  if (activeRoundName) html += `<span style="font-size:var(--fs-xs);font-weight:400;color:var(--muted);margin-left:8px">${activeRoundName}</span>`;
   html += `</div>`;
 
   // Compare-against selector
@@ -2593,14 +2607,14 @@ function renderRoadToVictory() {
     html += `<div class="rtv-status-card">`;
     html += `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">`;
     html += `<div>`;
-    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:2px">Your lead over ${leaderFirst} (#${leader.rank})</div>`;
-    html += `<div style="font-size:26px;font-weight:700;line-height:1;color:var(--green)">+${leadBy} pts</div>`;
-    html += `<div style="font-size:11px;color:var(--muted);margin-top:4px">You: ${myStanding.points} · ${leaderFirst}: ${leader.points}</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:2px">Your lead over ${leaderFirst} (#${leader.rank})</div>`;
+    html += `<div style="font-size:var(--fs-4xl);font-weight:700;line-height:1;color:var(--green)">+${leadBy} pts</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:4px">You: ${myStanding.points} · ${leaderFirst}: ${leader.points}</div>`;
     html += `</div>`;
     html += `<div style="text-align:right">`;
-    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:2px">Their best-case swing</div>`;
-    html += `<div style="font-size:26px;font-weight:700;line-height:1;color:${theyCatch ? 'var(--orange)' : 'var(--green)'}">+${theirBestSwing}</div>`;
-    html += `<div style="font-size:11px;color:${theyCatch ? 'var(--orange)' : 'var(--green)'};margin-top:4px">${theyCatch ? '⚠ They can catch you' : '✓ Safe lead'}</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:2px">Their best-case swing</div>`;
+    html += `<div style="font-size:var(--fs-4xl);font-weight:700;line-height:1;color:${theyCatch ? 'var(--orange)' : 'var(--green)'}">+${theirBestSwing}</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:${theyCatch ? 'var(--orange)' : 'var(--green)'};margin-top:4px">${theyCatch ? '⚠ They can catch you' : '✓ Safe lead'}</div>`;
     html += `</div>`;
     html += `</div>`;
     html += `</div>`;
@@ -2608,21 +2622,21 @@ function renderRoadToVictory() {
     html += `<div class="rtv-status-card">`;
     html += `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">`;
     html += `<div>`;
-    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:2px">Gap to ${leaderFirst} (#${leader.rank})</div>`;
-    html += `<div style="font-size:26px;font-weight:700;line-height:1">-${gapNow} pts</div>`;
-    html += `<div style="font-size:11px;color:var(--muted);margin-top:4px">You: ${myStanding.points} · ${leaderFirst}: ${leader.points}</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:2px">Gap to ${leaderFirst} (#${leader.rank})</div>`;
+    html += `<div style="font-size:var(--fs-4xl);font-weight:700;line-height:1">-${gapNow} pts</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:4px">You: ${myStanding.points} · ${leaderFirst}: ${leader.points}</div>`;
     html += `</div>`;
     html += `<div style="text-align:right">`;
-    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:2px">Best-case swing</div>`;
-    html += `<div style="font-size:26px;font-weight:700;line-height:1;color:${canWin ? 'var(--green)' : 'var(--red)'}">${bestSwing >= 0 ? '+' : ''}${bestSwing}</div>`;
-    html += `<div style="font-size:11px;color:${canWin ? 'var(--green)' : 'var(--red)'};margin-top:4px">${canWin ? '✓ Can catch up' : '✗ Can\'t catch up'}</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:2px">Best-case swing</div>`;
+    html += `<div style="font-size:var(--fs-4xl);font-weight:700;line-height:1;color:${canWin ? 'var(--green)' : 'var(--red)'}">${bestSwing >= 0 ? '+' : ''}${bestSwing}</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:${canWin ? 'var(--green)' : 'var(--red)'};margin-top:4px">${canWin ? '✓ Can catch up' : '✗ Can\'t catch up'}</div>`;
     html += `</div>`;
     html += `</div>`;
     html += `</div>`;
   }
 
   if (gameAnalysis.length === 0) {
-    html += `<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0">No pending picks to analyze.</div>`;
+    html += `<div style="color:var(--muted);font-size:var(--fs-sm);text-align:center;padding:16px 0">No pending picks to analyze.</div>`;
     html += `</div>`;
     return html;
   }
@@ -2650,29 +2664,29 @@ function renderRoadToVictory() {
     if (!games.length) return;
 
     html += `<div style="margin-bottom:12px">`;
-    html += `<div style="font-size:10px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">${label}</div>`;
+    html += `<div style="font-size:var(--fs-2xs);font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">${label}</div>`;
 
     games.forEach(({ game, myTeam, ldrTeam, myPts, ldrPts, roundName, category }) => {
       html += `<div class="rtv-game-row" style="border-color:${border};background:${bg}" onclick="openGameSheet('${game.id}')">`;
       html += `<div class="rtv-game-matchup">`;
-      html += `<div style="font-size:13px;font-weight:500">${game.team1.abbreviation || '?'} vs ${game.team2.abbreviation || '?'}</div>`;
+      html += `<div style="font-size:var(--fs-base);font-weight:500">${game.team1.abbreviation || '?'} vs ${game.team2.abbreviation || '?'}</div>`;
       const rtvRegion = game.region || roundName;
       const rtvDay = game.state === 'scheduled' ? game.dateLabel + ' · ' : '';
-      html += `<div style="font-size:11px;color:var(--muted);margin-top:1px">${rtvRegion} · ${rtvDay}${game.statusDetail || ''}</div>`;
+      html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:1px">${rtvRegion} · ${rtvDay}${game.statusDetail || ''}</div>`;
       html += `</div>`;
       html += `<div class="rtv-game-pts">`;
       if (category === 'mine') {
-        html += `<span style="color:var(--green);font-weight:600;font-size:13px">+${myPts} pts</span>`;
-        html += `<span style="color:var(--muted);font-size:10px">if ${myTeam} wins</span>`;
+        html += `<span style="color:var(--green);font-weight:600;font-size:var(--fs-base)">+${myPts} pts</span>`;
+        html += `<span style="color:var(--muted);font-size:var(--fs-2xs)">if ${myTeam} wins</span>`;
       } else if (category === 'theirs') {
-        html += `<span style="color:var(--red);font-weight:600;font-size:13px">+${ldrPts} pts</span>`;
-        html += `<span style="color:var(--muted);font-size:10px">if ${ldrTeam} wins</span>`;
+        html += `<span style="color:var(--red);font-weight:600;font-size:var(--fs-base)">+${ldrPts} pts</span>`;
+        html += `<span style="color:var(--muted);font-size:var(--fs-2xs)">if ${ldrTeam} wins</span>`;
       } else if (category === 'split') {
-        html += `<span style="color:var(--blue);font-size:12px;font-weight:500">You: ${myTeam} +${myPts}</span>`;
-        html += `<span style="color:var(--muted);font-size:11px">Them: ${ldrTeam} +${ldrPts}</span>`;
+        html += `<span style="color:var(--blue);font-size:var(--fs-sm);font-weight:500">You: ${myTeam} +${myPts}</span>`;
+        html += `<span style="color:var(--muted);font-size:var(--fs-xs)">Them: ${ldrTeam} +${ldrPts}</span>`;
       } else {
-        html += `<span style="color:var(--muted2);font-size:12px">Both +${myPts}</span>`;
-        html += `<span style="color:var(--muted);font-size:10px">${myTeam}</span>`;
+        html += `<span style="color:var(--muted2);font-size:var(--fs-sm)">Both +${myPts}</span>`;
+        html += `<span style="color:var(--muted);font-size:var(--fs-2xs)">${myTeam}</span>`;
       }
       html += `</div>`;
       html += `</div>`;
@@ -2715,14 +2729,14 @@ function renderChampionAnalysis() {
   const totalElim = champData.reduce((s, c) => s + c.eliminated, 0);
   html += `<div style="display:flex;gap:8px;margin-bottom:12px">`;
   html += `<div style="flex:1;background:var(--surface2);padding:10px;border-radius:var(--radius);text-align:center">`;
-  html += `<div style="font-size:18px;font-weight:700;color:var(--accent)">${champData.length}</div>`;
-  html += `<div style="font-size:10px;color:var(--muted)">Different Picks</div></div>`;
+  html += `<div style="font-size:var(--fs-xl);font-weight:700;color:var(--accent)">${champData.length}</div>`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">Different Picks</div></div>`;
   html += `<div style="flex:1;background:var(--surface2);padding:10px;border-radius:var(--radius);text-align:center">`;
-  html += `<div style="font-size:18px;font-weight:700;color:var(--green)">${totalAlive}</div>`;
-  html += `<div style="font-size:10px;color:var(--muted)">Still Alive</div></div>`;
+  html += `<div style="font-size:var(--fs-xl);font-weight:700;color:var(--green)">${totalAlive}</div>`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">Still Alive</div></div>`;
   html += `<div style="flex:1;background:var(--surface2);padding:10px;border-radius:var(--radius);text-align:center">`;
-  html += `<div style="font-size:18px;font-weight:700;color:var(--red)">${totalElim}</div>`;
-  html += `<div style="font-size:10px;color:var(--muted)">Eliminated</div></div>`;
+  html += `<div style="font-size:var(--fs-xl);font-weight:700;color:var(--red)">${totalElim}</div>`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">Eliminated</div></div>`;
   html += `</div>`;
   
   // Cards
@@ -2731,7 +2745,7 @@ function renderChampionAnalysis() {
     const alive = c.alive > 0;
     const pct = Math.round((c.count / entries.length) * 100);
     html += `<div class="champ-card">`;
-    html += `<span class="${alive ? 'champ-alive' : 'champ-eliminated'}" style="font-size:12px">${alive ? '●' : '○'}</span>`;
+    html += `<span class="${alive ? 'champ-alive' : 'champ-eliminated'}" style="font-size:var(--fs-sm)">${alive ? '●' : '○'}</span>`;
     html += `<span class="champ-team ${alive ? '' : 'champ-eliminated'}">${c.team}</span>`;
     html += `<div class="champ-bar"><div class="champ-bar-fill" style="width:${pct}%;background:${alive ? 'var(--green)' : 'var(--red)'}"></div></div>`;
     html += `<span class="champ-count">${c.count} (${pct}%)</span>`;
@@ -2741,7 +2755,7 @@ function renderChampionAnalysis() {
   
   // Names per champion
   champData.forEach(c => {
-    html += `<div style="margin-top:8px;font-size:11px;color:var(--muted)"><strong style="color:var(--muted2)">${c.team}:</strong> ${c.names.join(', ')}</div>`;
+    html += `<div style="margin-top:8px;font-size:var(--fs-xs);color:var(--muted)"><strong style="color:var(--muted2)">${c.team}:</strong> ${c.names.join(', ')}</div>`;
   });
   
   html += `</div>`;
@@ -2777,11 +2791,11 @@ function renderLeverage() {
     const levRegion = game.region || game.roundName;
     const levDay = game.state === 'scheduled' ? ` · ${game.dateLabel}` : '';
     html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">`;
-    html += `<span style="font-size:13px;font-weight:500">${game.team1.abbreviation} vs ${game.team2.abbreviation}</span>`;
+    html += `<span style="font-size:var(--fs-base);font-weight:500">${game.team1.abbreviation} vs ${game.team2.abbreviation}</span>`;
     html += `<span class="leverage-badge ${isHigh ? 'high' : ''}" style="${!isHigh ? 'color:var(--muted2)' : ''}">${isHigh ? '🔥 ' : ''}${leverage}% affected</span>`;
     html += `</div>`;
-    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:4px">${levRegion}${levDay}</div>`;
-    html += `<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)">`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:4px">${levRegion}${levDay}</div>`;
+    html += `<div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--muted)">`;
     html += `<span>${picks.team1.length}× ${game.team1.abbreviation} (${t1Pts}pts)</span>`;
     html += `<span>${picks.team2.length}× ${game.team2.abbreviation} (${t2Pts}pts)</span>`;
     html += `</div>`;
@@ -2816,18 +2830,18 @@ function renderSettings() {
   html += `<div class="settings-title">📡 Status</div>`;
   html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">`;
   html += `<div style="background:var(--surface2);padding:10px;border-radius:var(--radius)">`;
-  html += `<div style="font-size:18px;font-weight:700;color:${gamesLoaded > 0 ? 'var(--green)' : 'var(--red)'}">${gamesLoaded}</div>`;
-  html += `<div style="font-size:10px;color:var(--muted)">ESPN Games</div></div>`;
+  html += `<div style="font-size:var(--fs-xl);font-weight:700;color:${gamesLoaded > 0 ? 'var(--green)' : 'var(--red)'}">${gamesLoaded}</div>`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">ESPN Games</div></div>`;
   html += `<div style="background:var(--surface2);padding:10px;border-radius:var(--radius)">`;
-  html += `<div style="font-size:18px;font-weight:700;color:${picksLoaded > 0 ? 'var(--green)' : 'var(--red)'}">${picksLoaded}</div>`;
-  html += `<div style="font-size:10px;color:var(--muted)">Pool Entries</div></div>`;
+  html += `<div style="font-size:var(--fs-xl);font-weight:700;color:${picksLoaded > 0 ? 'var(--green)' : 'var(--red)'}">${picksLoaded}</div>`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">Pool Entries</div></div>`;
   html += `<div style="background:var(--surface2);padding:10px;border-radius:var(--radius)">`;
-  html += `<div style="font-size:18px;font-weight:700;color:${espnCovered >= 64 ? 'var(--green)' : teamsMapped > 0 ? 'var(--orange)' : 'var(--red)'}">${espnCovered}/64</div>`;
-  html += `<div style="font-size:10px;color:var(--muted)">Teams Covered</div></div>`;
+  html += `<div style="font-size:var(--fs-xl);font-weight:700;color:${espnCovered >= 64 ? 'var(--green)' : teamsMapped > 0 ? 'var(--orange)' : 'var(--red)'}">${espnCovered}/64</div>`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">Teams Covered</div></div>`;
   html += `<div style="background:var(--surface2);padding:10px;border-radius:var(--radius)">`;
   const liveCount = state.games.filter(g => g.state === 'live').length;
-  html += `<div style="font-size:18px;font-weight:700;color:${liveCount > 0 ? 'var(--green)' : 'var(--muted)'}">${liveCount}</div>`;
-  html += `<div style="font-size:10px;color:var(--muted)">Live Now</div></div>`;
+  html += `<div style="font-size:var(--fs-xl);font-weight:700;color:${liveCount > 0 ? 'var(--green)' : 'var(--muted)'}">${liveCount}</div>`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">Live Now</div></div>`;
   html += `</div></div>`;
   
   // Config
@@ -2837,14 +2851,14 @@ function renderSettings() {
     html += `<div class="setting-row">`;
     html += `<div class="setting-label">Master Key</div>`;
     html += `<input class="setting-input" id="cfg-bin-key" type="password" value="${CONFIG.jsonbinKey}" placeholder="JSONBin Master Key (for imports only)">`;
-    html += `<div style="font-size:10px;color:var(--muted);margin-top:2px">Only needed to import/update picks. Found at jsonbin.io → Dashboard → API Keys</div>`;
+    html += `<div style="font-size:var(--fs-2xs);color:var(--muted);margin-top:2px">Only needed to import/update picks. Found at jsonbin.io → Dashboard → API Keys</div>`;
     html += `</div>`;
   } else {
     html += `<input type="hidden" id="cfg-bin-key" value="${CONFIG.jsonbinKey}">`;
   }
   const nameNotSet = !CONFIG.myName;
   html += `<div class="setting-row" style="${nameNotSet ? 'background:rgba(232,255,71,0.05);border:1px solid rgba(232,255,71,0.25);border-radius:var(--radius);padding:10px;margin:-2px' : ''}">`;
-  html += `<div class="setting-label">Your Name${nameNotSet ? ' <span style="color:var(--accent);font-size:10px">← start here</span>' : ''}</div>`;
+  html += `<div class="setting-label">Your Name${nameNotSet ? ' <span style="color:var(--accent);font-size:var(--fs-2xs)">← start here</span>' : ''}</div>`;
   if (state.picks?.entries?.length) {
     html += `<select class="setting-input" id="cfg-my-name">`;
     html += `<option value="">— Select your name —</option>`;
@@ -2867,7 +2881,7 @@ function renderSettings() {
     // Import
     html += `<div class="settings-section">`;
     html += `<div class="settings-title">📥 Import CBS Picks to JSONBin</div>`;
-    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Paste CBS bracket JSON data (array of entries)</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:8px">Paste CBS bracket JSON data (array of entries)</div>`;
     html += `<textarea class="import-area" id="import-data" placeholder='[{"name":"...", "picks":[...], "championTeam":{...}}]'></textarea>`;
     html += `<button class="btn btn-primary btn-block" style="margin-top:8px" onclick="importPicks()">Import to JSONBin</button>`;
     html += `</div>`;
@@ -2878,7 +2892,7 @@ function renderSettings() {
     html += `<div class="settings-section">`;
     // Show mapping summary
     html += `<div class="settings-title">🏀 Team Coverage (${espnCovered}/64)</div>`;
-    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:8px">`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:8px">`;
     html += `${teamsMapped}/${teamsTotal} picked teams mapped`;
     if (unpickedCount > 0) html += ` · ${unpickedCount} teams received 0 picks`;
     html += `</div>`;
@@ -2890,22 +2904,22 @@ function renderSettings() {
       if (!mapped.has(cid)) {
         hasErrors = true;
         const team = state.picks?.teamMap?.[cid];
-        html += `<div style="font-size:12px;padding:6px 8px;margin:4px 0;background:var(--surface2);border-radius:var(--radius);color:var(--red)">`;
+        html += `<div style="font-size:var(--fs-sm);padding:6px 8px;margin:4px 0;background:var(--surface2);border-radius:var(--radius);color:var(--red)">`;
         html += `<div>❌ <strong>${team?.abbrev || '???'}</strong> — ${team?.mediumName || team?.name || 'Unknown'} (CBS ID: ${cid})</div>`;
-        html += `<div style="font-size:10px;color:var(--muted)">Picked by pool members but not mapped to ESPN — scoring affected!</div>`;
+        html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">Picked by pool members but not mapped to ESPN — scoring affected!</div>`;
         html += `</div>`;
       }
     });
 
     // Show unpicked teams (informational, not errors)
     if (unpickedCount > 0) {
-      html += `<details style="margin-top:8px"><summary style="font-size:11px;color:var(--muted);cursor:pointer">`;
+      html += `<details style="margin-top:8px"><summary style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer">`;
       html += `${unpickedCount} unpicked teams (0 picks received — no scoring impact)</summary>`;
       const sorted = Object.entries(ESPN_COVERAGE)
         .filter(([, t]) => !t.picked)
         .sort((a, b) => a[1].region.localeCompare(b[1].region) || a[1].seed - b[1].seed);
       sorted.forEach(([espnId, t]) => {
-        html += `<div style="font-size:11px;padding:4px 8px;margin:2px 0;background:var(--surface2);border-radius:var(--radius);color:var(--muted)">`;
+        html += `<div style="font-size:var(--fs-xs);padding:4px 8px;margin:2px 0;background:var(--surface2);border-radius:var(--radius);color:var(--muted)">`;
         html += `(${t.seed}) ${t.abbr} — ${t.region}`;
         html += `</div>`;
       });
@@ -2913,7 +2927,7 @@ function renderSettings() {
     }
 
     if (!hasErrors && espnCovered >= 64) {
-      html += `<div style="font-size:12px;padding:8px;margin-top:8px;background:#1e3a2e;border-radius:var(--radius);color:var(--green)">✅ All 64 tournament teams accounted for. Scoring is fully operational.</div>`;
+      html += `<div style="font-size:var(--fs-sm);padding:8px;margin-top:8px;background:#1e3a2e;border-radius:var(--radius);color:var(--green)">✅ All 64 tournament teams accounted for. Scoring is fully operational.</div>`;
     }
     html += `</div>`;
   }

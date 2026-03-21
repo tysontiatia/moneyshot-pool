@@ -5,7 +5,6 @@ Live bracket tracking dashboard for the Tiatia family pool.
 ## Files
 
 - `bracket-tracker.html` — Main dashboard (Standings, Root For, Bracket, Player Profile, My Stats)
-- `admin.html` — Admin panel for managing picks and bracket data
 - `config.js` — Pool settings (name, season, JSONBin IDs, scoring rules)
 
 ## Setup
@@ -24,7 +23,6 @@ Live bracket tracking dashboard for the Tiatia family pool.
 
 ### During the Tournament
 
-- Use `admin.html` to update game results and manage picks
 - The dashboard auto-refreshes every 3 minutes
 - Share the GitHub Pages URL with pool participants
 
