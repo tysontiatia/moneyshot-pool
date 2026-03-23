@@ -1199,9 +1199,9 @@ const CONFIG = {
   tournamentDates: [
     '20260319', '20260320', // R64
     '20260321', '20260322', // R32
-    '20260327', '20260328', // Sweet 16
-    '20260329',             // Elite 8 (Sat)
-    '20260330',             // Elite 8 (Sun)
+    '20260326', '20260327', // Sweet 16
+    '20260328',             // Elite 8 (Sat)
+    '20260329',             // Elite 8 (Sun)
     '20260405',             // Final Four
     '20260407',             // Championship
   ],
@@ -1474,7 +1474,18 @@ function parseEspnGame(event) {
   
   const team1 = parseTeam(competitors[0]); // higher seed
   const team2 = parseTeam(competitors[1]); // lower seed
-  
+
+  // Odds & win probability
+  const oddsEntry = comp.odds?.[0];
+  const spread = oddsEntry?.details || null; // e.g. "DUKE -3.5"
+  const overUnder = oddsEntry?.overUnder ? parseFloat(oddsEntry.overUnder) : null;
+  const predictor = comp.predictor;
+  const homeWinPct = predictor?.homeTeam?.gameProjection != null ? Math.round(predictor.homeTeam.gameProjection) : null;
+  const awayWinPct = predictor?.awayTeam?.gameProjection != null ? Math.round(predictor.awayTeam.gameProjection) : null;
+  const team1IsHome = competitors[0].homeAway === 'home';
+  const team1WinPct = (homeWinPct != null && awayWinPct != null) ? (team1IsHome ? homeWinPct : awayWinPct) : null;
+  const team2WinPct = team1WinPct != null ? (100 - team1WinPct) : null;
+
   // Game state
   let gameState = 'scheduled'; // scheduled, live, final
   const stateType = status.type.state;
@@ -1510,6 +1521,10 @@ function parseEspnGame(event) {
     period: status.period || 0,
     venue: comp.venue?.fullName || '',
     broadcast: comp.broadcasts?.[0]?.names?.[0] || '',
+    spread,
+    overUnder,
+    team1WinPct,
+    team2WinPct,
     winnerId: gameState === 'final' ? (team1.winner ? team1.id : team2.winner ? team2.id : null) : null,
     winnerName: gameState === 'final' ? (team1.winner ? team1.name : team2.winner ? team2.name : null) : null,
   };
@@ -1528,7 +1543,7 @@ async function fetchESPNGames() {
   const todayNum = parseInt(today);
   CONFIG.tournamentDates.forEach(d => {
     const dNum = parseInt(d);
-    if (dNum <= todayNum + 1) datesToFetch.add(d);
+    if (dNum <= todayNum + 7) datesToFetch.add(d);
   });
   
   console.log(`🏀 Fetching ESPN games for ${datesToFetch.size} dates...`);
@@ -2092,10 +2107,28 @@ function renderGames() {
       html += `</div>`;
       html += `</div>`;
     }
-    
+
+    // Win probability bar (scheduled + live only)
+    if (game.state !== 'final' && game.team1WinPct != null) {
+      const isLive = game.state === 'live';
+      const centerLabel = isLive ? 'live win prob' : (game.spread ? game.spread : 'win prob');
+      const t1Fav = game.team1WinPct >= game.team2WinPct;
+      html += `<div class="consensus-inline" style="margin-top:4px">`;
+      html += `<div class="consensus-inline-labels">`;
+      html += `<span class="cl-team" style="color:${t1Fav ? 'var(--muted2)' : 'var(--muted)'}">${game.team1WinPct}%</span>`;
+      html += `<span style="font-size:var(--fs-2xs);color:var(--muted)">${centerLabel}</span>`;
+      html += `<span class="cl-team" style="color:${!t1Fav ? 'var(--muted2)' : 'var(--muted)'}">${game.team2WinPct}%</span>`;
+      html += `</div>`;
+      html += `<div class="consensus-bar-inline">`;
+      html += `<div class="cb-fill" style="width:${game.team1WinPct}%;background:${isLive ? 'var(--blue)' : 'var(--border2)'};border-radius:3px 0 0 3px"></div>`;
+      html += `<div class="cb-fill" style="width:${game.team2WinPct}%;background:${isLive ? 'var(--muted)' : 'var(--border2)'};opacity:${isLive ? 1 : 0.4};border-radius:0 3px 3px 0"></div>`;
+      html += `</div>`;
+      html += `</div>`;
+    }
+
     html += `</div>`;
   });
-  
+
   container.innerHTML = html;
 }
 
