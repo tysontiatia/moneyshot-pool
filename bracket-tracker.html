@@ -1477,14 +1477,16 @@ function parseEspnGame(event) {
 
   // Odds & win probability
   const oddsEntry = comp.odds?.[0];
-  const spread = oddsEntry?.details || null; // e.g. "DUKE -3.5"
-  const overUnder = oddsEntry?.overUnder ? parseFloat(oddsEntry.overUnder) : null;
   const predictor = comp.predictor;
   const homeWinPct = predictor?.homeTeam?.gameProjection != null ? Math.round(predictor.homeTeam.gameProjection) : null;
   const awayWinPct = predictor?.awayTeam?.gameProjection != null ? Math.round(predictor.awayTeam.gameProjection) : null;
   const team1IsHome = competitors[0].homeAway === 'home';
   const team1WinPct = (homeWinPct != null && awayWinPct != null) ? (team1IsHome ? homeWinPct : awayWinPct) : null;
   const team2WinPct = team1WinPct != null ? (100 - team1WinPct) : null;
+  const homeML = oddsEntry?.moneyline?.home?.close?.odds ? parseInt(oddsEntry.moneyline.home.close.odds) : null;
+  const awayML = oddsEntry?.moneyline?.away?.close?.odds ? parseInt(oddsEntry.moneyline.away.close.odds) : null;
+  const team1ML = (homeML != null && awayML != null) ? (team1IsHome ? homeML : awayML) : null;
+  const team2ML = (homeML != null && awayML != null) ? (team1IsHome ? awayML : homeML) : null;
 
   // Game state
   let gameState = 'scheduled'; // scheduled, live, final
@@ -1521,8 +1523,8 @@ function parseEspnGame(event) {
     period: status.period || 0,
     venue: comp.venue?.fullName || '',
     broadcast: comp.broadcasts?.[0]?.names?.[0] || '',
-    spread,
-    overUnder,
+    team1ML,
+    team2ML,
     team1WinPct,
     team2WinPct,
     winnerId: gameState === 'final' ? (team1.winner ? team1.id : team2.winner ? team2.id : null) : null,
@@ -2070,16 +2072,21 @@ function renderGames() {
     
     // Teams
     html += `<div class="game-teams">`;
-    [game.team1, game.team2].forEach(team => {
+    [[game.team1, game.team1ML], [game.team2, game.team2ML]].forEach(([team, ml]) => {
       const isWinner = game.state === 'final' && team.winner;
       const isLoser = game.state === 'final' && !team.winner;
+      const mlStr = game.state === 'scheduled' && ml != null ? (ml > 0 ? `+${ml}` : `${ml}`) : '';
       html += `<div class="team-row ${isWinner ? 'winner' : ''} ${isLoser ? 'loser' : ''}">`;
       html += `<span class="team-seed">${team.seed || ''}</span>`;
       if (team.logo) {
         html += `<img class="team-logo" src="${team.logo}" alt="" onerror="this.style.display='none'">`;
       }
       html += `<span class="team-name">${team.name}</span>`;
-      html += `<span class="team-score">${game.state !== 'scheduled' ? team.score : ''}</span>`;
+      if (game.state === 'scheduled' && mlStr) {
+        html += `<span class="team-score" style="font-size:var(--fs-xs);color:var(--muted)">${mlStr}</span>`;
+      } else {
+        html += `<span class="team-score">${game.state !== 'scheduled' ? team.score : ''}</span>`;
+      }
       html += `</div>`;
     });
     html += `</div>`;
@@ -2112,7 +2119,7 @@ function renderGames() {
     // Win probability bar (scheduled + live only)
     if (game.state !== 'final' && game.team1WinPct != null) {
       const isLive = game.state === 'live';
-      const centerLabel = isLive ? 'live win prob' : (game.spread ? game.spread : 'win prob');
+      const centerLabel = isLive ? 'live win prob' : 'win prob';
       const t1Fav = game.team1WinPct >= game.team2WinPct;
       html += `<div class="consensus-inline" style="margin-top:4px">`;
       html += `<div class="consensus-inline-labels">`;
@@ -2161,20 +2168,25 @@ function openGameSheet(gameId) {
   
   // Teams and scores
   html += `<div class="sheet-teams">`;
+  const t1MLStr = game.state === 'scheduled' && game.team1ML != null ? (game.team1ML > 0 ? `+${game.team1ML}` : `${game.team1ML}`) : '';
+  const t2MLStr = game.state === 'scheduled' && game.team2ML != null ? (game.team2ML > 0 ? `+${game.team2ML}` : `${game.team2ML}`) : '';
+
   html += `<div class="sheet-team">`;
   html += `<span class="sheet-team-seed">${game.team1.seed ? '#' + game.team1.seed + ' seed' : ''}</span>`;
   if (game.team1.logo) html += `<img src="${game.team1.logo}" style="width:40px;height:40px;border-radius:6px;object-fit:contain" onerror="this.style.display='none'">`;
   html += `<span class="sheet-team-name">${game.team1.name}</span>`;
   if (game.state !== 'scheduled') html += `<span class="sheet-team-score">${game.team1.score}</span>`;
+  if (t1MLStr) html += `<span style="font-size:var(--fs-xs);color:var(--muted);margin-top:2px">${t1MLStr}</span>`;
   html += `</div>`;
-  
+
   html += `<span class="sheet-vs">${game.state === 'scheduled' ? 'vs' : ''}</span>`;
-  
+
   html += `<div class="sheet-team">`;
   html += `<span class="sheet-team-seed">${game.team2.seed ? '#' + game.team2.seed + ' seed' : ''}</span>`;
   if (game.team2.logo) html += `<img src="${game.team2.logo}" style="width:40px;height:40px;border-radius:6px;object-fit:contain" onerror="this.style.display='none'">`;
   html += `<span class="sheet-team-name">${game.team2.name}</span>`;
   if (game.state !== 'scheduled') html += `<span class="sheet-team-score">${game.team2.score}</span>`;
+  if (t2MLStr) html += `<span style="font-size:var(--fs-xs);color:var(--muted);margin-top:2px">${t2MLStr}</span>`;
   html += `</div>`;
   html += `</div>`;
   
