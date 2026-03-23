@@ -1991,7 +1991,8 @@ function renderGames() {
     const liveRound = rounds.find(r => state.games.some(g => g.roundNum === r && g.state === 'live'));
     const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }).replace(/-/g, '');
     const todayRound = rounds.find(r => state.games.some(g => g.roundNum === r && g.dateStr === todayStr));
-    state.selectedRound = liveRound || todayRound || rounds[rounds.length - 1];
+    const upcomingRound = rounds.find(r => state.games.some(g => g.roundNum === r && g.state !== 'final'));
+    state.selectedRound = liveRound || todayRound || upcomingRound || rounds[rounds.length - 1];
   }
   
   // Available days for selected round
