@@ -263,16 +263,26 @@
           placeholder="https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=..."
           oninput="updateApiUrl()">
 
-        <div class="alert alert-warn" style="margin-top:12px">
-          <strong>ESPN requires you to be logged in.</strong> Here's how to get your picks:<br><br>
-          1. Make sure you're <strong>logged into ESPN</strong> in this browser<br>
-          2. Open this link in a new tab — it will show raw JSON:<br>
-          <div id="espn-api-url" style="margin:8px 0;padding:8px;background:rgba(0,0,0,0.3);border-radius:6px;font-size:11px;word-break:break-all;color:var(--accent);cursor:pointer" onclick="openApiUrl()">← Paste your group URL above first</div>
-          3. Select all (Cmd+A) → Copy (Cmd+C) → paste below
+        <div style="margin-top:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">ESPN requires you to be logged in. Use the bookmarklet below:</div>
+
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <a id="bookmarklet-link" href="#" style="display:inline-block;padding:7px 14px;background:rgba(232,255,71,0.12);border:1px solid var(--accent);border-radius:6px;color:var(--accent);font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;cursor:grab">
+              📋 Copy ESPN Picks
+            </a>
+            <span style="font-size:11px;color:var(--muted);line-height:1.4">← Drag this to your bookmarks bar</span>
+          </div>
+
+          <ol style="font-size:12px;color:var(--text2);line-height:1.8;padding-left:16px;margin:0">
+            <li>Drag <strong style="color:var(--accent)">Copy ESPN Picks</strong> to your bookmarks bar</li>
+            <li>Go to your <span id="espn-group-link-wrap">ESPN TC group page</span></li>
+            <li>Click the bookmarklet — it copies the JSON automatically</li>
+            <li>Come back here and paste below</li>
+          </ol>
         </div>
 
-        <label for="espn-json" style="margin-top:4px">Paste JSON response here</label>
-        <textarea id="espn-json" placeholder='Paste the raw JSON from that URL...'></textarea>
+        <label for="espn-json" style="margin-top:12px">Paste picks JSON here</label>
+        <textarea id="espn-json" placeholder='Paste here after clicking the bookmarklet on your ESPN group page...'></textarea>
       </div>
 
       <!-- Manual panel -->
@@ -393,27 +403,48 @@ function goStep4() {
   goStep(4);
 }
 
-// ─── Update ESPN API URL hint as user types group URL ────────────────────
+// ─── Build bookmarklet ────────────────────────────────────────────────────
+function buildBookmarklet(groupId) {
+  const apiUrl = `https://fantasy.espn.com/apis/v3/games/tournament-challenge-bracket-2026/groups/${groupId}/entries?view=detail`;
+  // Minified bookmarklet — fetches from ESPN with credentials, copies JSON to clipboard
+  const code = `(function(){
+var apiUrl=${JSON.stringify(apiUrl)};
+fetch(apiUrl,{credentials:'include'}).then(function(r){
+  if(!r.ok)throw new Error('ESPN returned '+r.status+'. Make sure you are logged in.');
+  return r.json();
+}).then(function(data){
+  var json=JSON.stringify(data);
+  navigator.clipboard.writeText(json).then(function(){
+    alert('\\u2705 Picks copied to clipboard! Go back to BracketIQ and paste.');
+  }).catch(function(){
+    var ta=document.createElement('textarea');
+    ta.value=json;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    alert('\\u2705 Picks copied! Go back to BracketIQ and paste.');
+  });
+}).catch(function(e){alert('\\u274C '+e.message);});
+})();`.replace(/\n/g,'');
+  return 'javascript:' + encodeURIComponent(code);
+}
+
+// ─── Update bookmarklet as user types group URL ───────────────────────────
 function updateApiUrl() {
   const urlInput = document.getElementById('espn-url').value.trim();
   const match = urlInput.match(/[?&](?:groupID?|id)=([^&\s]+)/i)
              || urlInput.match(/groups?\/([^/?&\s]+)/i);
   const groupId = match ? match[1] : (urlInput.match(/^[a-zA-Z0-9_-]+$/) ? urlInput : '');
-  const el = document.getElementById('espn-api-url');
-  if (groupId) {
-    const apiUrl = `https://fantasy.espn.com/apis/v3/games/tournament-challenge-bracket-2026/groups/${groupId}/entries?view=detail`;
-    el.textContent = apiUrl;
-    el.dataset.url = apiUrl;
-    el.title = 'Click to open in new tab';
-  } else {
-    el.textContent = '← Paste your group URL above first';
-    el.dataset.url = '';
-  }
-}
 
-function openApiUrl() {
-  const url = document.getElementById('espn-api-url').dataset.url;
-  if (url) window.open(url, '_blank');
+  const bmLink = document.getElementById('bookmarklet-link');
+  const groupLinkWrap = document.getElementById('espn-group-link-wrap');
+
+  if (groupId) {
+    bmLink.href = buildBookmarklet(groupId);
+    const groupPageUrl = `https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=${groupId}`;
+    groupLinkWrap.innerHTML = `<a href="${groupPageUrl}" target="_blank" style="color:var(--accent)">ESPN TC group page ↗</a>`;
+  } else {
+    bmLink.href = 'javascript:alert("Paste your group URL in BracketIQ first, then drag this bookmark.")';
+    groupLinkWrap.textContent = 'ESPN TC group page';
+  }
 }
 
 // ─── Platform toggle ──────────────────────────────────────────────────────
