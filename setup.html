@@ -264,13 +264,14 @@
           oninput="updateApiUrl()">
 
         <div style="margin-top:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px">
-          <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px">Two quick Network tab captures (ESPN requires login):</div>
-          <ol style="font-size:12px;color:var(--text2);line-height:1.9;padding-left:16px;margin:0">
+          <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px">Two Network tab captures (ESPN requires login):</div>
+          <ol style="font-size:12px;color:var(--text2);line-height:1.9;padding-left:16px;margin:0 0 12px 0">
             <li>Go to your <span id="espn-group-link-wrap">ESPN TC group page</span> while <strong>logged in</strong></li>
             <li>Open DevTools <strong>F12</strong> → <strong>Network</strong> tab → reload page</li>
-            <li>Click the large request named after your <strong>group UUID</strong> (70–80 kB) → <strong>Response</strong> → copy all → paste in box 1</li>
-            <li>Click the <code style="background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:3px">propositions?challengeid=...</code> request (8 kB) → <strong>Response</strong> → copy all → paste in box 2</li>
+            <li>Find and click the request named <strong id="espn-uuid-hint" style="color:var(--accent);font-family:monospace">← paste your URL above</strong> → <strong>Response</strong> → copy all → paste in box 1</li>
+            <li>Find and click <strong style="color:var(--accent);font-family:monospace">propositions?challengeid=...</strong> → <strong>Response</strong> → copy all → paste in box 2</li>
           </ol>
+          <div style="font-size:11px;color:var(--muted);line-height:1.5">Tip: both requests appear after the page reloads. If you see multiple <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">propositions</code> requests, pick the larger one (~6–9 kB).</div>
         </div>
 
         <label for="espn-group-json" style="margin-top:12px">1 — Group data (the large ~75 kB request)</label>
@@ -406,11 +407,15 @@ function updateApiUrl() {
              || urlInput.match(/groups?\/([^/?&\s]+)/i);
   const groupId = match ? match[1] : (urlInput.match(/^[a-zA-Z0-9_-]+$/) ? urlInput : '');
   const groupLinkWrap = document.getElementById('espn-group-link-wrap');
+  const uuidHint = document.getElementById('espn-uuid-hint');
   if (groupId) {
     const groupPageUrl = `https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=${groupId}`;
     groupLinkWrap.innerHTML = `<a href="${groupPageUrl}" target="_blank" style="color:var(--accent)">ESPN TC group page ↗</a>`;
+    // Show first 8 chars of UUID so they can spot it in Network tab
+    uuidHint.textContent = `${groupId.slice(0, 8)}... (starts with your group ID)`;
   } else {
     groupLinkWrap.textContent = 'ESPN TC group page';
+    uuidHint.textContent = '← paste your URL above';
   }
 }
 
