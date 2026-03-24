@@ -502,11 +502,12 @@ async function importPicks() {
     let rawData;
 
     if (state.platform === 'espn') {
-      // Extract group ID from URL
+      // Extract group ID from URL — handles ?id=UUID, ?groupID=XXX, /groups/XXX formats
       const urlInput = document.getElementById('espn-url').value.trim();
-      const match = urlInput.match(/groupID?[=:]([^&\s]+)/i) || urlInput.match(/groups?\/([^/?&\s]+)/i);
-      const groupId = match ? match[1] : urlInput.replace(/[^a-zA-Z0-9_-]/g, '');
-      if (!groupId) throw new Error('Could not find group ID in URL. Check the URL and try again.');
+      const match = urlInput.match(/[?&](?:groupID?|id)=([^&\s]+)/i)
+                 || urlInput.match(/groups?\/([^/?&\s]+)/i);
+      const groupId = match ? match[1] : (urlInput.match(/^[a-zA-Z0-9_-]+$/) ? urlInput : '');
+      if (!groupId) throw new Error('Could not find group ID in URL. Try pasting just the ID (e.g. 8aa4da22-767d-430f-9b2f-51133fa50bf1).');
 
       const swid = document.getElementById('espn-swid').value.trim();
       const s2   = document.getElementById('espn-s2').value.trim();
