@@ -274,11 +274,23 @@
           <div style="font-size:11px;color:var(--muted);line-height:1.5">Tip: both requests appear after the page reloads. If you see multiple <code style="background:rgba(0,0,0,0.2);padding:1px 4px;border-radius:3px">propositions</code> requests, pick the larger one (~6–9 kB).</div>
         </div>
 
-        <label for="espn-group-json" style="margin-top:12px">1 — Group data (the large ~75 kB request)</label>
-        <textarea id="espn-group-json" placeholder='{"challengeId":277,"entries":[...],"groupSettings":{...}}'></textarea>
+        <label for="espn-group-json" style="margin-top:12px">1 — Group data (the large request starting with your group UUID)</label>
+        <textarea id="espn-group-json" placeholder='{"challengeId":277,"entries":[...],"groupSettings":{...}}' oninput="onGroupDataPaste()"></textarea>
 
-        <label for="espn-props-json" style="margin-top:10px">2 — Propositions data (the ~8 kB request)</label>
+        <label for="espn-props-json" style="margin-top:10px">2 — Propositions data (<code style="font-size:10px">propositions?challengeid=...</code> request)</label>
         <textarea id="espn-props-json" placeholder='[{"id":"c90b70e0-...","possibleOutcomes":[...],...}]'></textarea>
+
+        <!-- Step 2b: auto-generated picks script -->
+        <div id="picks-script-section" style="display:none;margin-top:14px;background:rgba(232,255,71,0.06);border:1px solid rgba(232,255,71,0.2);border-radius:8px;padding:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">3 — Optional: Get everyone's individual picks (recommended)</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.5">
+            This script fetches all <span id="entry-count-hint">?</span> entries' bracket picks at once. Run it in the browser console while on your ESPN TC group page.
+          </div>
+          <div id="picks-script-box" onclick="copyPicksScript()" style="background:rgba(0,0,0,0.4);border-radius:6px;padding:10px;font-family:monospace;font-size:10px;color:var(--accent);word-break:break-all;cursor:pointer;line-height:1.6;max-height:80px;overflow:hidden"></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:5px">Click to copy · Then: F12 → Console tab → paste → hit Enter · Wait for "✅ Copied!" alert</div>
+          <label for="espn-picks-json" style="margin-top:10px;font-size:13px">Paste the picks JSON here after running the script:</label>
+          <textarea id="espn-picks-json" placeholder='{"16e91820-...":{"picks":[...]},"e745ac20-...":{"picks":[...]}}'></textarea>
+        </div>
       </div>
 
       <!-- Manual panel -->
@@ -408,6 +420,35 @@ async function goStep4() {
 }
 
 // ─── Update group link + console snippet as user types ────────────────────
+// ─── Generate picks script when group data is pasted ─────────────────────
+function onGroupDataPaste() {
+  const raw = document.getElementById('espn-group-json').value.trim();
+  if (!raw) return;
+  let groupData;
+  try { groupData = JSON.parse(raw); } catch (_) { return; }
+  const entries = groupData.entries || [];
+  if (entries.length === 0) return;
+  const ids = entries.map(e => e.id).filter(Boolean);
+  document.getElementById('entry-count-hint').textContent = ids.length;
+  const slug = 'tournament-challenge-bracket-2026';
+  const script = `(async()=>{const ids=${JSON.stringify(ids)};const r={};await Promise.all(ids.map(async id=>{try{const res=await fetch('/apis/v3/games/${slug}/entries/'+id+'?platform=chui&view=chui_default',{credentials:'include'});const d=await res.json();if(d.picks)r[id]=d;}catch(e){}}));const j=JSON.stringify(r);try{await navigator.clipboard.writeText(j);alert('✅ Copied picks for '+Object.keys(r).length+'/${ids.length} entries! Go back to BracketIQ and paste.');}catch(_){const t=document.createElement('textarea');t.value=j;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert('✅ Copied! Go back to BracketIQ and paste.');}})();`;
+  const box = document.getElementById('picks-script-box');
+  box.textContent = script;
+  box.dataset.script = script;
+  document.getElementById('picks-script-section').style.display = 'block';
+}
+
+function copyPicksScript() {
+  const s = document.getElementById('picks-script-box').dataset.script;
+  if (!s) return;
+  navigator.clipboard.writeText(s).then(() => {
+    const box = document.getElementById('picks-script-box');
+    const orig = box.textContent;
+    box.textContent = '✅ Copied to clipboard!';
+    setTimeout(() => { box.textContent = orig; }, 2000);
+  }).catch(() => prompt('Copy this:', s));
+}
+
 function updateApiUrl() {
   const urlInput = document.getElementById('espn-url').value.trim();
   const match = urlInput.match(/[?&](?:groupID?|id)=([^&\s]+)/i)
@@ -556,6 +597,12 @@ async function importPicks() {
         };
       });
 
+      // Optional: individually-fetched picks
+      const rawPicks = document.getElementById('espn-picks-json').value.trim();
+      if (rawPicks) {
+        try { state.espnEntryPicks = JSON.parse(rawPicks); } catch (_) {}
+      }
+
       // Stash raw data for createPool
       state.espnGroupData = groupData;
       state.espnPropositionsData = propositionsData;
@@ -638,6 +685,7 @@ async function createPool() {
           poolName,
           groupData: state.espnGroupData,
           propositionsData: state.espnPropositionsData,
+          entryPicksOverride: state.espnEntryPicks || null,
         }),
       });
       data = await res.json();
