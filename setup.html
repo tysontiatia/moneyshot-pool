@@ -259,31 +259,27 @@
       <!-- ESPN TC panel -->
       <div id="panel-espn">
         <label for="espn-url">ESPN Tournament Challenge group URL</label>
-        <input type="url" id="espn-url" placeholder="https://fantasy.espn.com/tournament-challenge-bracket/2026/en/group?groupID=...">
-        <div class="hint">Your group must be <strong style="color:var(--text2)">public</strong> for automatic import. Private group? Use the manual option below.</div>
+        <input type="url" id="espn-url"
+          placeholder="https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=..."
+          oninput="updateApiUrl()">
 
-        <details>
-          <summary>Private group? Add your ESPN credentials</summary>
-          <div>
-            <label for="espn-swid" style="margin-top:0">SWID cookie</label>
-            <input type="text" id="espn-swid" placeholder="{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}">
-            <label for="espn-s2" style="margin-top:10px">espn_s2 cookie</label>
-            <input type="text" id="espn-s2" placeholder="Long cookie value...">
-            <div class="hint">Find these in your browser's cookies while logged into ESPN. Settings → Application → Cookies → fantasy.espn.com</div>
-          </div>
-        </details>
+        <div class="alert alert-warn" style="margin-top:12px">
+          <strong>ESPN requires you to be logged in.</strong> Here's how to get your picks:<br><br>
+          1. Make sure you're <strong>logged into ESPN</strong> in this browser<br>
+          2. Open this link in a new tab — it will show raw JSON:<br>
+          <div id="espn-api-url" style="margin:8px 0;padding:8px;background:rgba(0,0,0,0.3);border-radius:6px;font-size:11px;word-break:break-all;color:var(--accent);cursor:pointer" onclick="openApiUrl()">← Paste your group URL above first</div>
+          3. Select all (Cmd+A) → Copy (Cmd+C) → paste below
+        </div>
+
+        <label for="espn-json" style="margin-top:4px">Paste JSON response here</label>
+        <textarea id="espn-json" placeholder='Paste the raw JSON from that URL...'></textarea>
       </div>
 
       <!-- Manual panel -->
       <div id="panel-manual" style="display:none">
-        <div class="alert alert-warn" style="margin-bottom:12px">
-          While logged into ESPN, open this URL in your browser and paste the full JSON response below.
-        </div>
-        <div id="manual-url-hint" class="hint" style="margin-bottom:8px;word-break:break-all">
-          <code>https://fantasy.espn.com/apis/v3/games/tcmen/seasons/2026/groups/<strong>YOUR_GROUP_ID</strong>/entries?view=detail</code>
-        </div>
-        <label for="manual-json">Paste JSON response</label>
-        <textarea id="manual-json" placeholder='{"entries":[...]} or paste the raw array'></textarea>
+        <div class="hint" style="margin-bottom:8px">Paste a raw JSON array or object containing your pool entries.</div>
+        <label for="manual-json">Paste JSON</label>
+        <textarea id="manual-json" placeholder='{"entries":[...]} or a raw array'></textarea>
       </div>
 
       <div id="import-error" style="display:none" class="alert alert-error"></div>
@@ -397,6 +393,29 @@ function goStep4() {
   goStep(4);
 }
 
+// ─── Update ESPN API URL hint as user types group URL ────────────────────
+function updateApiUrl() {
+  const urlInput = document.getElementById('espn-url').value.trim();
+  const match = urlInput.match(/[?&](?:groupID?|id)=([^&\s]+)/i)
+             || urlInput.match(/groups?\/([^/?&\s]+)/i);
+  const groupId = match ? match[1] : (urlInput.match(/^[a-zA-Z0-9_-]+$/) ? urlInput : '');
+  const el = document.getElementById('espn-api-url');
+  if (groupId) {
+    const apiUrl = `https://fantasy.espn.com/apis/v3/games/tournament-challenge-bracket-2026/groups/${groupId}/entries?view=detail`;
+    el.textContent = apiUrl;
+    el.dataset.url = apiUrl;
+    el.title = 'Click to open in new tab';
+  } else {
+    el.textContent = '← Paste your group URL above first';
+    el.dataset.url = '';
+  }
+}
+
+function openApiUrl() {
+  const url = document.getElementById('espn-api-url').dataset.url;
+  if (url) window.open(url, '_blank');
+}
+
 // ─── Platform toggle ──────────────────────────────────────────────────────
 function setPlatform(p) {
   state.platform = p;
@@ -502,30 +521,15 @@ async function importPicks() {
     let rawData;
 
     if (state.platform === 'espn') {
-      // Extract group ID from URL — handles ?id=UUID, ?groupID=XXX, /groups/XXX formats
-      const urlInput = document.getElementById('espn-url').value.trim();
-      const match = urlInput.match(/[?&](?:groupID?|id)=([^&\s]+)/i)
-                 || urlInput.match(/groups?\/([^/?&\s]+)/i);
-      const groupId = match ? match[1] : (urlInput.match(/^[a-zA-Z0-9_-]+$/) ? urlInput : '');
-      if (!groupId) throw new Error('Could not find group ID in URL. Try pasting just the ID (e.g. 8aa4da22-767d-430f-9b2f-51133fa50bf1).');
-
-      const swid = document.getElementById('espn-swid').value.trim();
-      const s2   = document.getElementById('espn-s2').value.trim();
-      let proxyUrl = `${PROXY}/espn-tc/2026/${groupId}`;
-      if (swid && s2) proxyUrl += `?swid=${encodeURIComponent(swid)}&s2=${encodeURIComponent(s2)}`;
-
-      const res = await fetch(proxyUrl);
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `ESPN TC API returned ${res.status}. Try the Manual JSON option.`);
-      }
-      rawData = await res.json();
-      rawData = rawData.entries || rawData; // proxy wraps in { entries, group }
+      // User pastes JSON copied from the ESPN TC API URL in their logged-in browser
+      const raw = document.getElementById('espn-json').value.trim();
+      if (!raw) throw new Error('Paste the JSON from the ESPN link above first.');
+      rawData = JSON.parse(raw);
 
     } else {
       // Manual paste
       const raw = document.getElementById('manual-json').value.trim();
-      if (!raw) throw new Error('Paste your ESPN TC JSON first.');
+      if (!raw) throw new Error('Paste your JSON first.');
       rawData = JSON.parse(raw);
     }
 
