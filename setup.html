@@ -305,7 +305,7 @@
 
     <div id="review-warn" style="display:none" class="alert alert-warn"></div>
 
-    <button class="btn btn-primary" onclick="goStep4()">Looks good →</button>
+    <button class="btn btn-primary" id="step3-next-btn" onclick="goStep4()">Looks good →</button>
     <button class="btn btn-secondary" onclick="goStep(2)">← Re-import</button>
   </div>
 
@@ -396,7 +396,14 @@ function goStep2() {
   goStep(2);
 }
 
-function goStep4() {
+async function goStep4() {
+  if (state.platform === 'espn-tc-2026') {
+    // ESPN TC scoring is already computed by ESPN — skip to create
+    const btn = document.getElementById('create-btn-inline');
+    if (btn) btn.disabled = true;
+    await createPool();
+    return;
+  }
   goStep(4);
 }
 
@@ -596,6 +603,19 @@ function showReview(entries) {
   }).join('');
 
   document.getElementById('review-warn').style.display = 'none';
+
+  // ESPN TC: skip scoring step, go straight to Create
+  const nextBtn = document.getElementById('step3-next-btn');
+  if (state.platform === 'espn-tc-2026') {
+    nextBtn.textContent = 'Create My Pool →';
+    // Show scoring note
+    const warnEl = document.getElementById('review-warn');
+    warnEl.innerHTML = '⚡ Using ESPN\'s scoring (10/20/40/80/160/320 pts per correct pick per round). Scores are pulled directly from ESPN — no recalculation needed.';
+    warnEl.className = 'alert alert-success';
+    warnEl.style.display = 'block';
+  } else {
+    nextBtn.textContent = 'Looks good →';
+  }
 }
 
 // ─── Create pool ──────────────────────────────────────────────────────────
