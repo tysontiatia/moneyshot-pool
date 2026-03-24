@@ -284,11 +284,19 @@
         <div id="picks-script-section" style="display:none;margin-top:14px;background:rgba(232,255,71,0.06);border:1px solid rgba(232,255,71,0.2);border-radius:8px;padding:14px">
           <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">3 — Optional: Get everyone's individual picks (recommended)</div>
           <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.5">
-            This script fetches all <span id="entry-count-hint">?</span> entries' bracket picks at once. Run it in the browser console while on your ESPN TC group page.
+            Intercepts ESPN's own requests as you click each bracket — uses ESPN's auth automatically. All <span id="entry-count-hint">?</span> entries in ~30 seconds.
           </div>
-          <div id="picks-script-box" onclick="copyPicksScript()" style="background:rgba(0,0,0,0.4);border-radius:6px;padding:10px;font-family:monospace;font-size:10px;color:var(--accent);word-break:break-all;cursor:pointer;line-height:1.6;max-height:80px;overflow:hidden"></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:5px">Click to copy · Then: F12 → Console tab → paste → hit Enter · Wait for "✅ Copied!" alert</div>
-          <label for="espn-picks-json" style="margin-top:10px;font-size:13px">Paste the picks JSON here after running the script:</label>
+          <ol style="font-size:12px;color:var(--text2);line-height:1.9;padding-left:16px;margin:0 0 10px 0">
+            <li>Go to your ESPN TC group page · Open <strong>F12 → Console</strong></li>
+            <li>Click the script below to copy it → paste in console → hit <strong>Enter</strong></li>
+            <li>Click each person's name in the ESPN group leaderboard (all <span id="entry-count-hint2">?</span> of them)</li>
+            <li>Console will log "Got [name] (X/<span id="entry-count-hint3">?</span>)" as each loads</li>
+            <li>When all are captured, run in console: <code style="background:rgba(0,0,0,0.3);padding:1px 5px;border-radius:3px">copy(JSON.stringify(window.__bp))</code></li>
+            <li>Paste the result below</li>
+          </ol>
+          <div id="picks-script-box" onclick="copyPicksScript()" style="background:rgba(0,0,0,0.4);border-radius:6px;padding:10px;font-family:monospace;font-size:10px;color:var(--accent);word-break:break-all;cursor:pointer;line-height:1.6;max-height:60px;overflow:hidden"></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">Click script to copy</div>
+          <label for="espn-picks-json" style="margin-top:10px;font-size:13px">Paste picks JSON here (after running <code style="font-size:10px">copy(JSON.stringify(window.__bp))</code>):</label>
           <textarea id="espn-picks-json" placeholder='{"16e91820-...":{"picks":[...]},"e745ac20-...":{"picks":[...]}}'></textarea>
         </div>
       </div>
@@ -420,7 +428,7 @@ async function goStep4() {
 }
 
 // ─── Update group link + console snippet as user types ────────────────────
-// ─── Generate picks script when group data is pasted ─────────────────────
+// ─── Generate picks interception script when group data is pasted ─────────
 function onGroupDataPaste() {
   const raw = document.getElementById('espn-group-json').value.trim();
   if (!raw) return;
@@ -428,10 +436,32 @@ function onGroupDataPaste() {
   try { groupData = JSON.parse(raw); } catch (_) { return; }
   const entries = groupData.entries || [];
   if (entries.length === 0) return;
-  const ids = entries.map(e => e.id).filter(Boolean);
-  document.getElementById('entry-count-hint').textContent = ids.length;
-  const slug = 'tournament-challenge-bracket-2026';
-  const script = `(async()=>{const ids=${JSON.stringify(ids)};const r={};await Promise.all(ids.map(async id=>{try{const res=await fetch('/apis/v3/games/${slug}/entries/'+id+'?platform=chui&view=chui_default',{credentials:'include'});const d=await res.json();if(d.picks)r[id]=d;}catch(e){}}));const j=JSON.stringify(r);try{await navigator.clipboard.writeText(j);alert('✅ Copied picks for '+Object.keys(r).length+'/${ids.length} entries! Go back to BracketIQ and paste.');}catch(_){const t=document.createElement('textarea');t.value=j;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert('✅ Copied! Go back to BracketIQ and paste.');}})();`;
+  const total = entries.length;
+  document.getElementById('entry-count-hint').textContent = total;
+  document.getElementById('entry-count-hint2').textContent = total;
+  document.getElementById('entry-count-hint3').textContent = total;
+
+  // Intercepts ESPN's own fetch + XHR calls as the user clicks each bracket
+  const script = `(function(){
+window.__bp={};
+const _f=window.fetch;
+window.fetch=async function(u){
+  const res=await _f.apply(this,arguments);
+  try{const s=String(u?.url||u||'');
+  if(s.includes('/entries/')&&s.includes('chui')){
+    res.clone().json().then(d=>{if(d&&d.picks&&d.id){window.__bp[d.id]=d;console.log('Got '+d.name+' ('+(Object.keys(window.__bp).length)+'/${total})');}}).catch(()=>{});
+  }}catch(_){}return res;};
+const _o=XMLHttpRequest.prototype.open,_s=XMLHttpRequest.prototype.send;
+XMLHttpRequest.prototype.open=function(m,u){this.__u=u;return _o.apply(this,arguments);};
+XMLHttpRequest.prototype.send=function(){
+  this.addEventListener('load',function(){try{
+    if(this.__u&&this.__u.includes('/entries/')&&this.__u.includes('chui')){
+      const d=JSON.parse(this.responseText);
+      if(d&&d.picks&&d.id){window.__bp[d.id]=d;console.log('Got '+d.name+' ('+(Object.keys(window.__bp).length)+'/${total})');}
+    }}catch(_){}});return _s.apply(this,arguments);};
+console.log('✅ Ready! Now click each person\\'s bracket in the group. When all ${total} are captured run:\\n\\ncopy(JSON.stringify(window.__bp))');
+})();`;
+
   const box = document.getElementById('picks-script-box');
   box.textContent = script;
   box.dataset.script = script;
