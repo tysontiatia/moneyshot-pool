@@ -1,0 +1,3228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Bracket Pool Demo — 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   CSS VARIABLES & RESET
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --bg: #0a0a0b;
+  --surface: #141416;
+  --surface2: #1c1c1f;
+  --surface3: #242428;
+  --border: #2a2a2e;
+  --border2: #38383d;
+  --text: #f0f0f2;
+  --text2: #c8c8cc;
+  --muted: #6e6e78;
+  --muted2: #8e8e98;
+  --accent: #e8ff47;
+  --accent2: #d4eb3a;
+  --green: #3ddc84;
+  --green-dim: #2a9d5e;
+  --red: #ff5f57;
+  --red-dim: #cc3b34;
+  --orange: #ffaa00;
+  --blue: #5b9cf6;
+  --purple: #c084fc;
+  --cyan: #67e8f9;
+  --r1: #e8ff47;
+  --r2: #3ddc84;
+  --r3: #5b9cf6;
+  --r4: #c084fc;
+  --r5: #fb923c;
+  --r6: #f43f5e;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --nav-height: 56px;
+  /* Typography scale */
+  --fs-2xs: 10px;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-base: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 18px;
+  --fs-2xl: 20px;
+  --fs-3xl: 24px;
+  --fs-4xl: 26px;
+  --fs-5xl: 28px;
+  --fs-6xl: 32px;
+  --fs-7xl: 42px;
+}
+
+[data-theme="light"] {
+  --bg: #f4f4f6;
+  --surface: #ffffff;
+  --surface2: #ededf0;
+  --surface3: #e2e2e6;
+  --border: #d8d8dc;
+  --border2: #c4c4c9;
+  --text: #111113;
+  --text2: #3a3a3e;
+  --muted: #7a7a84;
+  --muted2: #5a5a64;
+  --accent: #5a7a00;
+  --accent2: #4a6600;
+  --green: #16a34a;
+  --green-dim: #15803d;
+  --red: #dc2626;
+  --red-dim: #b91c1c;
+  --orange: #d97706;
+  --blue: #2563eb;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-size: var(--fs-md);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 8px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════════════════════════════════════ */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: var(--fs-2xl);
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.logo .year {
+  color: var(--muted);
+  font-size: var(--fs-base);
+  font-family: 'DM Mono', monospace;
+  font-weight: 400;
+  margin-left: 8px;
+}
+
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: var(--fs-md);
+  line-height: 1;
+  color: var(--muted2);
+  transition: border-color 0.15s;
+}
+.theme-toggle:active { opacity: 0.7; }
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: background 0.3s;
+}
+.status-dot.live {
+  background: var(--green);
+  animation: pulse 2s ease-in-out infinite;
+}
+.status-dot.error { background: var(--red); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.status-text {
+  font-family: 'DM Mono', monospace;
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BOTTOM NAV (mobile-first)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 300;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: var(--nav-height);
+  padding-bottom: var(--safe-bottom);
+}
+
+.nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: var(--fs-2xs);
+  font-weight: 500;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  min-width: 56px;
+}
+.nav-btn .icon { font-size: var(--fs-2xl); }
+.nav-btn.active { color: var(--accent); }
+.nav-btn:active { transform: scale(0.92); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TAB CONTENT
+   ═══════════════════════════════════════════════════════════════════════════ */
+.tab-content {
+  display: none;
+  padding: 12px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.tab-content.active { display: block; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GAMES TAB — Live Scoreboard
+   ═══════════════════════════════════════════════════════════════════════════ */
+.round-pills {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0 12px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.round-pills::-webkit-scrollbar { display: none; }
+
+.round-pill {
+  background: var(--surface2);
+  color: var(--muted2);
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.round-pill.active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.day-pills {
+  display: flex;
+  gap: 6px;
+  padding: 0 0 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.day-pills::-webkit-scrollbar { display: none; }
+.day-pill {
+  background: var(--surface2);
+  color: var(--muted2);
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.day-pill.active {
+  background: var(--surface3);
+  color: var(--text);
+  border-color: var(--border2);
+}
+
+.game-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.game-card:active { transform: scale(0.985); }
+.game-card.live { border-color: var(--green); }
+.game-card.final { opacity: 0.8; }
+
+.game-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.game-region {
+  font-size: var(--fs-2xs);
+  font-family: 'DM Mono', monospace;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.game-status {
+  font-size: var(--fs-2xs);
+  font-family: 'DM Mono', monospace;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.game-status.live {
+  background: rgba(61, 220, 132, 0.15);
+  color: var(--green);
+  animation: pulse 2s ease-in-out infinite;
+}
+.game-status.final {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted2);
+}
+.game-status.upcoming {
+  color: var(--muted);
+}
+
+.game-teams {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.team-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+}
+.team-row.winner { font-weight: 600; }
+.team-row.loser { opacity: 0.45; }
+
+.team-seed {
+  font-family: 'DM Mono', monospace;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.team-logo {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.team-name {
+  flex: 1;
+  font-size: var(--fs-md);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-score {
+  font-family: 'DM Mono', monospace;
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  min-width: 32px;
+  text-align: right;
+}
+
+.game-picks-preview {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--fs-xs);
+  color: var(--muted2);
+}
+
+.picks-split {
+  display: flex;
+  gap: 12px;
+}
+
+.pick-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pick-bar {
+  height: 3px;
+  border-radius: 2px;
+  flex: 1;
+  min-width: 40px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INLINE CONSENSUS BAR (inside game cards)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.consensus-inline {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.consensus-inline-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: var(--fs-xs);
+}
+.consensus-inline-labels .cl-team {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+.consensus-inline-labels .cl-tag {
+  font-size: var(--fs-2xs);
+  font-weight: 500;
+  color: var(--orange);
+  letter-spacing: 0.02em;
+}
+.consensus-bar-inline {
+  display: flex;
+  height: 5px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--surface2);
+}
+.consensus-bar-inline .cb-fill {
+  height: 100%;
+  transition: width 0.3s;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GAME DETAIL SHEET (bottom sheet on tap)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.sheet-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.sheet-overlay.open { display: block; }
+
+.sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 401;
+  background: var(--surface);
+  border-radius: 16px 16px 0 0;
+  max-height: 85vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  padding-bottom: calc(16px + var(--safe-bottom));
+}
+.sheet.open { transform: translateY(0); }
+
+.sheet-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 20px 10px;
+  cursor: grab;
+  user-select: none;
+}
+.sheet-handle::after {
+  content: '';
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-right: 2.5px solid var(--muted);
+  border-bottom: 2.5px solid var(--muted);
+  transform: rotate(45deg);
+  margin-top: -7px;
+  border-radius: 1px;
+}
+
+.sheet-header {
+  padding: 0 16px 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.sheet-game-info {
+  text-align: center;
+}
+
+.sheet-teams {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.sheet-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 80px;
+}
+
+.sheet-team-name {
+  font-weight: 600;
+  font-size: var(--fs-lg);
+}
+
+.sheet-team-seed {
+  font-family: 'DM Mono', monospace;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.sheet-team-score {
+  font-family: 'DM Mono', monospace;
+  font-size: var(--fs-5xl);
+  font-weight: 700;
+}
+
+.sheet-vs {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.sheet-status {
+  font-size: var(--fs-xs);
+  color: var(--muted2);
+  text-align: center;
+  margin-top: 4px;
+}
+
+.sheet-section {
+  padding: 0 16px;
+  margin-bottom: 16px;
+}
+
+.sheet-section-title {
+  font-size: var(--fs-xs);
+  font-family: 'DM Mono', monospace;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.picks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pick-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  font-size: var(--fs-base);
+}
+
+
+.pick-entry .entry-name {
+  flex: 1;
+}
+
+.pick-entry .entry-points {
+  font-family: 'DM Mono', monospace;
+  font-size: var(--fs-xs);
+  color: var(--muted2);
+}
+
+.pick-entry.is-me {
+  border: 1px solid var(--accent);
+  background: rgba(232, 255, 71, 0.05);
+}
+
+.leverage-badge {
+  font-size: var(--fs-2xs);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.leverage-badge.high {
+  background: rgba(251, 146, 60, 0.15);
+  color: var(--orange);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STANDINGS TAB
+   ═══════════════════════════════════════════════════════════════════════════ */
+.my-rank-card {
+  background: linear-gradient(135deg, rgba(232, 255, 71, 0.08), rgba(232, 255, 71, 0.02));
+  border: 1px solid rgba(232, 255, 71, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.my-rank-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.my-rank-pos {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: var(--fs-7xl);
+  color: var(--accent);
+  line-height: 1;
+}
+.my-rank-pos span {
+  font-size: var(--fs-xl);
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.my-rank-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.my-stat {
+  text-align: center;
+}
+.my-stat-value {
+  font-family: 'DM Mono', monospace;
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  color: var(--text);
+}
+.my-stat-label {
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.standings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.setup-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.setup-banner:active { opacity: 0.75; }
+.setup-banner-body { flex: 1; min-width: 0; }
+.setup-banner-title { font-size: var(--fs-md); font-weight: 600; color: var(--accent); }
+.setup-banner-sub { font-size: var(--fs-sm); color: var(--muted); margin-top: 2px; }
+.setup-banner-chevron { color: var(--accent); font-size: var(--fs-2xl); flex-shrink: 0; }
+
+.standing-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.standing-row:active { background: var(--surface2); }
+@media (hover: hover) { .standing-row:hover { background: var(--surface2); } }
+.standing-row.is-me {
+  border-color: rgba(232, 255, 71, 0.2);
+  background: rgba(232, 255, 71, 0.04);
+}
+.standing-row.is-me:active { background: rgba(232, 255, 71, 0.08); }
+.standing-chevron { color: var(--border2); font-size: var(--fs-xl); flex-shrink: 0; line-height: 1; }
+
+.standing-rank-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 28px;
+}
+.standing-rank {
+  font-family: 'DM Mono', monospace;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1;
+}
+.standing-movement {
+  font-size: var(--fs-2xs);
+  line-height: 1;
+  margin-top: 2px;
+  height: 12px;
+}
+.movement-up { color: var(--green); }
+.movement-down { color: var(--red); }
+
+.standing-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.standing-name {
+  font-size: var(--fs-md);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.standing-detail {
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  margin-top: 2px;
+}
+
+.standing-pts-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+.standing-pts {
+  font-family: 'DM Mono', monospace;
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  line-height: 1;
+}
+.standing-max {
+  font-family: 'DM Mono', monospace;
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANALYTICS TAB
+   ═══════════════════════════════════════════════════════════════════════════ */
+.analytics-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.analytics-title {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.analytics-title .icon { font-size: var(--fs-lg); }
+
+/* Champion cards */
+.champ-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.champ-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+}
+
+.champ-team {
+  font-weight: 600;
+  font-size: var(--fs-base);
+  flex: 1;
+}
+
+.champ-count {
+  font-family: 'DM Mono', monospace;
+  font-size: var(--fs-sm);
+  color: var(--muted2);
+}
+
+.champ-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--surface3);
+  flex: 1;
+  max-width: 80px;
+  overflow: hidden;
+}
+
+.champ-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s;
+}
+
+.champ-alive { color: var(--green); }
+.champ-eliminated { color: var(--red); text-decoration: line-through; opacity: 0.6; }
+
+/* Consensus cards */
+.consensus-card {
+  padding: 10px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  margin-bottom: 6px;
+}
+
+.consensus-matchup {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: var(--fs-base);
+}
+
+.consensus-bar-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface3);
+  display: flex;
+  overflow: hidden;
+}
+
+.consensus-bar-left {
+  height: 100%;
+  border-radius: 3px 0 0 3px;
+  transition: width 0.5s;
+}
+.consensus-bar-right {
+  height: 100%;
+  border-radius: 0 3px 3px 0;
+  transition: width 0.5s;
+}
+
+/* Road to Victory */
+.rtv-selector {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  margin-bottom: 10px;
+  padding-bottom: 2px;
+}
+.rtv-selector::-webkit-scrollbar { display: none; }
+.rtv-selector-wrap {
+  position: relative;
+}
+.rtv-selector-wrap::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 2px;
+  width: 40px;
+  background: linear-gradient(to right, transparent, var(--bg));
+  pointer-events: none;
+}
+.rtv-target-btn {
+  flex-shrink: 0;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text2);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  padding: 5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.rtv-target-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+}
+.rtv-target-rank {
+  font-size: var(--fs-2xs);
+  opacity: 0.7;
+}
+.rtv-status-card {
+  background: var(--surface2);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.rtv-status-card.rtv-leading {
+  background: rgba(61,220,132,0.06);
+  border: 1px solid rgba(61,220,132,0.25);
+  text-align: center;
+  padding: 16px;
+}
+.rtv-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.rtv-pill {
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+}
+.rtv-pill.rtv-mine   { background: rgba(61,220,132,0.12); color: var(--green); }
+.rtv-pill.rtv-theirs { background: rgba(255,95,87,0.12);  color: var(--red); }
+.rtv-pill.rtv-danger { background: rgba(255,170,0,0.12);  color: var(--orange); }
+.rtv-pill.rtv-split  { background: rgba(91,156,246,0.12); color: var(--blue); }
+.rtv-pill.rtv-shared { background: rgba(110,110,120,0.12); color: var(--muted2); }
+.rtv-game-row {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.rtv-game-row:active { opacity: 0.7; }
+.rtv-game-matchup { flex: 1; min-width: 0; }
+.rtv-game-pts { display: flex; flex-direction: column; align-items: flex-end; text-align: right; white-space: nowrap; gap: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SETTINGS TAB
+   ═══════════════════════════════════════════════════════════════════════════ */
+.settings-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.settings-title {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.setting-row {
+  margin-bottom: 12px;
+}
+
+.setting-label {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.setting-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  font-family: 'DM Mono', monospace;
+  font-size: var(--fs-base);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.setting-input:focus { border-color: var(--accent); }
+
+.setting-input::placeholder { color: var(--muted); }
+select.setting-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; cursor: pointer; }
+select.setting-input option { background: var(--surface2); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif;
+  font-size: var(--fs-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.96); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+}
+.btn-secondary {
+  background: var(--surface3);
+  color: var(--text);
+}
+.btn-danger {
+  background: rgba(255, 95, 87, 0.15);
+  color: var(--red);
+}
+.btn-block { width: 100%; }
+
+.import-area {
+  width: 100%;
+  min-height: 120px;
+  background: var(--surface2);
+  border: 1px dashed var(--border2);
+  color: var(--text);
+  padding: 12px;
+  border-radius: var(--radius);
+  font-family: 'DM Mono', monospace;
+  font-size: var(--fs-xs);
+  resize: vertical;
+  outline: none;
+}
+.import-area:focus { border-color: var(--accent); }
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: var(--fs-base);
+  font-weight: 500;
+  z-index: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  white-space: nowrap;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--muted);
+  gap: 12px;
+}
+
+.spinner {
+  width: 24px; height: 24px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+}
+.empty-state .icon { font-size: var(--fs-6xl); margin-bottom: 8px; }
+.empty-state p { font-size: var(--fs-base); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE — larger screens
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  .tab-content { max-width: 640px; padding: 16px 24px; }
+  .header { padding: 0 24px; height: 52px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div style="background:#e8ff47;color:#0a0a0a;text-align:center;padding:7px 16px;font-size:12px;font-weight:600;letter-spacing:0.03em">
+  DEMO &mdash; Sample Office Pool &nbsp;·&nbsp; <a href="https://tysontiatia.github.io/march-madness/bracket-tracker.html" style="color:#0a0a0a;text-decoration:underline">Set up your pool</a>
+</div>
+<div class="header">
+  <div class="logo">SAMPLE OFFICE POOL <span class="year">2026</span></div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"></button>
+    <div class="header-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-text" id="status-text">connecting...</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TAB CONTENT ═══ -->
+<div class="tab-content active" id="tab-games"></div>
+<div class="tab-content" id="tab-standings"></div>
+<div class="tab-content" id="tab-analytics"></div>
+<div class="tab-content" id="tab-settings"></div>
+
+<!-- ═══ GAME DETAIL SHEET ═══ -->
+<div class="sheet-overlay" id="sheet-overlay" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-handle"></div>
+  <div id="sheet-content"></div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══ BOTTOM NAV ═══ -->
+<div class="bottom-nav">
+  <button class="nav-btn active" data-tab="games" onclick="switchTab('games')">
+    <span class="icon">🏀</span>
+    Games
+  </button>
+  <button class="nav-btn" data-tab="standings" onclick="switchTab('standings')">
+    <span class="icon">🏆</span>
+    Standings
+  </button>
+  <button class="nav-btn" data-tab="analytics" onclick="switchTab('analytics')">
+    <span class="icon">📊</span>
+    Analytics
+  </button>
+  <button class="nav-btn" data-tab="settings" onclick="switchTab('settings')">
+    <span class="icon">⚙️</span>
+    Settings
+  </button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// CONFIG — change these each year
+// ═══════════════════════════════════════════════════════════════════════════
+const CONFIG = {
+  year: 2026,
+  poolName: 'Sample Office Pool',
+  jsonbinId: '69c2e373b7ec241ddc9c8f97',       // Demo picks bin (30 anonymized entries)
+  jsonbinKey: '',
+  teamMapBinId: '69bdf9b3aa77b81da903ff97',    // Static CBS→ESPN team map (ground truth)
+  myName: '',
+  pollInterval: 45, // seconds
+  // Scoring: points = round_multiplier × seed
+  scoring: {
+    1: { name: 'Round 1', short: 'R64', mult: 1, color: 'var(--r1)' },
+    2: { name: 'Round 2', short: 'R32', mult: 2, color: 'var(--r2)' },
+    3: { name: 'Sweet 16', short: 'S16', mult: 3, color: 'var(--r3)' },
+    4: { name: 'Elite 8', short: 'E8', mult: 4, color: 'var(--r4)' },
+    5: { name: 'Final Four', short: 'F4', mult: 5, color: 'var(--r5)' },
+    6: { name: 'Championship', short: 'NCG', mult: 6, color: 'var(--r6)' },
+  },
+  // CBS round numbers map to our round index
+  cbsRoundMap: { 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6 },
+  // ESPN API base
+  espnBase: 'https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball',
+  // Tournament dates (2026 — adjust yearly)
+  tournamentDates: [
+    '20260319', '20260320', // R64
+    '20260321', '20260322', // R32
+    '20260326', '20260327', // Sweet 16
+    '20260328',             // Elite 8 (Sat)
+    '20260329',             // Elite 8 (Sun)
+    '20260405',             // Final Four
+    '20260407',             // Championship
+  ],
+};
+
+// Load from URL params (for bookmark persistence)
+(function loadFromURL() {
+  const p = new URLSearchParams(window.location.search);
+  if (p.get('key')) { CONFIG.jsonbinKey = p.get('key'); localStorage.setItem('ms_jsonbinKey', p.get('key')); }
+  if (p.get('name')) { CONFIG.myName = p.get('name'); localStorage.setItem('ms_myName', p.get('name')); }
+  // Clean URL
+  if (p.has('key') || p.has('name')) {
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════════
+const state = {
+  games: [],          // ESPN game objects (normalized)
+  picks: null,        // { teamMap, entries } from CBS/JSONBin
+  teamMap: null,      // Static CBS→ESPN team map from JSONBin (ground truth)
+  standings: [],      // computed standings array
+  activeTab: 'games',
+  selectedRound: null,
+  selectedDay: null,
+  rtvTarget: null,    // name of player to compare against in Road to Victory (null = #1)
+  lastFetch: null,
+  loading: true,
+  fetchDone: false,
+  rankHistory: JSON.parse(localStorage.getItem('ms_rankHistory') || '[]'),
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TEAM NAME MAPPING — CBS team IDs → ESPN team IDs
+// Fetched from a static, manually-verified JSONBin (ground truth)
+// ═══════════════════════════════════════════════════════════════════════════
+const CBS_ESPN_MAP = {};   // cbsTeamId → espnTeamId
+const ESPN_CBS_MAP = {};   // espnTeamId → cbsTeamId (reverse lookup)
+const ESPN_COVERAGE = {};  // espnTeamId → { abbr, seed, region, cbsId|null, picked:bool }
+const ESPN_R64_ORD = {};   // espnTeamId → R64 ordinal (0-31) for bracket-position tracking
+const CBS_R64_ORD = {};    // cbsTeamId → R64 ordinal (0-31)
+
+// Standard NCAA bracket seed-pair order within each region (8 games per region)
+const SEED_PAIRS = [[1,16],[8,9],[5,12],[4,13],[6,11],[3,14],[7,10],[2,15]];
+
+// Fetch the static team map from JSONBin
+async function fetchTeamMap() {
+  if (!CONFIG.teamMapBinId) {
+    console.warn('⚠️ No team map bin ID configured');
+    return null;
+  }
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.teamMapBinId}/latest`);
+    if (!res.ok) throw new Error(`TeamMap JSONBin ${res.status}`);
+    const data = await res.json();
+    const record = data.record;
+    if (!record?.teams?.length) {
+      console.warn('⚠️ Team map is empty — fill it in on JSONBin');
+      return null;
+    }
+    // Validate: reject if any team has an empty espnId (map not yet filled)
+    const incomplete = record.teams.filter(t => !t.espnId);
+    if (incomplete.length > 0) {
+      console.warn(`⚠️ Team map has ${incomplete.length} unmapped entries — fill espnId for all teams`);
+      return null;
+    }
+    return record;
+  } catch (err) {
+    console.error('❌ Failed to fetch team map:', err.message);
+    return null;
+  }
+}
+
+// Build all lookup maps from the static team map + live ESPN game data
+function buildTeamMapping(teamMap) {
+  if (!state.games.length) return;
+
+  // Clear previous mappings (safe for re-runs on each fetch cycle)
+  Object.keys(CBS_ESPN_MAP).forEach(k => delete CBS_ESPN_MAP[k]);
+  Object.keys(ESPN_CBS_MAP).forEach(k => delete ESPN_CBS_MAP[k]);
+  Object.keys(ESPN_COVERAGE).forEach(k => delete ESPN_COVERAGE[k]);
+  Object.keys(ESPN_R64_ORD).forEach(k => delete ESPN_R64_ORD[k]);
+  Object.keys(CBS_R64_ORD).forEach(k => delete CBS_R64_ORD[k]);
+
+  // ── Step 1: Populate CBS↔ESPN maps from the static team map ──
+  if (teamMap?.teams?.length) {
+    teamMap.teams.forEach(t => {
+      const cbsId = String(t.cbsTeamId);
+      const espnId = String(t.espnId);
+      CBS_ESPN_MAP[cbsId] = espnId;
+      ESPN_CBS_MAP[espnId] = cbsId;
+    });
+    console.log(`🔗 Static team map: ${teamMap.teams.length} CBS→ESPN mappings loaded`);
+  } else {
+    console.warn('⚠️ No team map provided — scoring will not work');
+    return;
+  }
+
+  // ── Step 2: Build ESPN_COVERAGE and R64 ordinals from live ESPN game data ──
+  const r64Games = state.games.filter(g => g.roundNum === 1);
+
+  // Group ESPN R64 games by region, sorted by seed-pair order
+  const espnByRegion = {};
+  r64Games.forEach(g => {
+    if (!g.region) return;
+    if (!espnByRegion[g.region]) espnByRegion[g.region] = [];
+    espnByRegion[g.region].push(g);
+  });
+  Object.values(espnByRegion).forEach(games => {
+    games.sort((a, b) => {
+      const seedA = Math.min(a.team1.seed || 99, a.team2.seed || 99);
+      const seedB = Math.min(b.team1.seed || 99, b.team2.seed || 99);
+      const posA = SEED_PAIRS.findIndex(p => p[0] === seedA);
+      const posB = SEED_PAIRS.findIndex(p => p[0] === seedB);
+      return posA - posB;
+    });
+  });
+
+  // Determine region order from team map entries. Use the first mapped team per
+  // region to figure out which ESPN region corresponds to which ordinal range.
+  // We need CBS_R64_ORD to be built from picks data so getPicksForGame() works.
+  // Build CBS R64 ordinals from picks (which ordinal each CBS team appears at in R64)
+  const cbsOrdinals = {};  // cbsTeamId → R64 ordinal
+  if (state.picks?.entries?.length) {
+    state.picks.entries.forEach(entry => {
+      entry.picks.forEach(pick => {
+        if (pick.tournamentRound !== 2) return; // CBS round 2 = R64
+        const cid = String(pick.cbsTeamId);
+        if (!cbsOrdinals[cid]) cbsOrdinals[cid] = pick.roundOrdinal;
+      });
+    });
+  }
+
+  // Determine ordinal-range → ESPN-region mapping
+  // For each mapped CBS team, find its R64 ordinal and its ESPN team's region
+  const ordRangeToRegion = {};
+  const espnTeamRegions = {};
+  r64Games.forEach(g => {
+    [g.team1, g.team2].forEach(t => {
+      if (t.id && g.region) espnTeamRegions[t.id] = g.region;
+    });
+  });
+
+  Object.entries(CBS_ESPN_MAP).forEach(([cbsId, espnId]) => {
+    const ord = cbsOrdinals[cbsId];
+    const region = espnTeamRegions[espnId];
+    if (ord !== undefined && region) {
+      const rangeStart = Math.floor(ord / 8) * 8;
+      const rangeKey = `${rangeStart}-${rangeStart + 7}`;
+      if (!ordRangeToRegion[rangeKey]) ordRangeToRegion[rangeKey] = region;
+    }
+  });
+  console.log('🗺️ Ordinal range → Region:', ordRangeToRegion);
+
+  // ── Step 3: Build ESPN_R64_ORD, CBS_R64_ORD, and ESPN_COVERAGE ──
+  // Walk each ordinal 0-31, map to ESPN games by region
+  for (let ord = 0; ord < 32; ord++) {
+    const rangeStart = Math.floor(ord / 8) * 8;
+    const rangeKey = `${rangeStart}-${rangeStart + 7}`;
+    const region = ordRangeToRegion[rangeKey];
+    if (!region || !espnByRegion[region]) continue;
+
+    const posInRegion = ord - rangeStart;
+    const espnGame = espnByRegion[region][posInRegion];
+    if (!espnGame) continue;
+
+    const hiSeedTeam = (espnGame.team1.seed||99) < (espnGame.team2.seed||99) ? espnGame.team1 : espnGame.team2;
+    const loSeedTeam = hiSeedTeam === espnGame.team1 ? espnGame.team2 : espnGame.team1;
+
+    // Set ESPN R64 ordinals
+    ESPN_R64_ORD[hiSeedTeam.id] = ord;
+    ESPN_R64_ORD[loSeedTeam.id] = ord;
+
+    // Set CBS R64 ordinals from the reverse map
+    const hiCbs = ESPN_CBS_MAP[hiSeedTeam.id];
+    const loCbs = ESPN_CBS_MAP[loSeedTeam.id];
+    if (hiCbs) CBS_R64_ORD[hiCbs] = ord;
+    if (loCbs) CBS_R64_ORD[loCbs] = ord;
+
+    // ESPN_COVERAGE for both teams
+    ESPN_COVERAGE[hiSeedTeam.id] = {
+      abbr: hiSeedTeam.abbreviation, seed: hiSeedTeam.seed, region,
+      cbsId: hiCbs || null, picked: !!hiCbs
+    };
+    ESPN_COVERAGE[loSeedTeam.id] = {
+      abbr: loSeedTeam.abbreviation, seed: loSeedTeam.seed, region,
+      cbsId: loCbs || null, picked: !!loCbs
+    };
+  }
+
+  // ── Step 4: Validate coverage ──
+  const totalCbsTeams = new Set();
+  if (state.picks?.entries?.length) {
+    state.picks.entries.forEach(e => e.picks.forEach(p => totalCbsTeams.add(String(p.cbsTeamId))));
+  }
+  const pickedMapped = Object.keys(CBS_ESPN_MAP).length;
+  const espnCovered = Object.keys(ESPN_COVERAGE).length;
+  const unpickedTeams = Object.values(ESPN_COVERAGE).filter(t => !t.picked);
+
+  console.log(`🔗 CBS→ESPN: ${pickedMapped} teams mapped from static map`);
+  console.log(`🏀 ESPN coverage: ${espnCovered}/64 teams accounted for`);
+  if (unpickedTeams.length) {
+    console.log(`📋 ${unpickedTeams.length} teams received 0 picks:`, unpickedTeams.map(t => `${t.abbr}(${t.seed})`).join(', '));
+  }
+
+  // Log any picked CBS IDs that failed to map (indicates missing entries in team map)
+  totalCbsTeams.forEach(cid => {
+    if (!CBS_ESPN_MAP[cid]) console.warn(`⚠️ Still unmapped: CBS ${cid} — add it to the team map JSONBin`);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AVATAR SYSTEM
+// ═══════════════════════════════════════════════════════════════════════════
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ESPN API — Fetch & Normalize Games
+// ═══════════════════════════════════════════════════════════════════════════
+function parseEspnGame(event) {
+  const comp = event.competitions[0];
+  const status = comp.status;
+  const notes = comp.notes || [];
+  const headline = notes[0]?.headline || '';
+  
+  // Parse region and round from headline
+  // "NCAA Men's Basketball Championship - Midwest Region - 1st Round"
+  let region = '', roundName = '';
+  const regionMatch = headline.match(/(\w+)\s+Region/);
+  if (regionMatch) region = regionMatch[1];
+  const roundMatch = headline.match(/(?:1st|2nd|3rd|4th|First|Second)\s+Round|Sweet\s*16|Elite\s*(?:8|Eight)|Final\s*Four|Championship|Semifinal/i);
+  if (roundMatch) roundName = roundMatch[0];
+  
+  // Determine our round number from the headline
+  let roundNum = 0;
+  const hl = headline.toLowerCase();
+  if (hl.includes('1st round') || hl.includes('first round')) roundNum = 1;
+  else if (hl.includes('2nd round') || hl.includes('second round')) roundNum = 2;
+  else if (hl.includes('sweet')) roundNum = 3;
+  else if (hl.includes('elite')) roundNum = 4;
+  else if (hl.includes('semifinal') || hl.includes('final four')) roundNum = 5;
+  else if (hl.includes('championship')) roundNum = 6;
+  
+  // Competitors — ESPN has order 0 = home, 1 = away but for tournament we want higher seed first
+  const competitors = comp.competitors.sort((a, b) => {
+    const seedA = a.curatedRank?.current || 99;
+    const seedB = b.curatedRank?.current || 99;
+    return seedA - seedB;
+  });
+  
+  function parseTeam(c) {
+    return {
+      id: c.team.id,
+      espnId: c.team.id,
+      name: c.team.shortDisplayName || c.team.displayName,
+      displayName: c.team.displayName,
+      abbreviation: c.team.abbreviation,
+      shortName: c.team.shortDisplayName || c.team.location,
+      location: c.team.location || '',
+      seed: c.curatedRank?.current || null,
+      score: parseInt(c.score) || 0,
+      logo: c.team.logo || '',
+      color: c.team.color ? `#${c.team.color}` : null,
+      winner: c.winner || false,
+      record: c.records?.find(r => r.type === 'total')?.summary || '',
+    };
+  }
+  
+  const team1 = parseTeam(competitors[0]); // higher seed
+  const team2 = parseTeam(competitors[1]); // lower seed
+
+  // Odds & win probability
+  const oddsEntry = comp.odds?.[0];
+  const predictor = comp.predictor;
+  const homeWinPct = predictor?.homeTeam?.gameProjection != null ? Math.round(predictor.homeTeam.gameProjection) : null;
+  const awayWinPct = predictor?.awayTeam?.gameProjection != null ? Math.round(predictor.awayTeam.gameProjection) : null;
+  const team1IsHome = competitors[0].homeAway === 'home';
+  const team1WinPct = (homeWinPct != null && awayWinPct != null) ? (team1IsHome ? homeWinPct : awayWinPct) : null;
+  const team2WinPct = team1WinPct != null ? (100 - team1WinPct) : null;
+  const homeML = oddsEntry?.moneyline?.home?.close?.odds ? parseInt(oddsEntry.moneyline.home.close.odds) : null;
+  const awayML = oddsEntry?.moneyline?.away?.close?.odds ? parseInt(oddsEntry.moneyline.away.close.odds) : null;
+  const team1ML = (homeML != null && awayML != null) ? (team1IsHome ? homeML : awayML) : null;
+  const team2ML = (homeML != null && awayML != null) ? (team1IsHome ? awayML : homeML) : null;
+
+  // Game state
+  let gameState = 'scheduled'; // scheduled, live, final
+  const stateType = status.type.state;
+  if (stateType === 'in') gameState = 'live';
+  else if (stateType === 'post') gameState = 'final';
+  else if (stateType === 'pre') gameState = 'scheduled';
+  
+  // Convert UTC date to US Eastern to get correct calendar day
+  const localDate = new Date(event.date);
+  const eastern = localDate.toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // YYYY-MM-DD
+  const dateStr = eastern.replace(/-/g, '');
+
+  const dateLabel = new Date(event.date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+
+  return {
+    id: event.id,
+    espnId: event.id,
+    date: event.date,
+    dateStr,
+    dateLabel,
+    name: event.name,
+    shortName: event.shortName,
+    region,
+    roundNum,
+    roundName: CONFIG.scoring[roundNum]?.name || roundName || `Round ${roundNum}`,
+    team1,
+    team2,
+    state: gameState,
+    statusDetail: gameState === 'scheduled'
+      ? new Date(event.date).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+      : (status.type.shortDetail || status.type.detail || ''),
+    clock: status.displayClock || '',
+    period: status.period || 0,
+    venue: comp.venue?.fullName || '',
+    broadcast: comp.broadcasts?.[0]?.names?.[0] || '',
+    team1ML,
+    team2ML,
+    team1WinPct,
+    team2WinPct,
+    winnerId: gameState === 'final' ? (team1.winner ? team1.id : team2.winner ? team2.id : null) : null,
+    winnerName: gameState === 'final' ? (team1.winner ? team1.name : team2.winner ? team2.name : null) : null,
+  };
+}
+
+async function fetchESPNGames() {
+  const allGames = [];
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }).replace(/-/g, '');
+  
+  // Determine which dates to fetch
+  // Always fetch today + check which tournament dates have passed
+  const datesToFetch = new Set();
+  datesToFetch.add(today);
+  
+  // Add all tournament dates up to today + 1 day ahead
+  const todayNum = parseInt(today);
+  CONFIG.tournamentDates.forEach(d => {
+    const dNum = parseInt(d);
+    if (dNum <= todayNum + 7) datesToFetch.add(d);
+  });
+  
+  console.log(`🏀 Fetching ESPN games for ${datesToFetch.size} dates...`);
+  
+  // Fetch all dates in parallel
+  const fetches = [...datesToFetch].map(async date => {
+    try {
+      const url = `${CONFIG.espnBase}/scoreboard?dates=${date}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`ESPN ${res.status}`);
+      const data = await res.json();
+      const events = data.events || [];
+      
+      // Filter to tournament games only
+      return events
+        .filter(e => {
+          const notes = e.competitions[0]?.notes || [];
+          const headline = notes[0]?.headline || '';
+          return headline.includes('NCAA') && headline.includes('Championship');
+        })
+        .map(parseEspnGame);
+    } catch (err) {
+      console.warn(`⚠️ Failed to fetch ${date}:`, err.message);
+      return [];
+    }
+  });
+  
+  const results = await Promise.all(fetches);
+  results.forEach(games => allGames.push(...games));
+  
+  // Dedupe by game ID
+  const seen = new Set();
+  const unique = [];
+  allGames.forEach(g => {
+    if (!seen.has(g.id)) {
+      seen.add(g.id);
+      unique.push(g);
+    }
+  });
+  
+  // Sort: live first, then by date, then by round
+  unique.sort((a, b) => {
+    const stateOrder = { live: 0, scheduled: 1, final: 2 };
+    if (stateOrder[a.state] !== stateOrder[b.state]) return stateOrder[a.state] - stateOrder[b.state];
+    return new Date(a.date) - new Date(b.date);
+  });
+  
+  return unique;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// JSONBIN — Fetch Picks
+// ═══════════════════════════════════════════════════════════════════════════
+async function fetchPicks() {
+  if (!CONFIG.jsonbinId) {
+    console.log('⚠️ No JSONBin ID configured');
+    return null;
+  }
+  
+  try {
+    // Public bins don't need a key to read — only Master Key holder needs it for imports
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.jsonbinId}/latest`);
+    if (!res.ok) throw new Error(`JSONBin ${res.status}`);
+    
+    const data = await res.json();
+    const record = data.record;
+    
+    // The JSONBin data has { teamMap, entries } 
+    // Or it's the raw CBS format with individual entries
+    if (record.teamMap && record.entries) {
+      return record;
+    }
+    
+    // If it's an array of entries (raw CBS import)
+    if (Array.isArray(record)) {
+      return processCBSEntries(record);
+    }
+    
+    // If it contains entries as a field
+    if (record.entries && Array.isArray(record.entries)) {
+      return { teamMap: record.teamMap || {}, entries: record.entries };
+    }
+    
+    console.warn('⚠️ Unrecognized JSONBin data format');
+    return null;
+  } catch (err) {
+    console.error('❌ Failed to fetch picks:', err.message);
+    return null;
+  }
+}
+
+function processCBSEntries(rawEntries) {
+  const teamMap = {};
+  const entries = [];
+  const seenNames = new Set();
+  
+  rawEntries.forEach(entry => {
+    const name = (entry.name || '').trim();
+    if (seenNames.has(name)) return;
+    seenNames.add(name);
+    
+    if (entry.championTeam) {
+      teamMap[entry.championTeam.cbsTeamId] = entry.championTeam;
+    }
+    
+    entries.push({
+      name: name,
+      picks: entry.picks || [],
+      championCbsTeamId: entry.championTeam?.cbsTeamId || null,
+    });
+  });
+  
+  return { teamMap, entries };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SCORING ENGINE  (v2 — clean rebuild, seed from static team map)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Build a fast lookup: cbsTeamId → seed  (from the static JSONBin team map)
+const CBS_SEED = {};   // cbsTeamId (string) → number
+
+function buildSeedLookup() {
+  Object.keys(CBS_SEED).forEach(k => delete CBS_SEED[k]);
+  if (!state.teamMap?.teams?.length) return;
+  state.teamMap.teams.forEach(t => {
+    CBS_SEED[String(t.cbsTeamId)] = t.seed;
+  });
+}
+
+// Find which ESPN game a CBS pick belongs to
+function findGameForPick(pick) {
+  const ourRound = CONFIG.cbsRoundMap[pick.tournamentRound];
+  if (!ourRound) return null;
+
+  const espnId = CBS_ESPN_MAP[String(pick.cbsTeamId)];
+  if (!espnId) return null;
+
+  return state.games.find(g =>
+    g.roundNum === ourRound &&
+    (g.team1.id === espnId || g.team2.id === espnId)
+  );
+}
+
+// Check if a team has been eliminated from the tournament
+function isTeamEliminated(cbsTeamId) {
+  const espnId = CBS_ESPN_MAP[String(cbsTeamId)];
+  if (!espnId) return false;
+
+  return state.games.some(g =>
+    g.state === 'final' &&
+    (g.team1.id === espnId || g.team2.id === espnId) &&
+    g.winnerId !== espnId
+  );
+}
+
+// Score a single pick
+function scorePick(pick) {
+  const cbsId  = String(pick.cbsTeamId);
+  const ourRound = CONFIG.cbsRoundMap[pick.tournamentRound];
+  if (!ourRound) return { pts: 0, correct: null, pending: false, pickValue: 0 };
+
+  const seed = CBS_SEED[cbsId] || 1;
+  const mult = CONFIG.scoring[ourRound]?.mult || 1;
+  const pickValue = mult * seed;
+
+  const espnId = CBS_ESPN_MAP[cbsId];
+  if (!espnId) {
+    // Unmapped team — can't score
+    return { pts: 0, correct: null, pending: false, eliminated: false, pickValue };
+  }
+
+  const game = findGameForPick(pick);
+
+  if (!game) {
+    // No game yet (future round, teams TBD, or team already eliminated)
+    const eliminated = isTeamEliminated(cbsId);
+    return { pts: 0, correct: null, pending: !eliminated, eliminated, pickValue };
+  }
+
+  if (game.state !== 'final') {
+    // Game in progress or not started
+    const eliminated = isTeamEliminated(cbsId);
+    return { pts: 0, correct: null, pending: !eliminated, eliminated, pickValue, game };
+  }
+
+  // Game is final — did the picked team win?
+  const correct = (game.winnerId === espnId);
+  return {
+    pts: correct ? pickValue : 0,
+    correct,
+    pending: false,
+    eliminated: !correct,
+    pickValue,
+    game,
+  };
+}
+
+// Score all picks for one entry
+function scoreEntry(entry) {
+  let total = 0, correct = 0, wrong = 0, pending = 0;
+  let maxPossible = 0;
+
+  const scored = entry.picks.map(pick => {
+    const result = scorePick(pick);
+    total += result.pts;
+    if (result.correct === true)  { correct++; maxPossible += result.pts; }
+    if (result.correct === false) wrong++;
+    if (result.pending)           { pending++; maxPossible += result.pickValue; }
+    return { ...pick, ...result };
+  });
+
+  return { total, correct, wrong, pending, maxPts: maxPossible, scored };
+}
+
+// Build standings for all entries
+function computeStandings() {
+  if (!state.picks?.entries?.length) return [];
+
+  // Make sure seed lookup is fresh
+  buildSeedLookup();
+
+  const standings = state.picks.entries.map(entry => {
+    const { total, correct, wrong, pending, maxPts, scored } = scoreEntry(entry);
+    const champTeam = state.picks.teamMap[entry.championCbsTeamId];
+    const champEliminated = entry.championCbsTeamId
+      ? isTeamEliminated(entry.championCbsTeamId)
+      : true;
+    const champAlive = !champEliminated;
+
+    // Champion bonus: 1 extra point if the NCG winner matches entry's champion pick
+    let champBonus = 0;
+    if (entry.championCbsTeamId) {
+      const champEspnId = CBS_ESPN_MAP[String(entry.championCbsTeamId)];
+      if (champEspnId) {
+        const ncgGame = state.games.find(g => g.roundNum === 6 && g.state === 'final');
+        if (ncgGame && ncgGame.winnerId === champEspnId) champBonus = 1;
+      }
+    }
+
+    // Look up champion logo from ESPN game data
+    let champLogo = '';
+    if (entry.championCbsTeamId) {
+      const espnId = CBS_ESPN_MAP[String(entry.championCbsTeamId)];
+      if (espnId) {
+        for (const g of state.games) {
+          if (g.team1.id === espnId && g.team1.logo) { champLogo = g.team1.logo; break; }
+          if (g.team2.id === espnId && g.team2.logo) { champLogo = g.team2.logo; break; }
+        }
+      }
+    }
+
+    return {
+      name: entry.name,
+      points: total + champBonus,
+      correct,
+      wrong,
+      pending,
+      maxPts: maxPts,
+      scored,
+      champTeam: champTeam?.mediumName || champTeam?.abbrev || '?',
+      champLogo,
+      champAlive,
+      isMe: entry.name.trim().toLowerCase() === CONFIG.myName.trim().toLowerCase(),
+    };
+  });
+
+  standings.sort((a, b) => b.points - a.points || b.correct - a.correct || b.maxPts - a.maxPts);
+
+  // Assign ranks (tied entries share the same rank)
+  standings.forEach((s, i) => {
+    if (i > 0 && s.points === standings[i-1].points && s.correct === standings[i-1].correct) {
+      s.rank = standings[i-1].rank;
+    } else {
+      s.rank = i + 1;
+    }
+  });
+
+  // ── Debug: log per-entry totals to console ──
+  console.table(standings.map(s => ({
+    Rank: s.rank, Name: s.name, Pts: s.points,
+    W: s.correct, L: s.wrong, Pend: s.pending, Max: s.maxPts,
+    Champ: s.champTeam, ChampAlive: s.champAlive,
+  })));
+
+  return standings;
+}
+
+function getTeamLogoForCbs(cbsTeamId) {
+  const espnId = CBS_ESPN_MAP[String(cbsTeamId)];
+  if (!espnId) return null;
+  for (const g of state.games) {
+    if (g.team1.id === espnId && g.team1.logo) return g.team1.logo;
+    if (g.team2.id === espnId && g.team2.logo) return g.team2.logo;
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WHO PICKED WHAT — for a given game
+// ═══════════════════════════════════════════════════════════════════════════
+function getPicksForGame(game) {
+  if (!state.picks?.entries?.length) return { team1: [], team2: [], eliminated: [], noPick: [] };
+  
+  const result = { team1: [], team2: [], eliminated: [], noPick: [] };
+  const ourRound = game.roundNum;
+  
+  // For R32+ games, compute bracket pods.
+  // Each team's "pod" is the set of R64 ordinals that funnel into this game on that team's side.
+  let team1Pod = null, team2Pod = null;
+  if (ourRound >= 2 && game.team1.id && game.team2.id) {
+    const t1Ord = ESPN_R64_ORD[game.team1.id];
+    const t2Ord = ESPN_R64_ORD[game.team2.id];
+    if (t1Ord !== undefined && t2Ord !== undefined) {
+      const podSize = Math.pow(2, ourRound - 1);
+      const t1Base = Math.floor(t1Ord / podSize) * podSize;
+      const t2Base = Math.floor(t2Ord / podSize) * podSize;
+      team1Pod = { base: t1Base, end: t1Base + podSize - 1 };
+      team2Pod = { base: t2Base, end: t2Base + podSize - 1 };
+    }
+  }
+
+  // Build ESPN ID → team name lookup for context
+  const espnTeamNames = {};
+  state.games.forEach(g => {
+    if (g.team1.id) espnTeamNames[g.team1.id] = g.team1.name;
+    if (g.team2.id) espnTeamNames[g.team2.id] = g.team2.name;
+  });
+  
+  state.picks.entries.forEach(entry => {
+    const roundPicks = entry.picks.filter(p => CONFIG.cbsRoundMap[p.tournamentRound] === ourRound);
+    
+    const standing = state.standings.find(s => s.name === entry.name);
+    const info = {
+      name: entry.name,
+      points: standing?.points || 0,
+      rank: standing?.rank || '?',
+      isMe: entry.name.trim().toLowerCase() === CONFIG.myName.trim().toLowerCase(),
+    };
+    
+    // Direct team match — they picked one of the two teams in this game
+    const directMatch = roundPicks.find(p => {
+      const espnId = CBS_ESPN_MAP[String(p.cbsTeamId)];
+      return espnId === game.team1.id || espnId === game.team2.id;
+    });
+    
+    if (directMatch) {
+      const espnId = CBS_ESPN_MAP[String(directMatch.cbsTeamId)];
+      if (espnId === game.team1.id) result.team1.push(info);
+      else result.team2.push(info);
+      return;
+    }
+    
+    // Fallback for R32+: bracket-position matching for eliminated picks.
+    if (team1Pod && team2Pod) {
+      const posPick = roundPicks.find(p => {
+        const r64Ord = CBS_R64_ORD[String(p.cbsTeamId)];
+        if (r64Ord === undefined) return false;
+        return (r64Ord >= team1Pod.base && r64Ord <= team1Pod.end) ||
+               (r64Ord >= team2Pod.base && r64Ord <= team2Pod.end);
+      });
+      
+      if (posPick) {
+        const pickedEspnId = CBS_ESPN_MAP[String(posPick.cbsTeamId)];
+        const pickedTeamName = espnTeamNames[pickedEspnId] || 'Unknown';
+        const r64Ord = CBS_R64_ORD[String(posPick.cbsTeamId)];
+        const side = (r64Ord >= team1Pod.base && r64Ord <= team1Pod.end) ? 'team1' : 'team2';
+        result.eliminated.push({ ...info, pickedTeam: pickedTeamName, side });
+        return;
+      }
+    }
+    
+    result.noPick.push(entry.name);
+  });
+  
+  return result;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ROAD TO VICTORY
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STATUS & TOAST
+// ═══════════════════════════════════════════════════════════════════════════
+function setStatus(s, msg) {
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
+  dot.className = 'status-dot';
+  if (s === 'live') {
+    dot.classList.add('live');
+    const t = state.lastFetch || new Date();
+    txt.textContent = msg || `updated ${t.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+  } else if (s === 'error') {
+    dot.classList.add('error');
+    txt.textContent = msg || 'error';
+  } else {
+    txt.textContent = msg || 'connecting...';
+  }
+}
+
+function showToast(msg, duration = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════════════════════════════
+function switchTab(tab) {
+  state.activeTab = tab;
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.querySelector(`.nav-btn[data-tab="${tab}"]`).classList.add('active');
+  
+  // Render the selected tab
+  if (tab === 'games') renderGames();
+  else if (tab === 'standings') renderStandings();
+  else if (tab === 'analytics') renderAnalytics();
+  else if (tab === 'settings') renderSettings();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER — GAMES TAB
+// ═══════════════════════════════════════════════════════════════════════════
+function renderGames() {
+  const container = document.getElementById('tab-games');
+  
+  if (!state.games.length) {
+    if (!state.fetchDone) {
+      container.innerHTML = `<div class="loading"><div class="spinner"></div><span>Loading games...</span></div>`;
+    } else {
+      container.innerHTML = `<div class="loading"><span>No tournament games found. ESPN may be unavailable — try refreshing.</span></div>`;
+    }
+    return;
+  }
+  
+  // Determine available rounds
+  const rounds = [...new Set(state.games.map(g => g.roundNum))].filter(r => r > 0).sort((a,b) => a-b);
+  if (!state.selectedRound && rounds.length) {
+    // Default to the latest round that has games in progress or today
+    const liveRound = rounds.find(r => state.games.some(g => g.roundNum === r && g.state === 'live'));
+    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }).replace(/-/g, '');
+    const todayRound = rounds.find(r => state.games.some(g => g.roundNum === r && g.dateStr === todayStr));
+    const upcomingRound = rounds.find(r => state.games.some(g => g.roundNum === r && g.state !== 'final'));
+    state.selectedRound = liveRound || todayRound || upcomingRound || rounds[rounds.length - 1];
+  }
+  
+  // Available days for selected round
+  const roundGames = state.games.filter(g => g.roundNum === state.selectedRound);
+  const days = [...new Set(roundGames.map(g => g.dateStr))].sort();
+  if (!state.selectedDay || !days.includes(state.selectedDay)) {
+    // Default to day with live games, or today, or first day
+    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }).replace(/-/g, '');
+    const liveDay = days.find(d => roundGames.some(g => g.dateStr === d && g.state === 'live'));
+    state.selectedDay = liveDay || (days.includes(todayStr) ? todayStr : days[0]);
+  }
+  
+  // Build round pills
+  let html = `<div class="round-pills">`;
+  rounds.forEach(r => {
+    const info = CONFIG.scoring[r];
+    const label = info?.name || `Round ${r}`;
+    const hasLive = state.games.some(g => g.roundNum === r && g.state === 'live');
+    html += `<button class="round-pill ${r === state.selectedRound ? 'active' : ''}" onclick="selectRound(${r})">${label}${hasLive ? ' 🔴' : ''}</button>`;
+  });
+  html += `</div>`;
+  
+  // Day pills (only if multiple days)
+  if (days.length > 1) {
+    html += `<div class="day-pills">`;
+    days.forEach(d => {
+      const dt = new Date(d.slice(0,4) + '-' + d.slice(4,6) + '-' + d.slice(6,8) + 'T12:00:00');
+      const label = dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      html += `<button class="day-pill ${d === state.selectedDay ? 'active' : ''}" onclick="selectDay('${d}')">${label}</button>`;
+    });
+    html += `</div>`;
+  }
+  
+  // Filter games
+  let filteredGames = roundGames;
+  if (state.selectedDay) {
+    filteredGames = roundGames.filter(g => g.dateStr === state.selectedDay);
+  }
+  
+  // Sort: live first, then scheduled, then final
+  filteredGames.sort((a, b) => {
+    const order = { live: 0, scheduled: 1, final: 2 };
+    return (order[a.state] || 1) - (order[b.state] || 1) || new Date(a.date) - new Date(b.date);
+  });
+  
+  if (!filteredGames.length) {
+    html += `<div class="empty-state"><div class="icon">🏀</div><p>No games scheduled for this day</p></div>`;
+  }
+  
+  // Render game cards
+  filteredGames.forEach(game => {
+    const picks = state.picks ? getPicksForGame(game) : null;
+    const t1Count = picks?.team1?.length || 0;
+    const t2Count = picks?.team2?.length || 0;
+    const elimCount = picks?.eliminated?.length || 0;
+    const totalPicks = t1Count + t2Count;
+    const allPicks = totalPicks + elimCount;
+    const t1Pct = totalPicks > 0 ? Math.round((t1Count / totalPicks) * 100) : 50;
+    const t2Pct = 100 - t1Pct;
+    
+    html += `<div class="game-card ${game.state}" onclick="openGameSheet('${game.id}')">`;
+    
+    // Meta
+    const regionStr = game.region || game.roundName;
+    html += `<div class="game-meta">`;
+    html += `<span class="game-region">${regionStr}${game.broadcast ? ' · ' + game.broadcast : ''}</span>`;
+    if (game.state === 'live') {
+      html += `<span class="game-status live">● ${game.statusDetail}</span>`;
+    } else if (game.state === 'final') {
+      html += `<span class="game-status final">${game.statusDetail}</span>`;
+    } else {
+      html += `<span class="game-status upcoming">${game.dateLabel} · ${game.statusDetail}</span>`;
+    }
+    html += `</div>`;
+    
+    // Teams
+    html += `<div class="game-teams">`;
+    [[game.team1, game.team1ML], [game.team2, game.team2ML]].forEach(([team, ml]) => {
+      const isWinner = game.state === 'final' && team.winner;
+      const isLoser = game.state === 'final' && !team.winner;
+      const mlStr = game.state === 'scheduled' && ml != null ? (ml > 0 ? `+${ml}` : `${ml}`) : '';
+      html += `<div class="team-row ${isWinner ? 'winner' : ''} ${isLoser ? 'loser' : ''}">`;
+      html += `<span class="team-seed">${team.seed || ''}</span>`;
+      if (team.logo) {
+        html += `<img class="team-logo" src="${team.logo}" alt="" onerror="this.style.display='none'">`;
+      }
+      html += `<span class="team-name">${team.name}</span>`;
+      if (game.state === 'scheduled' && mlStr) {
+        html += `<span class="team-score" style="font-size:var(--fs-xs);color:var(--muted)">${mlStr}</span>`;
+      } else {
+        html += `<span class="team-score">${game.state !== 'scheduled' ? team.score : ''}</span>`;
+      }
+      html += `</div>`;
+    });
+    html += `</div>`;
+    
+    // Inline consensus bar
+    if (picks && totalPicks > 0) {
+      const isFinal = game.state === 'final';
+      const t1Winner = isFinal && game.team1.winner;
+      const t2Winner = isFinal && game.team2.winner;
+      const t1Color = isFinal ? (t1Winner ? 'var(--green)' : 'var(--red)') : (game.team1.color || 'var(--blue)');
+      const t2Color = isFinal ? (t2Winner ? 'var(--green)' : 'var(--red)') : (game.team2.color || 'var(--red)');
+      const isUnanimous = t1Pct === 100 || t2Pct === 100;
+      const highConsensus = !isUnanimous && (t1Pct >= 75 || t2Pct >= 75);
+      
+      html += `<div class="consensus-inline">`;
+      html += `<div class="consensus-inline-labels">`;
+      html += `<span class="cl-team" style="color:${t1Pct >= t2Pct ? t1Color : 'var(--muted)'}">${t1Pct}% <span style="font-weight:400;font-size:var(--fs-2xs);color:var(--muted)">(${t1Count})</span></span>`;
+      if (isUnanimous) html += `<span class="cl-tag">unanimous</span>`;
+      else if (highConsensus) html += `<span class="cl-tag" style="color:var(--muted)">high consensus</span>`;
+      else html += `<span style="font-size:var(--fs-2xs);color:var(--muted)">${allPicks} picks${elimCount > 0 ? ` · ${elimCount} elim` : ''}</span>`;
+      html += `<span class="cl-team" style="color:${t2Pct > t1Pct ? t2Color : 'var(--muted)'}">${t2Pct}% <span style="font-weight:400;font-size:var(--fs-2xs);color:var(--muted)">(${t2Count})</span></span>`;
+      html += `</div>`;
+      html += `<div class="consensus-bar-inline">`;
+      html += `<div class="cb-fill" style="width:${t1Pct}%;background:${t1Color};border-radius:3px 0 0 3px"></div>`;
+      html += `<div class="cb-fill" style="width:${t2Pct}%;background:${t2Color};border-radius:0 3px 3px 0"></div>`;
+      html += `</div>`;
+      html += `</div>`;
+    }
+
+    // Win probability bar (scheduled + live only)
+    if (game.state !== 'final' && game.team1WinPct != null) {
+      const isLive = game.state === 'live';
+      const centerLabel = isLive ? 'live win prob' : 'win prob';
+      const t1Fav = game.team1WinPct >= game.team2WinPct;
+      html += `<div class="consensus-inline" style="margin-top:4px">`;
+      html += `<div class="consensus-inline-labels">`;
+      html += `<span class="cl-team" style="color:${t1Fav ? 'var(--muted2)' : 'var(--muted)'}">${game.team1WinPct}%</span>`;
+      html += `<span style="font-size:var(--fs-2xs);color:var(--muted)">${centerLabel}</span>`;
+      html += `<span class="cl-team" style="color:${!t1Fav ? 'var(--muted2)' : 'var(--muted)'}">${game.team2WinPct}%</span>`;
+      html += `</div>`;
+      html += `<div class="consensus-bar-inline">`;
+      html += `<div class="cb-fill" style="width:${game.team1WinPct}%;background:${isLive ? 'var(--blue)' : 'var(--border2)'};border-radius:3px 0 0 3px"></div>`;
+      html += `<div class="cb-fill" style="width:${game.team2WinPct}%;background:${isLive ? 'var(--muted)' : 'var(--border2)'};opacity:${isLive ? 1 : 0.4};border-radius:0 3px 3px 0"></div>`;
+      html += `</div>`;
+      html += `</div>`;
+    }
+
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+function selectRound(r) {
+  state.selectedRound = r;
+  state.selectedDay = null;
+  renderGames();
+}
+
+function selectDay(d) {
+  state.selectedDay = d;
+  renderGames();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GAME DETAIL SHEET
+// ═══════════════════════════════════════════════════════════════════════════
+function openGameSheet(gameId) {
+  const game = state.games.find(g => g.id === gameId);
+  if (!game) return;
+  
+  const picks = getPicksForGame(game);
+  const totalPicks = state.picks?.entries?.length || 0;
+  const t1Count = picks.team1.length;
+  const t2Count = picks.team2.length;
+  const elimCount = picks.eliminated.length;
+  
+  let html = `<div class="sheet-header"><div class="sheet-game-info">`;
+  
+  // Teams and scores
+  html += `<div class="sheet-teams">`;
+  const t1MLStr = game.state === 'scheduled' && game.team1ML != null ? (game.team1ML > 0 ? `+${game.team1ML}` : `${game.team1ML}`) : '';
+  const t2MLStr = game.state === 'scheduled' && game.team2ML != null ? (game.team2ML > 0 ? `+${game.team2ML}` : `${game.team2ML}`) : '';
+
+  html += `<div class="sheet-team">`;
+  html += `<span class="sheet-team-seed">${game.team1.seed ? '#' + game.team1.seed + ' seed' : ''}</span>`;
+  if (game.team1.logo) html += `<img src="${game.team1.logo}" style="width:40px;height:40px;border-radius:6px;object-fit:contain" onerror="this.style.display='none'">`;
+  html += `<span class="sheet-team-name">${game.team1.name}</span>`;
+  if (game.state !== 'scheduled') html += `<span class="sheet-team-score">${game.team1.score}</span>`;
+  if (t1MLStr) html += `<span style="font-size:var(--fs-xs);color:var(--muted);margin-top:2px">${t1MLStr}</span>`;
+  html += `</div>`;
+
+  html += `<span class="sheet-vs">${game.state === 'scheduled' ? 'vs' : ''}</span>`;
+
+  html += `<div class="sheet-team">`;
+  html += `<span class="sheet-team-seed">${game.team2.seed ? '#' + game.team2.seed + ' seed' : ''}</span>`;
+  if (game.team2.logo) html += `<img src="${game.team2.logo}" style="width:40px;height:40px;border-radius:6px;object-fit:contain" onerror="this.style.display='none'">`;
+  html += `<span class="sheet-team-name">${game.team2.name}</span>`;
+  if (game.state !== 'scheduled') html += `<span class="sheet-team-score">${game.team2.score}</span>`;
+  if (t2MLStr) html += `<span style="font-size:var(--fs-xs);color:var(--muted);margin-top:2px">${t2MLStr}</span>`;
+  html += `</div>`;
+  html += `</div>`;
+  
+  // Status line
+  const sheetRegion = game.region || game.roundName;
+  const sheetDay = game.state === 'scheduled' ? `${game.dateLabel} · ` : '';
+  html += `<div class="sheet-status">${sheetDay}${game.statusDetail}${sheetRegion ? ' · ' + sheetRegion : ''} · ${game.roundName}</div>`;
+  html += `</div></div>`;
+  
+  // Pick value for this round
+  const roundMult = CONFIG.scoring[game.roundNum]?.mult || 1;
+  const t1Value = roundMult * (game.team1.seed || 1);
+  const t2Value = roundMult * (game.team2.seed || 1);
+  
+  // Team 1 pickers
+  html += `<div class="sheet-section">`;
+  html += `<div class="sheet-section-title">${game.team1.name} — ${t1Count} pick${t1Count !== 1 ? 's' : ''} (${t1Value} pts)</div>`;
+  html += `<div class="picks-list">`;
+  if (picks.team1.length === 0) {
+    html += `<div style="padding:8px;color:var(--muted);font-size:var(--fs-sm)">No one picked ${game.team1.name}</div>`;
+  }
+  picks.team1.sort((a,b) => a.rank - b.rank).forEach(p => {
+    html += `<div class="pick-entry ${p.isMe ? 'is-me' : ''}">`;
+    html += `<span class="entry-name">${p.name}${p.isMe ? ' (you)' : ''}</span>`;
+    html += `<span class="entry-points">#${p.rank} · ${p.points}pts</span>`;
+    html += `</div>`;
+  });
+  html += `</div></div>`;
+  
+  // Team 2 pickers
+  html += `<div class="sheet-section">`;
+  html += `<div class="sheet-section-title">${game.team2.name} — ${t2Count} pick${t2Count !== 1 ? 's' : ''} (${t2Value} pts)</div>`;
+  html += `<div class="picks-list">`;
+  if (picks.team2.length === 0) {
+    html += `<div style="padding:8px;color:var(--muted);font-size:var(--fs-sm)">No one picked ${game.team2.name}</div>`;
+  }
+  picks.team2.sort((a,b) => a.rank - b.rank).forEach(p => {
+    html += `<div class="pick-entry ${p.isMe ? 'is-me' : ''}">`;
+    html += `<span class="entry-name">${p.name}${p.isMe ? ' (you)' : ''}</span>`;
+    html += `<span class="entry-points">#${p.rank} · ${p.points}pts</span>`;
+    html += `</div>`;
+  });
+  html += `</div></div>`;
+  
+  // Eliminated pickers (picked a team that was already knocked out)
+  if (elimCount > 0) {
+    html += `<div class="sheet-section">`;
+    html += `<div class="sheet-section-title" style="color:var(--muted)">✖ Eliminated — ${elimCount} entr${elimCount !== 1 ? 'ies' : 'y'}</div>`;
+    html += `<div style="font-size:var(--fs-2xs);color:var(--muted);margin-bottom:6px;padding:0 4px">These entries picked a team that was already knocked out in a prior round</div>`;
+    html += `<div class="picks-list">`;
+    picks.eliminated.sort((a,b) => a.rank - b.rank).forEach(p => {
+      html += `<div class="pick-entry ${p.isMe ? 'is-me' : ''}" style="opacity:0.6">`;
+      html += `<span class="entry-name">${p.name}${p.isMe ? ' (you)' : ''} <span style="font-size:var(--fs-2xs);color:var(--red)">picked ${p.pickedTeam}</span></span>`;
+      html += `<span class="entry-points">#${p.rank} · ${p.points}pts</span>`;
+      html += `</div>`;
+    });
+    html += `</div></div>`;
+  }
+  
+  // Leverage info
+  if (totalPicks > 0 && (t1Count + t2Count) > 0) {
+    const activePicks = t1Count + t2Count;
+    const leverage = Math.round((activePicks / totalPicks) * 100);
+    const swing = Math.abs(t1Count - t2Count);
+    
+    html += `<div class="sheet-section">`;
+    html += `<div class="sheet-section-title">⚡ Impact</div>`;
+    html += `<div style="display:flex;gap:12px;flex-wrap:wrap">`;
+    html += `<div style="flex:1;background:var(--surface2);padding:12px;border-radius:var(--radius);text-align:center">`;
+    html += `<div style="font-family:'DM Mono',monospace;font-size:var(--fs-2xl);font-weight:700;color:${leverage >= 80 ? 'var(--orange)' : 'var(--text)'}">${leverage}%</div>`;
+    html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">pool affected</div>`;
+    html += `</div>`;
+    html += `<div style="flex:1;background:var(--surface2);padding:12px;border-radius:var(--radius);text-align:center">`;
+    html += `<div style="font-family:'DM Mono',monospace;font-size:var(--fs-2xl);font-weight:700">${swing}</div>`;
+    html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">pick differential</div>`;
+    html += `</div>`;
+    html += `</div></div>`;
+  }
+  
+  document.getElementById('sheet-content').innerHTML = html;
+  document.getElementById('sheet-overlay').classList.add('open');
+  document.getElementById('sheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSheet() {
+  document.getElementById('sheet-overlay').classList.remove('open');
+  document.getElementById('sheet').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PLAYER SHEET
+// ═══════════════════════════════════════════════════════════════════════════
+function openPlayerSheet(name) {
+  const standing = state.standings.find(s => s.name === name);
+  const entry = state.picks?.entries?.find(e => e.name.trim() === name.trim());
+  if (!standing || !entry) return;
+
+  const ordinal = s => s === 1 ? 'st' : s === 2 ? 'nd' : s === 3 ? 'rd' : 'th';
+
+  // Helper: get team name from cbsTeamId via CBS→ESPN map + game data
+  function teamName(cbsTeamId) {
+    // Try picks teamMap first (has champion team names)
+    const fromPicks = state.picks.teamMap[cbsTeamId];
+    if (fromPicks?.abbrev || fromPicks?.mediumName) return fromPicks.abbrev || fromPicks.mediumName;
+    // Fall back to ESPN game data
+    const espnId = CBS_ESPN_MAP[String(cbsTeamId)];
+    if (espnId) {
+      for (const g of state.games) {
+        if (g.team1.id === espnId) return g.team1.abbreviation || g.team1.name || espnId;
+        if (g.team2.id === espnId) return g.team2.abbreviation || g.team2.name || espnId;
+      }
+    }
+    return `#${cbsTeamId}`;
+  }
+  function teamSeed(cbsTeamId) {
+    return CBS_SEED[String(cbsTeamId)] || null;
+  }
+
+  // Header
+  let html = `<div class="sheet-header">`;
+  html += `<div style="display:flex;align-items:center;justify-content:space-between">`;
+  html += `<div>`;
+  html += `<div style="font-size:var(--fs-xl);font-weight:600">${name}</div>`;
+  html += `<div style="font-size:var(--fs-sm);color:var(--muted);margin-top:2px">${standing.rank}<sup>${ordinal(standing.rank)}</sup> · ${standing.points} pts · max ${standing.maxPts}</div>`;
+  html += `</div>`;
+  html += `<div style="text-align:right">`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted);margin-bottom:4px">Champion</div>`;
+  html += `<div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">`;
+  if (standing.champLogo) {
+    html += `<img src="${standing.champLogo}" style="width:24px;height:24px;object-fit:contain;border-radius:3px;${standing.champAlive ? '' : 'opacity:0.35;filter:grayscale(1)'}" onerror="this.style.display='none'">`;
+  }
+  html += `<span style="font-size:var(--fs-base);font-weight:500;color:${standing.champAlive ? 'var(--text)' : 'var(--muted)'}">${standing.champTeam}</span>`;
+  html += `</div>`;
+  html += `</div></div></div>`;
+
+  // Group scored picks by round, show future rounds only (pending/alive)
+  const { scored } = standing;
+  const roundNames = CONFIG.scoring;
+
+  // Group by round
+  const byRound = {};
+  scored.forEach(pick => {
+    const r = CONFIG.cbsRoundMap[pick.tournamentRound];
+    if (!r) return;
+    if (!byRound[r]) byRound[r] = [];
+    byRound[r].push(pick);
+  });
+
+  const rounds = Object.keys(byRound).map(Number).sort((a, b) => a - b);
+
+  rounds.forEach(r => {
+    const picks = byRound[r];
+    const roundCfg = roundNames[r];
+    if (!roundCfg) return;
+
+    html += `<div class="sheet-section">`;
+    html += `<div class="sheet-section-title">${roundCfg.name} <span style="color:var(--muted);font-size:var(--fs-2xs);font-weight:400">· ${roundCfg.mult}× seed</span></div>`;
+    html += `<div style="display:flex;flex-direction:column;gap:6px">`;
+
+    picks.forEach(pick => {
+      const name = teamName(pick.cbsTeamId);
+      const seed = teamSeed(pick.cbsTeamId);
+      const seedStr = seed ? `(${seed})` : '';
+      const pts = pick.pickValue;
+
+      let statusColor, statusIcon, statusLabel;
+      if (pick.correct === true) {
+        statusColor = 'var(--green)'; statusIcon = '✓'; statusLabel = `+${pick.pts} pts`;
+      } else if (pick.correct === false || pick.eliminated) {
+        statusColor = 'var(--red)'; statusIcon = '✗'; statusLabel = 'eliminated';
+      } else if (pick.pending) {
+        statusColor = 'var(--text2)'; statusIcon = '○'; statusLabel = `${pts} pts`;
+      } else {
+        statusColor = 'var(--muted)'; statusIcon = '–'; statusLabel = 'TBD';
+      }
+
+      // Live game score if in progress
+      let liveInfo = '';
+      if (pick.game && pick.game.state === 'live') {
+        const g = pick.game;
+        const espnId = CBS_ESPN_MAP[String(pick.cbsTeamId)];
+        const isT1 = g.team1.id === espnId;
+        const myScore = isT1 ? g.team1.score : g.team2.score;
+        const oppScore = isT1 ? g.team2.score : g.team1.score;
+        liveInfo = `<span style="color:var(--orange);font-size:var(--fs-2xs);margin-left:6px">LIVE ${myScore}-${oppScore}</span>`;
+      }
+
+      const pickLogo = getTeamLogoForCbs(pick.cbsTeamId);
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface2);border-radius:var(--radius)">`;
+      html += `<div style="display:flex;align-items:center;gap:6px">`;
+      html += `<span style="font-size:var(--fs-2xs);color:var(--muted);width:18px;text-align:center">${seedStr}</span>`;
+      if (pickLogo) html += `<img src="${pickLogo}" style="width:18px;height:18px;object-fit:contain;border-radius:2px;opacity:${pick.correct === false || pick.eliminated ? '0.35' : '1'};${pick.correct === false || pick.eliminated ? 'filter:grayscale(1)' : ''}" onerror="this.style.display='none'">`;
+      html += `<span style="font-size:var(--fs-md);font-weight:500;color:${statusColor}">${name}</span>`;
+      html += liveInfo;
+      html += `</div>`;
+      html += `<div style="display:flex;align-items:center;gap:4px">`;
+      if (statusIcon) html += `<span style="color:${statusColor};font-size:var(--fs-base)">${statusIcon}</span>`;
+      html += `<span style="font-family:'DM Mono',monospace;font-size:var(--fs-base);color:${statusColor}">${statusLabel}</span>`;
+      html += `</div></div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  document.getElementById('sheet-content').innerHTML = html;
+  document.getElementById('sheet-overlay').classList.add('open');
+  document.getElementById('sheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER — STANDINGS TAB
+// ═══════════════════════════════════════════════════════════════════════════
+function renderStandings() {
+  const container = document.getElementById('tab-standings');
+  
+  if (!state.standings.length) {
+    container.innerHTML = `<div class="loading"><div class="spinner"></div><span>Loading standings...</span></div>`;
+    return;
+  }
+  
+  let html = '';
+  
+  // My rank card — or setup prompt if no name selected
+  const me = state.standings.find(s => s.isMe);
+  if (!me) {
+    html += `<div class="setup-banner" onclick="switchTab('settings')">
+      <span style="font-size:var(--fs-5xl)">👤</span>
+      <div class="setup-banner-body">
+        <div class="setup-banner-title">Select your name to get started</div>
+        <div class="setup-banner-sub">Tap here → Settings → choose your name to track your picks and see Road to Victory</div>
+      </div>
+      <span class="setup-banner-chevron">›</span>
+    </div>`;
+  }
+  if (me) {
+    const ordinal = me.rank === 1 ? 'st' : me.rank === 2 ? 'nd' : me.rank === 3 ? 'rd' : 'th';
+    html += `<div class="my-rank-card">`;
+    html += `<div class="my-rank-top">`;
+    html += `<div class="my-rank-pos">${me.rank}<span>${ordinal}</span></div>`;
+    html += `<div style="text-align:right">`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:4px">Champion</div>`;
+    html += `<div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">`;
+    if (me.champLogo) html += `<img src="${me.champLogo}" style="width:24px;height:24px;object-fit:contain;border-radius:3px;${me.champAlive ? '' : 'opacity:0.35;filter:grayscale(1)'}" onerror="this.style.display='none'">`;
+    html += `<span style="font-size:var(--fs-base);font-weight:500;color:${me.champAlive ? 'var(--text)' : 'var(--muted)'}">${me.champTeam}</span>`;
+    html += `</div>`;
+    html += `</div></div>`;
+    html += `<div class="my-rank-stats">`;
+    html += `<div class="my-stat"><div class="my-stat-value">${me.points}</div><div class="my-stat-label">Points</div></div>`;
+    html += `<div class="my-stat"><div class="my-stat-value">${me.correct}</div><div class="my-stat-label">Correct</div></div>`;
+    html += `<div class="my-stat"><div class="my-stat-value">${me.maxPts}</div><div class="my-stat-label">Possible</div></div>`;
+    html += `</div></div>`;
+  }
+  
+  // Standings list
+  html += `<div class="standings-list">`;
+  const leaderPts = state.standings[0]?.points || 0;
+  let eliminatedDividerAdded = false;
+  state.standings.forEach(s => {
+    const prevRank = getPreviousRank(s.name);
+    let movement = '';
+    if (prevRank !== null) {
+      const diff = prevRank - s.rank;
+      if (diff > 0) movement = `<span class="movement-up">▲${diff}</span>`;
+      else if (diff < 0) movement = `<span class="movement-down">▼${Math.abs(diff)}</span>`;
+    }
+    
+    if (!eliminatedDividerAdded && leaderPts > 0 && s.maxPts < leaderPts) {
+      eliminatedDividerAdded = true;
+      html += `<div style="font-size:var(--fs-2xs);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:12px 4px 6px">Out of contention</div>`;
+    }
+    html += `<div class="standing-row ${s.isMe ? 'is-me' : ''}" onclick="openPlayerSheet('${s.name.replace(/'/g, "\\'")}')">`;
+    html += `<div class="standing-rank-col"><span class="standing-rank">${s.rank}</span><span class="standing-movement">${movement}</span></div>`;
+    html += `<div class="standing-info">`;
+    html += `<div class="standing-name">${s.name}</div>`;
+    const champImg = s.champLogo
+      ? `<img src="${s.champLogo}" style="width:16px;height:16px;object-fit:contain;border-radius:2px;vertical-align:middle;${s.champAlive ? '' : 'opacity:0.3;filter:grayscale(1)'}" onerror="this.style.display='none'">`
+      : `<span style="color:${s.champAlive ? 'var(--text2)' : 'var(--muted)'}">${s.champTeam}</span>`;
+    html += `<div class="standing-detail">${s.correct} correct · ${champImg}</div>`;
+    html += `</div>`;
+    html += `<div class="standing-pts-col"><span class="standing-pts">${s.points}</span><span class="standing-max">max ${s.maxPts}</span></div>`;
+    html += `<span class="standing-chevron">›</span>`;
+    html += `</div>`;
+  });
+  html += `</div>`;
+  
+  container.innerHTML = html;
+}
+
+function getPreviousRank(name) {
+  if (!state.rankHistory.length) return null;
+  const last = state.rankHistory[state.rankHistory.length - 1];
+  const entry = last?.rankings?.find(r => r.name === name);
+  return entry?.rank || null;
+}
+
+function saveRankSnapshot() {
+  if (!state.standings.length) return;
+  
+  const snapshot = {
+    timestamp: new Date().toISOString(),
+    rankings: state.standings.map(s => ({ name: s.name, rank: s.rank, points: s.points })),
+  };
+  
+  // Don't save duplicate snapshots
+  const last = state.rankHistory[state.rankHistory.length - 1];
+  if (last) {
+    const sameRankings = last.rankings.every((r, i) => 
+      snapshot.rankings[i] && r.name === snapshot.rankings[i].name && r.points === snapshot.rankings[i].points
+    );
+    if (sameRankings) return;
+  }
+  
+  state.rankHistory.push(snapshot);
+  // Keep last 100 snapshots
+  if (state.rankHistory.length > 100) state.rankHistory = state.rankHistory.slice(-100);
+  localStorage.setItem('ms_rankHistory', JSON.stringify(state.rankHistory));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER — ANALYTICS TAB
+// ═══════════════════════════════════════════════════════════════════════════
+function renderAnalytics() {
+  const container = document.getElementById('tab-analytics');
+  
+  if (!state.picks?.entries?.length || !state.games.length) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📊</div><p>Loading data…</p></div>`;
+    return;
+  }
+  
+  let html = '';
+  
+  // 1. Road to Victory
+  html += renderRoadToVictory();
+  
+  // 2. Champion Analysis
+  html += renderChampionAnalysis();
+  
+  // 3. Game Leverage
+  html += renderLeverage();
+  
+  container.innerHTML = html;
+}
+
+function setRtvTarget(name) {
+  state.rtvTarget = name;
+  renderAnalytics();
+  // Scroll the active pill into view after render
+  requestAnimationFrame(() => {
+    const active = document.querySelector('.rtv-target-btn.active');
+    if (active) active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  });
+}
+
+function renderRoadToVictory() {
+  if (!CONFIG.myName) {
+    return `<div class="analytics-section">
+      <div class="analytics-title"><span class="icon">🏁</span> Road to Victory</div>
+      <div class="setup-banner" onclick="switchTab('settings')" style="margin-bottom:0;margin-top:4px">
+        <span style="font-size:var(--fs-3xl)">👤</span>
+        <div class="setup-banner-body">
+          <div class="setup-banner-title">Select your name first</div>
+          <div class="setup-banner-sub">Tap here to go to Settings and pick your name</div>
+        </div>
+        <span class="setup-banner-chevron">›</span>
+      </div>
+    </div>`;
+  }
+
+  const standings = state.standings;
+  if (!standings.length) return '';
+
+  const myStanding = standings.find(s => s.isMe);
+  if (!myStanding) {
+    return `<div class="analytics-section">
+      <div class="analytics-title"><span class="icon">🏁</span> Road to Victory</div>
+      <div class="setup-banner" onclick="switchTab('settings')" style="margin-bottom:0;margin-top:4px">
+        <span style="font-size:var(--fs-3xl)">⚠️</span>
+        <div class="setup-banner-body">
+          <div class="setup-banner-title">Name not found in pool</div>
+          <div class="setup-banner-sub">Tap here to update your name in Settings</div>
+        </div>
+        <span class="setup-banner-chevron">›</span>
+      </div>
+    </div>`;
+  }
+
+  const myEntry = state.picks.entries.find(e => e.name.trim().toLowerCase() === CONFIG.myName.trim().toLowerCase());
+  if (!myEntry) return '';
+
+  // Resolve comparison target — default to #1, skip self
+  const others = standings.filter(s => !s.isMe);
+  const defaultTarget = others[0];
+  const targetStanding = (state.rtvTarget && state.rtvTarget !== myStanding.name)
+    ? standings.find(s => s.name === state.rtvTarget) || defaultTarget
+    : defaultTarget;
+
+  const isWinning = myStanding.rank === 1 && !state.rtvTarget;
+  const leader = targetStanding;
+  const leaderEntry = leader ? state.picks.entries.find(e => e.name === leader.name) : null;
+
+  // Build a map of espnId → true for each player's alive pending picks
+  function getPendingPickMap(entry) {
+    const map = {};
+    entry.picks.forEach(pick => {
+      const result = scorePick(pick);
+      if (!result.pending || result.eliminated) return;
+      const espnId = CBS_ESPN_MAP[String(pick.cbsTeamId)];
+      if (!espnId) return;
+      map[espnId] = true;
+    });
+    return map;
+  }
+
+  if (!leader) return '';
+
+  const myPickMap = getPendingPickMap(myEntry);
+  const leaderPickMap = leaderEntry ? getPendingPickMap(leaderEntry) : {};
+
+  // Analyze each pending game in the active round (lowest round with non-final games)
+  const allPending = state.games.filter(g => g.state !== 'final' && g.team1.id && g.team2.id);
+  const activeRound = allPending.length ? Math.min(...allPending.map(g => g.roundNum)) : null;
+  const activeRoundName = activeRound ? (CONFIG.scoring[activeRound]?.name || `Round ${activeRound}`) : null;
+  const pendingGames = allPending.filter(g => g.roundNum === activeRound);
+  const gameAnalysis = [];
+
+  for (const game of pendingGames) {
+    const myEspnId   = [game.team1.id, game.team2.id].find(id => myPickMap[id]);
+    const ldrEspnId  = [game.team1.id, game.team2.id].find(id => leaderPickMap[id]);
+
+    if (!myEspnId && !ldrEspnId) continue; // Neither has a stake — skip
+
+    const myTeam  = myEspnId  ? (game.team1.id === myEspnId  ? game.team1 : game.team2) : null;
+    const ldrTeam = ldrEspnId ? (game.team1.id === ldrEspnId ? game.team1 : game.team2) : null;
+    const roundMult = CONFIG.scoring[game.roundNum]?.mult || 1;
+    const myPts  = myTeam  ? roundMult * (myTeam.seed  || 1) : 0;
+    const ldrPts = ldrTeam ? roundMult * (ldrTeam.seed || 1) : 0;
+
+    let category;
+    if (myEspnId && ldrEspnId) {
+      category = myEspnId === ldrEspnId ? 'shared' : 'split';
+    } else if (myEspnId) {
+      category = 'mine';
+    } else {
+      category = 'theirs';
+    }
+
+    gameAnalysis.push({
+      game, category,
+      myTeam:  myTeam  ? (myTeam.abbreviation  || myTeam.name  || '?') : null,
+      myLogo:  myTeam?.logo || null,
+      ldrTeam: ldrTeam ? (ldrTeam.abbreviation || ldrTeam.name || '?') : null,
+      ldrLogo: ldrTeam?.logo || null,
+      myPts, ldrPts,
+      roundName: CONFIG.scoring[game.roundNum]?.name || `Round ${game.roundNum}`,
+    });
+  }
+
+  gameAnalysis.sort((a, b) => a.game.roundNum - b.game.roundNum);
+
+  const gapNow = leader.points - myStanding.points; // negative means I'm ahead
+  const iAhead = gapNow < 0;
+
+  // Best-case swing (catching up): points I can gain on them if all my picks win and their exclusive picks lose.
+  const bestSwing = gameAnalysis.reduce((s, g) =>
+    (g.category === 'mine' || g.category === 'split') ? s + g.myPts : s, 0);
+  const canWin = iAhead || bestSwing >= gapNow;
+
+  // Their best-case swing (catching me): points they can gain on me — danger when I'm ahead.
+  const theirBestSwing = gameAnalysis.reduce((s, g) =>
+    (g.category === 'theirs' || g.category === 'split') ? s + g.ldrPts : s, 0);
+  const theyCatch = !iAhead || theirBestSwing >= Math.abs(gapNow);
+
+  const leaderFirst = leader.name.split(' ')[0];
+
+  let html = `<div class="analytics-section">`;
+  html += `<div class="analytics-title"><span class="icon">🏁</span> Road to Victory`;
+  if (activeRoundName) html += `<span style="font-size:var(--fs-xs);font-weight:400;color:var(--muted);margin-left:8px">${activeRoundName}</span>`;
+  html += `</div>`;
+
+  // Compare-against selector
+  html += `<div class="rtv-selector-wrap"><div class="rtv-selector">`;
+  others.forEach(s => {
+    const isActive = s.name === leader.name;
+    html += `<button class="rtv-target-btn${isActive ? ' active' : ''}" onclick="setRtvTarget('${s.name.replace(/'/g, "\\'")}')">`;
+    html += `<span class="rtv-target-rank">#${s.rank}</span> ${s.name.split(' ')[0]}`;
+    html += `</button>`;
+  });
+  html += `</div></div>`;
+
+  // Status card
+  if (iAhead) {
+    const leadBy = Math.abs(gapNow);
+    html += `<div class="rtv-status-card">`;
+    html += `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">`;
+    html += `<div>`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:2px">Your lead over ${leaderFirst} (#${leader.rank})</div>`;
+    html += `<div style="font-size:var(--fs-4xl);font-weight:700;line-height:1;color:var(--green)">+${leadBy} pts</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:4px">You: ${myStanding.points} · ${leaderFirst}: ${leader.points}</div>`;
+    html += `</div>`;
+    html += `<div style="text-align:right">`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:2px">Their best-case swing</div>`;
+    html += `<div style="font-size:var(--fs-4xl);font-weight:700;line-height:1;color:${theyCatch ? 'var(--orange)' : 'var(--green)'}">+${theirBestSwing}</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:${theyCatch ? 'var(--orange)' : 'var(--green)'};margin-top:4px">${theyCatch ? '⚠ They can catch you' : '✓ Safe lead'}</div>`;
+    html += `</div>`;
+    html += `</div>`;
+    html += `</div>`;
+  } else {
+    html += `<div class="rtv-status-card">`;
+    html += `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">`;
+    html += `<div>`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:2px">Gap to ${leaderFirst} (#${leader.rank})</div>`;
+    html += `<div style="font-size:var(--fs-4xl);font-weight:700;line-height:1">-${gapNow} pts</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:4px">You: ${myStanding.points} · ${leaderFirst}: ${leader.points}</div>`;
+    html += `</div>`;
+    html += `<div style="text-align:right">`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:2px">Best-case swing</div>`;
+    html += `<div style="font-size:var(--fs-4xl);font-weight:700;line-height:1;color:${canWin ? 'var(--green)' : 'var(--red)'}">${bestSwing >= 0 ? '+' : ''}${bestSwing}</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:${canWin ? 'var(--green)' : 'var(--red)'};margin-top:4px">${canWin ? '✓ Can catch up' : '✗ Can\'t catch up'}</div>`;
+    html += `</div>`;
+    html += `</div>`;
+    html += `</div>`;
+  }
+
+  if (gameAnalysis.length === 0) {
+    html += `<div style="color:var(--muted);font-size:var(--fs-sm);text-align:center;padding:16px 0">No pending picks to analyze.</div>`;
+    html += `</div>`;
+    return html;
+  }
+
+  // Summary pills
+  const counts = { mine: 0, theirs: 0, split: 0, shared: 0 };
+  gameAnalysis.forEach(g => counts[g.category]++);
+  html += `<div class="rtv-pills">`;
+  if (counts.mine)   html += `<span class="rtv-pill rtv-mine">${iAhead ? '🟢' : '🟢'} ${counts.mine} ${iAhead ? 'extends lead' : 'only yours'}</span>`;
+  if (counts.theirs) html += `<span class="rtv-pill ${iAhead ? 'rtv-danger' : 'rtv-theirs'}">${iAhead ? '⚠️' : '🔴'} ${counts.theirs} ${iAhead ? 'danger' : 'only theirs'}</span>`;
+  if (counts.split)  html += `<span class="rtv-pill rtv-split">⚡ ${counts.split} split</span>`;
+  if (counts.shared) html += `<span class="rtv-pill rtv-shared">⚪ ${counts.shared} shared</span>`;
+  html += `</div>`;
+
+  // Games grouped by category — labels flip based on whether I'm ahead or behind
+  const groups = [
+    { key: 'mine',   label: iAhead ? 'Extends Your Lead'  : 'Your Advantage',  color: 'var(--green)', border: 'rgba(61,220,132,0.25)',  bg: 'rgba(61,220,132,0.04)' },
+    { key: 'theirs', label: iAhead ? 'Danger — Closes Gap' : 'Their Advantage', color: iAhead ? 'var(--orange)' : 'var(--red)', border: iAhead ? 'rgba(255,170,0,0.25)' : 'rgba(255,95,87,0.25)', bg: iAhead ? 'rgba(255,170,0,0.04)' : 'rgba(255,95,87,0.04)' },
+    { key: 'split',  label: 'Split Picks',                                       color: 'var(--blue)',  border: 'rgba(91,156,246,0.25)',  bg: 'rgba(91,156,246,0.04)' },
+    { key: 'shared', label: 'Shared Picks',                                      color: 'var(--muted2)', border: 'var(--border)',         bg: 'transparent' },
+  ];
+
+  groups.forEach(({ key, label, color, border, bg }) => {
+    const games = gameAnalysis.filter(g => g.category === key);
+    if (!games.length) return;
+
+    html += `<div style="margin-bottom:12px">`;
+    html += `<div style="font-size:var(--fs-2xs);font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">${label}</div>`;
+
+    games.forEach(({ game, myTeam, myLogo, ldrTeam, ldrLogo, myPts, ldrPts, roundName, category }) => {
+      const rtv1Logo = game.team1.logo ? `<img src="${game.team1.logo}" style="width:13px;height:13px;object-fit:contain;border-radius:2px;vertical-align:middle;margin-right:2px" onerror="this.style.display='none'">` : '';
+      const rtv2Logo = game.team2.logo ? `<img src="${game.team2.logo}" style="width:13px;height:13px;object-fit:contain;border-radius:2px;vertical-align:middle;margin-right:2px" onerror="this.style.display='none'">` : '';
+      const myLogoHtml = myLogo ? `<img src="${myLogo}" style="width:11px;height:11px;object-fit:contain;border-radius:2px;vertical-align:middle;margin-right:2px" onerror="this.style.display='none'">` : '';
+      const ldrLogoHtml = ldrLogo ? `<img src="${ldrLogo}" style="width:11px;height:11px;object-fit:contain;border-radius:2px;vertical-align:middle;margin-right:2px" onerror="this.style.display='none'">` : '';
+      html += `<div class="rtv-game-row" style="border-color:${border};background:${bg}" onclick="openGameSheet('${game.id}')">`;
+      html += `<div class="rtv-game-matchup">`;
+      html += `<div style="font-size:var(--fs-base);font-weight:500">${rtv1Logo}${game.team1.abbreviation || '?'} vs ${rtv2Logo}${game.team2.abbreviation || '?'}</div>`;
+      const rtvRegion = game.region || roundName;
+      const rtvDay = game.state === 'scheduled' ? game.dateLabel + ' · ' : '';
+      html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:1px">${rtvRegion} · ${rtvDay}${game.statusDetail || ''}</div>`;
+      html += `</div>`;
+      html += `<div class="rtv-game-pts">`;
+      if (category === 'mine') {
+        html += `<span style="color:var(--green);font-weight:600;font-size:var(--fs-base)">+${myPts} pts</span>`;
+        html += `<span style="color:var(--muted);font-size:var(--fs-2xs)">if ${myTeam} wins</span>`;
+      } else if (category === 'theirs') {
+        html += `<span style="color:var(--red);font-weight:600;font-size:var(--fs-base)">+${ldrPts} pts</span>`;
+        html += `<span style="color:var(--muted);font-size:var(--fs-2xs)">if ${ldrTeam} wins</span>`;
+      } else if (category === 'split') {
+        html += `<span style="color:var(--blue);font-size:var(--fs-sm);font-weight:500">You: ${myLogoHtml}${myTeam} +${myPts}</span>`;
+        html += `<span style="color:var(--muted);font-size:var(--fs-xs)">Them: ${ldrLogoHtml}${ldrTeam} +${ldrPts}</span>`;
+      } else {
+        html += `<span style="color:var(--muted2);font-size:var(--fs-sm)">Both +${myPts}</span>`;
+        html += `<span style="color:var(--muted);font-size:var(--fs-2xs)">${myLogoHtml}${myTeam}</span>`;
+      }
+      html += `</div>`;
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+  return html;
+}
+
+function renderChampionAnalysis() {
+  const entries = state.picks.entries;
+  const teamMap = state.picks.teamMap;
+  
+  const champCounts = {};
+  entries.forEach(entry => {
+    const cid = entry.championCbsTeamId;
+    if (!cid) return;
+    if (!champCounts[cid]) champCounts[cid] = { count: 0, alive: 0, eliminated: 0, names: [] };
+    champCounts[cid].count++;
+    champCounts[cid].names.push(entry.name);
+    if (isTeamEliminated(cid)) champCounts[cid].eliminated++;
+    else champCounts[cid].alive++;
+  });
+  
+  const champData = Object.entries(champCounts)
+    .map(([cid, data]) => {
+      const team = teamMap[cid];
+      return { cbsId: cid, team: team?.mediumName || team?.abbrev || '?', logo: getTeamLogoForCbs(cid), ...data };
+    })
+    .sort((a, b) => b.count - a.count);
+  
+  let html = `<div class="analytics-section">`;
+  html += `<div class="analytics-title"><span class="icon">🏆</span> Champion Pick Analysis</div>`;
+  
+  // Summary
+  const totalAlive = champData.reduce((s, c) => s + c.alive, 0);
+  const totalElim = champData.reduce((s, c) => s + c.eliminated, 0);
+  html += `<div style="display:flex;gap:8px;margin-bottom:12px">`;
+  html += `<div style="flex:1;background:var(--surface2);padding:10px;border-radius:var(--radius);text-align:center">`;
+  html += `<div style="font-size:var(--fs-xl);font-weight:700;color:var(--accent)">${champData.length}</div>`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">Different Picks</div></div>`;
+  html += `<div style="flex:1;background:var(--surface2);padding:10px;border-radius:var(--radius);text-align:center">`;
+  html += `<div style="font-size:var(--fs-xl);font-weight:700;color:var(--green)">${totalAlive}</div>`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">Still Alive</div></div>`;
+  html += `<div style="flex:1;background:var(--surface2);padding:10px;border-radius:var(--radius);text-align:center">`;
+  html += `<div style="font-size:var(--fs-xl);font-weight:700;color:var(--red)">${totalElim}</div>`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">Eliminated</div></div>`;
+  html += `</div>`;
+  
+  // Cards
+  html += `<div class="champ-grid">`;
+  champData.forEach(c => {
+    const alive = c.alive > 0;
+    const pct = Math.round((c.count / entries.length) * 100);
+    html += `<div class="champ-card">`;
+    if (c.logo) {
+      html += `<img src="${c.logo}" style="width:18px;height:18px;object-fit:contain;border-radius:2px;${alive ? '' : 'opacity:0.3;filter:grayscale(1)'}" onerror="this.style.display='none'">`;
+    } else {
+      html += `<span class="${alive ? 'champ-alive' : 'champ-eliminated'}" style="font-size:var(--fs-sm)">${alive ? '●' : '○'}</span>`;
+    }
+    html += `<span class="champ-team ${alive ? '' : 'champ-eliminated'}">${c.team}</span>`;
+    html += `<div class="champ-bar"><div class="champ-bar-fill" style="width:${pct}%;background:${alive ? 'var(--green)' : 'var(--red)'}"></div></div>`;
+    html += `<span class="champ-count">${c.count} (${pct}%)</span>`;
+    html += `</div>`;
+  });
+  html += `</div>`;
+  
+  // Names per champion
+  champData.forEach(c => {
+    const champNameLogo = c.logo ? `<img src="${c.logo}" style="width:12px;height:12px;object-fit:contain;border-radius:2px;vertical-align:middle;margin-right:3px" onerror="this.style.display='none'">` : '';
+    html += `<div style="margin-top:8px;font-size:var(--fs-xs);color:var(--muted)">${champNameLogo}<strong style="color:var(--muted2)">${c.team}:</strong> ${c.names.join(', ')}</div>`;
+  });
+  
+  html += `</div>`;
+  return html;
+}
+
+function renderLeverage() {
+  const activeGames = state.games.filter(g => 
+    g.state !== 'final' && g.team1.id && g.team2.id
+  ).slice(0, 12);
+  
+  if (!activeGames.length) return '';
+  
+  const totalEntries = state.picks?.entries?.length || 1;
+  
+  // Calculate leverage per game
+  const leverageData = activeGames.map(game => {
+    const picks = getPicksForGame(game);
+    const affected = picks.team1.length + picks.team2.length;
+    const leverage = Math.round((affected / totalEntries) * 100);
+    const mult = CONFIG.scoring[game.roundNum]?.mult || 1;
+    const t1Pts = mult * (game.team1.seed || 1);
+    const t2Pts = mult * (game.team2.seed || 1);
+    return { game, picks, leverage, affected, t1Pts, t2Pts };
+  }).sort((a, b) => b.leverage - a.leverage);
+  
+  let html = `<div class="analytics-section">`;
+  html += `<div class="analytics-title"><span class="icon">⚡</span> Game Leverage</div>`;
+  
+  leverageData.forEach(({ game, leverage, affected, t1Pts, t2Pts, picks }) => {
+    const isHigh = leverage >= 80;
+    html += `<div class="consensus-card" onclick="openGameSheet('${game.id}')">`;
+    const levRegion = game.region || game.roundName;
+    const levDay = game.state === 'scheduled' ? ` · ${game.dateLabel}` : '';
+    const lev1Logo = game.team1.logo ? `<img src="${game.team1.logo}" style="width:14px;height:14px;object-fit:contain;border-radius:2px;vertical-align:middle;margin-right:3px" onerror="this.style.display='none'">` : '';
+    const lev2Logo = game.team2.logo ? `<img src="${game.team2.logo}" style="width:14px;height:14px;object-fit:contain;border-radius:2px;vertical-align:middle;margin-right:3px" onerror="this.style.display='none'">` : '';
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">`;
+    html += `<span style="font-size:var(--fs-base);font-weight:500">${lev1Logo}${game.team1.abbreviation} vs ${lev2Logo}${game.team2.abbreviation}</span>`;
+    html += `<span class="leverage-badge ${isHigh ? 'high' : ''}" style="${!isHigh ? 'color:var(--muted2)' : ''}">${isHigh ? '🔥 ' : ''}${leverage}% affected</span>`;
+    html += `</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:4px">${levRegion}${levDay}</div>`;
+    html += `<div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--muted)">`;
+    html += `<span style="${picks.team1.length === 0 ? 'color:var(--muted);opacity:0.5' : ''}">${picks.team1.length}× ${lev1Logo}${game.team1.abbreviation} (${t1Pts}pts)</span>`;
+    html += `<span style="${picks.team2.length === 0 ? 'color:var(--muted);opacity:0.5' : ''}">${picks.team2.length}× ${lev2Logo}${game.team2.abbreviation} (${t2Pts}pts)</span>`;
+    html += `</div>`;
+    html += `</div>`;
+  });
+  
+  html += `</div>`;
+  return html;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER — SETTINGS TAB
+// ═══════════════════════════════════════════════════════════════════════════
+function renderSettings() {
+  const container = document.getElementById('tab-settings');
+  
+  const gamesLoaded = state.games.length;
+  const picksLoaded = state.picks?.entries?.length || 0;
+  const teamsMapped = Object.keys(CBS_ESPN_MAP).length;
+  const espnCovered = Object.keys(ESPN_COVERAGE).length;
+  // Count total unique CBS teams from actual picks, not just teamMap
+  const allCbsTeams = new Set();
+  if (state.picks?.entries) state.picks.entries.forEach(e => e.picks.forEach(p => allCbsTeams.add(String(p.cbsTeamId))));
+  const teamsTotal = allCbsTeams.size || (state.picks?.teamMap ? Object.keys(state.picks.teamMap).length : 0);
+  const unpickedCount = Object.values(ESPN_COVERAGE).filter(t => !t.picked).length;
+  
+  const isAdmin = false; // Demo mode — no admin access
+  let html = '';
+
+  // Status
+  html += `<div class="settings-section">`;
+  html += `<div class="settings-title">📡 Status</div>`;
+  html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">`;
+  html += `<div style="background:var(--surface2);padding:10px;border-radius:var(--radius)">`;
+  html += `<div style="font-size:var(--fs-xl);font-weight:700;color:${gamesLoaded > 0 ? 'var(--green)' : 'var(--red)'}">${gamesLoaded}</div>`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">ESPN Games</div></div>`;
+  html += `<div style="background:var(--surface2);padding:10px;border-radius:var(--radius)">`;
+  html += `<div style="font-size:var(--fs-xl);font-weight:700;color:${picksLoaded > 0 ? 'var(--green)' : 'var(--red)'}">${picksLoaded}</div>`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">Pool Entries</div></div>`;
+  html += `<div style="background:var(--surface2);padding:10px;border-radius:var(--radius)">`;
+  html += `<div style="font-size:var(--fs-xl);font-weight:700;color:${espnCovered >= 64 ? 'var(--green)' : teamsMapped > 0 ? 'var(--orange)' : 'var(--red)'}">${espnCovered}/64</div>`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">Teams Covered</div></div>`;
+  html += `<div style="background:var(--surface2);padding:10px;border-radius:var(--radius)">`;
+  const liveCount = state.games.filter(g => g.state === 'live').length;
+  html += `<div style="font-size:var(--fs-xl);font-weight:700;color:${liveCount > 0 ? 'var(--green)' : 'var(--muted)'}">${liveCount}</div>`;
+  html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">Live Now</div></div>`;
+  html += `</div></div>`;
+  
+  // Config
+  html += `<div class="settings-section">`;
+  html += `<div class="settings-title">🔧 Configuration</div>`;
+  html += `<div style="background:rgba(232,255,71,0.07);border:1px solid rgba(232,255,71,0.2);border-radius:var(--radius);padding:10px;margin-bottom:10px;font-size:var(--fs-xs);color:var(--muted)">This is a demo with anonymized picks. <strong style="color:var(--accent)">Want this for your pool?</strong> <a href="https://tysontiatia.github.io/march-madness/bracket-tracker.html" style="color:var(--accent)">Get started →</a></div>`;
+  if (isAdmin) {
+    html += `<div class="setting-row">`;
+    html += `<div class="setting-label">Master Key</div>`;
+    html += `<input class="setting-input" id="cfg-bin-key" type="password" value="${CONFIG.jsonbinKey}" placeholder="JSONBin Master Key (for imports only)">`;
+    html += `<div style="font-size:var(--fs-2xs);color:var(--muted);margin-top:2px">Only needed to import/update picks. Found at jsonbin.io → Dashboard → API Keys</div>`;
+    html += `</div>`;
+  } else {
+    html += `<input type="hidden" id="cfg-bin-key" value="${CONFIG.jsonbinKey}">`;
+  }
+  const nameNotSet = !CONFIG.myName;
+  html += `<div class="setting-row" style="${nameNotSet ? 'background:rgba(232,255,71,0.05);border:1px solid rgba(232,255,71,0.25);border-radius:var(--radius);padding:10px;margin:-2px' : ''}">`;
+  html += `<div class="setting-label">Your Name${nameNotSet ? ' <span style="color:var(--accent);font-size:var(--fs-2xs)">← start here</span>' : ''}</div>`;
+  if (state.picks?.entries?.length) {
+    html += `<select class="setting-input" id="cfg-my-name">`;
+    html += `<option value="">— Select your name —</option>`;
+    state.picks.entries.forEach(e => {
+      const selected = e.name.trim().toLowerCase() === CONFIG.myName.trim().toLowerCase() ? 'selected' : '';
+      html += `<option value="${e.name}" ${selected}>${e.name}</option>`;
+    });
+    html += `</select>`;
+  } else {
+    html += `<input class="setting-input" id="cfg-my-name" value="${CONFIG.myName}" placeholder="Picks not loaded yet">`;
+  }
+  html += `</div>`;
+  html += `<button class="btn btn-primary btn-block" onclick="saveSettings()" style="margin-top:8px">Save & Reload</button>`;
+  if (isAdmin) {
+    html += `<button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="generateBookmark()">📎 Generate Bookmark URL</button>`;
+  }
+  html += `</div>`;
+
+  if (isAdmin) {
+    // Import
+    html += `<div class="settings-section">`;
+    html += `<div class="settings-title">📥 Import CBS Picks to JSONBin</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:8px">Paste CBS bracket JSON data (array of entries)</div>`;
+    html += `<textarea class="import-area" id="import-data" placeholder='[{"name":"...", "picks":[...], "championTeam":{...}}]'></textarea>`;
+    html += `<button class="btn btn-primary btn-block" style="margin-top:8px" onclick="importPicks()">Import to JSONBin</button>`;
+    html += `</div>`;
+  }
+  
+  // Team coverage details (admin only)
+  if (isAdmin && espnCovered > 0) {
+    html += `<div class="settings-section">`;
+    // Show mapping summary
+    html += `<div class="settings-title">🏀 Team Coverage (${espnCovered}/64)</div>`;
+    html += `<div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:8px">`;
+    html += `${teamsMapped}/${teamsTotal} picked teams mapped`;
+    if (unpickedCount > 0) html += ` · ${unpickedCount} teams received 0 picks`;
+    html += `</div>`;
+
+    // Show any unmapped CBS IDs that ARE in picks (should be 0 — real errors)
+    const mapped = new Set(Object.keys(CBS_ESPN_MAP));
+    let hasErrors = false;
+    allCbsTeams.forEach(cid => {
+      if (!mapped.has(cid)) {
+        hasErrors = true;
+        const team = state.picks?.teamMap?.[cid];
+        html += `<div style="font-size:var(--fs-sm);padding:6px 8px;margin:4px 0;background:var(--surface2);border-radius:var(--radius);color:var(--red)">`;
+        html += `<div>❌ <strong>${team?.abbrev || '???'}</strong> — ${team?.mediumName || team?.name || 'Unknown'} (CBS ID: ${cid})</div>`;
+        html += `<div style="font-size:var(--fs-2xs);color:var(--muted)">Picked by pool members but not mapped to ESPN — scoring affected!</div>`;
+        html += `</div>`;
+      }
+    });
+
+    // Show unpicked teams (informational, not errors)
+    if (unpickedCount > 0) {
+      html += `<details style="margin-top:8px"><summary style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer">`;
+      html += `${unpickedCount} unpicked teams (0 picks received — no scoring impact)</summary>`;
+      const sorted = Object.entries(ESPN_COVERAGE)
+        .filter(([, t]) => !t.picked)
+        .sort((a, b) => a[1].region.localeCompare(b[1].region) || a[1].seed - b[1].seed);
+      sorted.forEach(([espnId, t]) => {
+        html += `<div style="font-size:var(--fs-xs);padding:4px 8px;margin:2px 0;background:var(--surface2);border-radius:var(--radius);color:var(--muted)">`;
+        html += `(${t.seed}) ${t.abbr} — ${t.region}`;
+        html += `</div>`;
+      });
+      html += `</details>`;
+    }
+
+    if (!hasErrors && espnCovered >= 64) {
+      html += `<div style="font-size:var(--fs-sm);padding:8px;margin-top:8px;background:#1e3a2e;border-radius:var(--radius);color:var(--green)">✅ All 64 tournament teams accounted for. Scoring is fully operational.</div>`;
+    }
+    html += `</div>`;
+  }
+  
+  container.innerHTML = html;
+}
+
+function saveSettings() {
+  const binKey = document.getElementById('cfg-bin-key').value.trim();
+  const myName = document.getElementById('cfg-my-name').value.trim();
+  
+  localStorage.setItem('ms_jsonbinKey', binKey);
+  localStorage.setItem('ms_myName', myName);
+  
+  CONFIG.jsonbinKey = binKey;
+  CONFIG.myName = myName;
+  
+  showToast('✅ Settings saved');
+  fetchAll();
+}
+
+function generateBookmark() {
+  const params = new URLSearchParams();
+  if (CONFIG.jsonbinKey) params.set('key', CONFIG.jsonbinKey);
+  if (CONFIG.myName) params.set('name', CONFIG.myName);
+  
+  const url = window.location.origin + window.location.pathname + '?' + params.toString();
+  
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('📎 Bookmark URL copied!');
+    }).catch(() => {
+      prompt('Copy this URL:', url);
+    });
+  } else {
+    prompt('Copy this URL:', url);
+  }
+}
+
+async function importPicks() {
+  const data = document.getElementById('import-data').value.trim();
+  if (!data) { showToast('⚠️ Paste CBS data first'); return; }
+  if (!CONFIG.jsonbinId || !CONFIG.jsonbinKey) { showToast('⚠️ Configure JSONBin first'); return; }
+  
+  try {
+    let parsed = JSON.parse(data);
+    if (!Array.isArray(parsed)) parsed = [parsed];
+    
+    // Process into our format
+    const processed = processCBSEntries(parsed);
+    
+    // Upload to JSONBin
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.jsonbinId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': CONFIG.jsonbinKey,
+      },
+      body: JSON.stringify(processed),
+    });
+    
+    if (!res.ok) throw new Error(`JSONBin PUT failed: ${res.status}`);
+    
+    showToast(`✅ Imported ${processed.entries.length} entries`);
+    document.getElementById('import-data').value = '';
+    fetchAll();
+  } catch (err) {
+    showToast(`❌ Import failed: ${err.message}`);
+    console.error('Import error:', err);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN FETCH LOOP
+// ═══════════════════════════════════════════════════════════════════════════
+async function fetchAll() {
+  try {
+    setStatus('loading', 'updating...');
+    
+    // Fetch ESPN games, JSONBin picks, and team map in parallel
+    const [games, picks, teamMap] = await Promise.all([
+      fetchESPNGames(),
+      state.picks ? Promise.resolve(state.picks) : fetchPicks(),
+      state.teamMap ? Promise.resolve(state.teamMap) : fetchTeamMap(),
+    ]);
+    
+    state.games = games;
+    if (picks) state.picks = picks;
+    if (teamMap) state.teamMap = teamMap;
+    state.lastFetch = new Date();
+    
+    // Build team mapping from static map
+    buildTeamMapping(state.teamMap);
+    
+    // Compute standings
+    state.standings = computeStandings();
+    
+    // Save rank snapshot
+    saveRankSnapshot();
+    
+    // Update status
+    const liveGames = state.games.filter(g => g.state === 'live');
+    if (liveGames.length) {
+      setStatus('live', `${liveGames.length} game${liveGames.length > 1 ? 's' : ''} live`);
+    } else {
+      setStatus('live');
+    }
+    
+    state.fetchDone = true;
+    console.log(`✅ Loaded: ${games.length} games, ${state.picks?.entries?.length || 0} entries, ${Object.keys(CBS_ESPN_MAP).length} team mappings`);
+
+    // Re-render current tab
+    if (state.activeTab === 'games') renderGames();
+    else if (state.activeTab === 'standings') renderStandings();
+    else if (state.activeTab === 'analytics') renderAnalytics();
+    else if (state.activeTab === 'settings') renderSettings();
+    
+  } catch (err) {
+    console.error('❌ Fetch error:', err);
+    setStatus('error', err.message);
+  }
+}
+
+// Force refresh picks and team map from JSONBin
+async function refreshPicks() {
+  state.picks = null;
+  state.teamMap = null;
+  await fetchAll();
+  showToast('🔄 Picks & team map refreshed');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MOBILE SWIPE-TO-CLOSE FOR GAME SHEET
+// ═══════════════════════════════════════════════════════════════════════════
+(function enableSheetSwipeClose() {
+  const sheet = document.getElementById('sheet');
+  const handle = sheet ? sheet.querySelector('.sheet-handle') : null;
+  if (!sheet || !handle) return;
+  let startY = null, lastY = null, dragging = false;
+
+  // Only start swipe-to-close when touch begins on the handle
+  handle.addEventListener('touchstart', function(e) {
+    if (e.touches.length !== 1) return;
+    startY = lastY = e.touches[0].clientY;
+    dragging = true;
+  }, {passive: true});
+
+  handle.addEventListener('touchmove', function(e) {
+    if (!dragging || e.touches.length !== 1) return;
+    const y = e.touches[0].clientY;
+    const dy = y - startY;
+    if (dy > 0) {
+      sheet.style.transform = `translateY(${dy}px)`;
+      e.preventDefault();
+    }
+    lastY = y;
+  }, {passive: false});
+
+  handle.addEventListener('touchend', function(e) {
+    if (!dragging) return;
+    const dy = lastY - startY;
+    if (dy > 60) {
+      closeSheet();
+    } else {
+      sheet.style.transition = 'transform 0.2s';
+      sheet.style.transform = '';
+      setTimeout(() => { sheet.style.transition = ''; }, 200);
+    }
+    dragging = false;
+    startY = lastY = null;
+  });
+
+  // Reset transform on close
+  const origCloseSheet = window.closeSheet;
+  window.closeSheet = function() {
+    sheet.style.transform = '';
+    if (origCloseSheet) origCloseSheet();
+  };
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════════════════════════════
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('theme-toggle').textContent = theme === 'light' ? '🌙' : '☀️';
+}
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'light' ? 'dark' : 'light';
+  localStorage.setItem('ms_theme', next);
+  applyTheme(next);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  applyTheme(localStorage.getItem('ms_theme') || 'dark');
+  fetchAll();
+  setInterval(fetchAll, CONFIG.pollInterval * 1000);
+});
+</script>
+</body>
+</html>
