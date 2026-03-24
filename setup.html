@@ -264,29 +264,20 @@
           oninput="updateApiUrl()">
 
         <div style="margin-top:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px">
-          <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:12px">How to get your picks (ESPN requires login):</div>
-
-          <ol style="font-size:12px;color:var(--text2);line-height:1.9;padding-left:16px;margin:0 0 12px 0">
-            <li>Go to your <span id="espn-group-link-wrap">ESPN TC group page</span> — make sure you're <strong>logged in</strong></li>
-            <li>Open DevTools: <strong>F12</strong> on Windows · <strong>Cmd+Option+I</strong> on Mac</li>
-            <li>Click the <strong>Network</strong> tab, then <strong>reload the page</strong></li>
-            <li>In the filter box type <code style="background:rgba(0,0,0,0.3);padding:1px 5px;border-radius:3px">entries</code></li>
-            <li>Click the request ending in <code style="background:rgba(0,0,0,0.3);padding:1px 5px;border-radius:3px">entries?view=detail</code></li>
-            <li>Click <strong>Response</strong> → select all the text → copy</li>
+          <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px">Two quick Network tab captures (ESPN requires login):</div>
+          <ol style="font-size:12px;color:var(--text2);line-height:1.9;padding-left:16px;margin:0">
+            <li>Go to your <span id="espn-group-link-wrap">ESPN TC group page</span> while <strong>logged in</strong></li>
+            <li>Open DevTools <strong>F12</strong> → <strong>Network</strong> tab → reload page</li>
+            <li>Click the large request named after your <strong>group UUID</strong> (70–80 kB) → <strong>Response</strong> → copy all → paste in box 1</li>
+            <li>Click the <code style="background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:3px">propositions?challengeid=...</code> request (8 kB) → <strong>Response</strong> → copy all → paste in box 2</li>
           </ol>
-
-          <details>
-            <summary>Try console method instead (faster for developers)</summary>
-            <div style="margin-top:10px">
-              <div style="font-size:11px;color:var(--muted);margin-bottom:6px">While on your ESPN TC group page, open the browser console (F12 → Console) and paste this:</div>
-              <div id="console-snippet" style="background:rgba(0,0,0,0.4);border-radius:6px;padding:10px;font-family:monospace;font-size:10px;color:var(--accent);word-break:break-all;cursor:pointer;line-height:1.5" onclick="copyConsoleSnippet()" title="Click to copy">← Paste your group URL above to generate this snippet</div>
-              <div style="font-size:10px;color:var(--muted);margin-top:4px">Click to copy · Then paste in the browser console on your ESPN TC page</div>
-            </div>
-          </details>
         </div>
 
-        <label for="espn-json" style="margin-top:12px">Paste picks JSON here</label>
-        <textarea id="espn-json" placeholder="Paste the JSON from the Network tab response (or console output) here..."></textarea>
+        <label for="espn-group-json" style="margin-top:12px">1 — Group data (the large ~75 kB request)</label>
+        <textarea id="espn-group-json" placeholder='{"challengeId":277,"entries":[...],"groupSettings":{...}}'></textarea>
+
+        <label for="espn-props-json" style="margin-top:10px">2 — Propositions data (the ~8 kB request)</label>
+        <textarea id="espn-props-json" placeholder='[{"id":"c90b70e0-...","possibleOutcomes":[...],...}]'></textarea>
       </div>
 
       <!-- Manual panel -->
@@ -365,10 +356,11 @@
 
 <script>
 // ─── Config ───────────────────────────────────────────────────────────────
-const PROXY     = 'https://pooliq-proxy.tysontiatia.workers.dev';
-const POOL_URL  = 'https://tysontiatia.github.io/moneyshot-pool/bracket-tracker.html';
-const TEAM_MAP_BIN = '69bdf9b3aa77b81da903ff97';
-const CBS_ROUND_MAP = { 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7 }; // ourRound → cbsTournamentRound
+const PROXY          = 'https://pooliq-proxy.tysontiatia.workers.dev';
+const POOL_URL       = 'https://tysontiatia.github.io/moneyshot-pool/bracket-tracker.html';
+const ESPN_POOL_URL  = 'https://tysontiatia.github.io/moneyshot-pool/espn-pool.html';
+const TEAM_MAP_BIN   = '69bdf9b3aa77b81da903ff97';
+const CBS_ROUND_MAP  = { 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7 }; // ourRound → cbsTournamentRound
 
 // ─── State ────────────────────────────────────────────────────────────────
 let state = {
@@ -413,33 +405,13 @@ function updateApiUrl() {
   const match = urlInput.match(/[?&](?:groupID?|id)=([^&\s]+)/i)
              || urlInput.match(/groups?\/([^/?&\s]+)/i);
   const groupId = match ? match[1] : (urlInput.match(/^[a-zA-Z0-9_-]+$/) ? urlInput : '');
-
   const groupLinkWrap = document.getElementById('espn-group-link-wrap');
-  const snippetEl = document.getElementById('console-snippet');
-
   if (groupId) {
     const groupPageUrl = `https://fantasy.espn.com/games/tournament-challenge-bracket-2026/group?id=${groupId}`;
     groupLinkWrap.innerHTML = `<a href="${groupPageUrl}" target="_blank" style="color:var(--accent)">ESPN TC group page ↗</a>`;
-
-    const apiPath = `/apis/v3/games/tournament-challenge-bracket-2026/groups/${groupId}/entries?view=detail`;
-    snippetEl.textContent = `fetch('${apiPath}',{credentials:'include'}).then(r=>r.json()).then(d=>{copy(JSON.stringify(d));console.log('✅ Copied! Paste into BracketIQ.')}).catch(e=>console.error(e))`;
-    snippetEl.dataset.snippet = snippetEl.textContent;
   } else {
     groupLinkWrap.textContent = 'ESPN TC group page';
-    snippetEl.textContent = '← Paste your group URL above to generate this snippet';
-    snippetEl.dataset.snippet = '';
   }
-}
-
-function copyConsoleSnippet() {
-  const s = document.getElementById('console-snippet').dataset.snippet;
-  if (!s) return;
-  navigator.clipboard.writeText(s).then(() => {
-    const el = document.getElementById('console-snippet');
-    const orig = el.textContent;
-    el.textContent = '✅ Copied to clipboard!';
-    setTimeout(() => { el.textContent = orig; }, 2000);
-  }).catch(() => prompt('Copy this:', s));
 }
 
 // ─── Platform toggle ──────────────────────────────────────────────────────
@@ -537,34 +509,62 @@ async function importPicks() {
   const btn = document.getElementById('import-btn');
   const errEl = document.getElementById('import-error');
   errEl.style.display = 'none';
-
   btn.disabled = true;
   btn.innerHTML = '<span class="loader"></span>Importing...';
 
   try {
-    await loadTeamMap();
-
-    let rawData;
-
     if (state.platform === 'espn') {
-      // User pastes JSON copied from the ESPN TC API URL in their logged-in browser
-      const raw = document.getElementById('espn-json').value.trim();
-      if (!raw) throw new Error('Paste the JSON from the ESPN link above first.');
-      rawData = JSON.parse(raw);
+      // ESPN TC 2026 — two JSON pastes
+      const rawGroup = document.getElementById('espn-group-json').value.trim();
+      const rawProps = document.getElementById('espn-props-json').value.trim();
+      if (!rawGroup) throw new Error('Paste the group data (box 1) first.');
+      if (!rawProps) throw new Error('Paste the propositions data (box 2) first.');
+
+      const groupData = JSON.parse(rawGroup);
+      const propositionsData = JSON.parse(rawProps);
+
+      if (!groupData.entries || groupData.entries.length === 0) throw new Error('No entries found in group data. Make sure you copied the large (~75 kB) group request.');
+      if (!Array.isArray(propositionsData) || propositionsData.length === 0) throw new Error('Propositions data looks empty. Make sure you copied the propositions request.');
+
+      // Build outcomeId → team name lookup for review
+      const outcomeMap = {};
+      for (const prop of propositionsData) {
+        for (const o of prop.possibleOutcomes || []) {
+          outcomeMap[o.id] = o.name || o.abbrev || o.id;
+        }
+      }
+
+      // Build entries for review display
+      const entries = groupData.entries.map(e => {
+        const champId = e.finalPick?.outcomesPicked?.[0]?.outcomeId;
+        return {
+          name: e.name || e.member?.displayName || 'Unknown',
+          championName: champId ? (outcomeMap[champId] || champId) : null,
+          score: e.score?.overallScore ?? null,
+        };
+      });
+
+      // Stash raw data for createPool
+      state.espnGroupData = groupData;
+      state.espnPropositionsData = propositionsData;
+      state.entries = entries;
+      state.platform = 'espn-tc-2026';
+
+      showReview(entries);
+      goStep(3);
 
     } else {
-      // Manual paste
+      // Manual paste (CBS-style)
       const raw = document.getElementById('manual-json').value.trim();
       if (!raw) throw new Error('Paste your JSON first.');
-      rawData = JSON.parse(raw);
+      await loadTeamMap();
+      const rawData = JSON.parse(raw);
+      const entries = parseESPNTCResponse(rawData);
+      if (entries.length === 0) throw new Error('No entries found.');
+      state.entries = entries;
+      showReview(entries);
+      goStep(3);
     }
-
-    const entries = parseESPNTCResponse(rawData);
-    if (entries.length === 0) throw new Error('No entries found. Make sure the JSON is from the ESPN TC entries endpoint.');
-
-    state.entries = entries;
-    showReview(entries);
-    goStep(3);
 
   } catch (err) {
     errEl.textContent = '❌ ' + err.message;
@@ -581,21 +581,16 @@ function showReview(entries) {
   document.getElementById('entry-count').textContent = `${entries.length} entries found`;
 
   const list = document.getElementById('entry-list');
-  list.innerHTML = entries.map(e => `
-    <div class="entry-row">
+  list.innerHTML = entries.map(e => {
+    const scoreStr = e.score != null ? `<span style="font-size:11px;color:var(--green)">${e.score} pts</span>` : '';
+    const champStr = e.championName ? `🏆 ${e.championName}` : '—';
+    return `<div class="entry-row">
       <span class="entry-name">${e.name}</span>
-      <span class="entry-champ">${e.championName ? '🏆 ' + e.championName : '—'}</span>
-    </div>
-  `).join('');
+      <span class="entry-champ" style="display:flex;gap:8px;align-items:center">${scoreStr}<span style="color:var(--muted)">${champStr}</span></span>
+    </div>`;
+  }).join('');
 
-  const warnEl = document.getElementById('review-warn');
-  const unmapped = entries.filter(e => e.picks.length < 10);
-  if (unmapped.length > 0) {
-    warnEl.textContent = `⚠️ ${unmapped.length} entries have fewer picks than expected — team mapping may be incomplete. The dashboard will still work but some picks may not score correctly.`;
-    warnEl.style.display = 'block';
-  } else {
-    warnEl.style.display = 'none';
-  }
+  document.getElementById('review-warn').style.display = 'none';
 }
 
 // ─── Create pool ──────────────────────────────────────────────────────────
@@ -607,33 +602,53 @@ async function createPool() {
   try {
     const poolName = document.getElementById('pool-name').value.trim();
 
-    // Build team map subset (only teams in picks)
-    const usedCbsIds = new Set();
-    state.entries.forEach(e => {
-      e.picks.forEach(p => usedCbsIds.add(String(p.cbsTeamId)));
-      if (e.championCbsTeamId) usedCbsIds.add(String(e.championCbsTeamId));
-    });
-    const teamMap = {};
-    usedCbsIds.forEach(id => { if (state.teamMap[id]) teamMap[id] = state.teamMap[id]; });
+    let res, data;
 
-    // Strip internal-only fields before saving
-    const entries = state.entries.map(({ name, picks, championCbsTeamId }) => ({
-      name,
-      picks,
-      championCbsTeamId,
-    }));
+    if (state.platform === 'espn-tc-2026') {
+      // ESPN TC 2026 path — use /create-espn-pool
+      res = await fetch(`${PROXY}/create-espn-pool`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          poolName,
+          groupData: state.espnGroupData,
+          propositionsData: state.espnPropositionsData,
+        }),
+      });
+      data = await res.json();
+      if (!res.ok || !data.binId) throw new Error(data.error || 'Failed to create pool');
 
-    const res = await fetch(`${PROXY}/create-pool`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ poolName, entries, teamMap }),
-    });
+      const picksMsg = data.picksCount > 0
+        ? ` (auto-fetched ${data.picksCount}/${data.totalEntries} individual brackets)`
+        : ' (individual bracket picks not fetched — ESPN requires auth)';
+      console.log('Pool created' + picksMsg);
 
-    const data = await res.json();
-    if (!res.ok || !data.binId) throw new Error(data.error || 'Failed to create pool');
+      const poolURL = `${ESPN_POOL_URL}?bin=${data.binId}&poolname=${encodeURIComponent(poolName)}`;
+      showResult(poolURL);
 
-    const poolURL = `${POOL_URL}?bin=${data.binId}&poolname=${encodeURIComponent(poolName)}`;
-    showResult(poolURL);
+    } else {
+      // CBS path — use /create-pool
+      const usedCbsIds = new Set();
+      state.entries.forEach(e => {
+        e.picks.forEach(p => usedCbsIds.add(String(p.cbsTeamId)));
+        if (e.championCbsTeamId) usedCbsIds.add(String(e.championCbsTeamId));
+      });
+      const teamMap = {};
+      usedCbsIds.forEach(id => { if (state.teamMap[id]) teamMap[id] = state.teamMap[id]; });
+
+      const entries = state.entries.map(({ name, picks, championCbsTeamId }) => ({ name, picks, championCbsTeamId }));
+
+      res = await fetch(`${PROXY}/create-pool`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ poolName, entries, teamMap }),
+      });
+      data = await res.json();
+      if (!res.ok || !data.binId) throw new Error(data.error || 'Failed to create pool');
+
+      const poolURL = `${POOL_URL}?bin=${data.binId}&poolname=${encodeURIComponent(poolName)}`;
+      showResult(poolURL);
+    }
 
   } catch (err) {
     alert('❌ ' + err.message);

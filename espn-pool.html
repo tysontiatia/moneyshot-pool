@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bracket Pool</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424; --border: #2e2e2e;
+    --text: #f0f0f0; --text2: #c0c0c0; --muted: #777;
+    --accent: #e8ff47; --green: #4ade80; --red: #f87171; --orange: #fb923c;
+    --radius: 10px;
+  }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+  /* Header */
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10; }
+  .header-logo { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; }
+  .header-pool { font-size: 15px; font-weight: 600; flex: 1; }
+  .header-meta { font-size: 11px; color: var(--muted); }
+
+  /* Tabs */
+  .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 20px; overflow-x: auto; }
+  .tab { padding: 12px 16px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.15s; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab:hover:not(.active) { color: var(--text2); }
+
+  /* Content */
+  .content { max-width: 900px; margin: 0 auto; padding: 20px 16px 64px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Standings table */
+  .standings { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .standings thead th { padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .standings thead th.right { text-align: right; }
+  .standings tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.1s; }
+  .standings tbody tr:hover { background: var(--surface); }
+  .standings td { padding: 10px 12px; vertical-align: middle; }
+  .standings td.right { text-align: right; }
+  .rank { font-size: 12px; color: var(--muted); width: 32px; }
+  .rank.top3 { color: var(--accent); font-weight: 700; }
+  .entry-name { font-weight: 500; }
+  .entry-member { font-size: 11px; color: var(--muted); }
+  .score-val { font-weight: 700; font-size: 15px; }
+  .score-max { font-size: 11px; color: var(--muted); }
+  .champ-cell { display: flex; align-items: center; gap: 6px; }
+  .champ-logo { width: 20px; height: 20px; border-radius: 50%; object-fit: contain; background: var(--surface2); }
+  .badge-eliminated { font-size: 10px; background: rgba(248,113,113,0.15); border: 1px solid rgba(248,113,113,0.3); color: var(--red); border-radius: 4px; padding: 1px 5px; }
+  .badge-alive { font-size: 10px; background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.2); color: var(--green); border-radius: 4px; padding: 1px 5px; }
+
+  /* Max possible bar */
+  .bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .bar-bg { flex: 1; height: 4px; background: var(--border); border-radius: 2px; min-width: 60px; }
+  .bar-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.3s; }
+  .bar-fill.low { background: var(--orange); }
+
+  /* Round breakdown cards */
+  .round-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; font-size: 11px; }
+  .round-cell { background: var(--surface2); border-radius: 6px; padding: 6px 4px; text-align: center; }
+  .round-label { color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
+  .round-score { font-weight: 600; font-size: 13px; }
+  .round-max { color: var(--muted); font-size: 10px; }
+
+  /* Champion picks section */
+  .champ-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .champ-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+  .champ-card-logo { width: 40px; height: 40px; object-fit: contain; }
+  .champ-card-team { font-size: 13px; font-weight: 600; }
+  .champ-card-count { font-size: 11px; color: var(--muted); }
+  .champ-card-names { font-size: 10px; color: var(--muted); line-height: 1.6; }
+
+  /* Loading */
+  .loading { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .spinner { display: inline-block; width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-box { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); color: var(--red); border-radius: 8px; padding: 16px; margin: 20px 0; font-size: 13px; }
+
+  /* Section header */
+  .section-header { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; margin-top: 24px; }
+  .section-header:first-child { margin-top: 0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">BracketIQ</div>
+  <div class="header-pool" id="pool-name">Loading...</div>
+  <div class="header-meta" id="pool-meta"></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('standings')">Standings</div>
+  <div class="tab" onclick="showTab('champion')">Champion Picks</div>
+</div>
+
+<div class="content">
+  <div id="loading" class="loading">
+    <div class="spinner"></div><br>Loading pool data...
+  </div>
+  <div id="error" class="error-box" style="display:none"></div>
+
+  <div class="tab-panel active" id="panel-standings"></div>
+  <div class="tab-panel" id="panel-champion"></div>
+</div>
+
+<script>
+// ── Config ───────────────────────────────────────────────────────────────
+const JSONBIN_BASE = 'https://api.jsonbin.io/v3/b';
+const ROUND_LABELS = { '1': 'R64', '2': 'R32', '3': 'S16', '4': 'E8', '5': 'F4', '6': 'Champ' };
+
+// ── State ────────────────────────────────────────────────────────────────
+let pool = null;
+
+// ── Tab switching ────────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', t.getAttribute('onclick').includes(name)));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+}
+
+// ── Load pool ────────────────────────────────────────────────────────────
+(async function loadFromURL() {
+  const p = new URLSearchParams(location.search);
+  const binId = p.get('bin');
+  const poolNameParam = p.get('poolname');
+
+  if (!binId) {
+    showError('No pool ID in URL. Add ?bin=YOUR_BIN_ID to the URL.');
+    return;
+  }
+
+  if (poolNameParam) document.getElementById('pool-name').textContent = decodeURIComponent(poolNameParam);
+  document.title = (poolNameParam ? decodeURIComponent(poolNameParam) : 'Bracket Pool') + ' — BracketIQ';
+
+  try {
+    const res = await fetch(`${JSONBIN_BASE}/${binId}/latest`);
+    if (!res.ok) throw new Error(`Failed to load pool (${res.status})`);
+    const data = await res.json();
+    pool = data.record;
+
+    if (pool.type !== 'espn-tc-2026') {
+      showError('This URL is for a CBS-style pool. Use bracket-tracker.html instead.');
+      return;
+    }
+
+    document.getElementById('loading').style.display = 'none';
+    renderPool();
+  } catch (err) {
+    showError(err.message);
+  }
+})();
+
+// ── Render ───────────────────────────────────────────────────────────────
+function renderPool() {
+  const name = pool.groupSettings?.name || 'Bracket Pool';
+  document.getElementById('pool-name').textContent = name;
+  document.title = name + ' — BracketIQ';
+
+  const entries = pool.entries || [];
+  const outcomeMap = pool.outcomeMap || {};
+
+  // Sort by score descending, then by possiblePointsMax descending
+  const sorted = [...entries].sort((a, b) => {
+    const sa = a.score?.overallScore ?? 0, sb = b.score?.overallScore ?? 0;
+    if (sb !== sa) return sb - sa;
+    return (b.score?.possiblePointsMax ?? 0) - (a.score?.possiblePointsMax ?? 0);
+  });
+
+  const maxScore = sorted[0]?.score?.possiblePointsMax ?? 1;
+  document.getElementById('pool-meta').textContent = `${entries.length} entries`;
+
+  // ── Standings ────────────────────────────────────────────────────────
+  let rank = 0, lastScore = null, lastMax = null;
+  const rows = sorted.map((e, i) => {
+    const s = e.score || {};
+    const curScore = s.overallScore ?? 0;
+    const maxPoss = s.possiblePointsMax ?? 0;
+    if (curScore !== lastScore || maxPoss !== lastMax) { rank = i + 1; lastScore = curScore; lastMax = maxPoss; }
+
+    const champOutcome = outcomeMap[e.championOutcomeId];
+    const champCell = champOutcome
+      ? `<div class="champ-cell">${champOutcome.logoUrl ? `<img class="champ-logo" src="${champOutcome.logoUrl}" onerror="this.style.display='none'">` : ''}<span>${champOutcome.name || '—'}</span></div>`
+      : '<span style="color:var(--muted)">—</span>';
+
+    const eliminated = s.eliminated;
+    const statusBadge = eliminated
+      ? '<span class="badge-eliminated">OUT</span>'
+      : '<span class="badge-alive">ALIVE</span>';
+
+    const barPct = maxScore > 0 ? Math.round((maxPoss / maxScore) * 100) : 0;
+    const barClass = barPct < 40 ? 'bar-fill low' : 'bar-fill';
+
+    const rankClass = rank <= 3 ? 'rank top3' : 'rank';
+
+    // Round breakdown mini-grid
+    const periods = s.scoreByPeriod || {};
+    const roundCells = [1,2,3,4,5,6].map(r => {
+      const pd = periods[String(r)] || {};
+      const sc = pd.score ?? 0;
+      const mx = pd.possiblePointsMax ?? 0;
+      const color = sc > 0 ? 'var(--green)' : mx === 0 ? 'var(--red)' : 'var(--text2)';
+      return `<div class="round-cell">
+        <div class="round-label">${ROUND_LABELS[r]}</div>
+        <div class="round-score" style="color:${color}">${sc}</div>
+        <div class="round-max">/${mx}</div>
+      </div>`;
+    }).join('');
+
+    return `<tr>
+      <td class="${rankClass}">${rank}</td>
+      <td>
+        <div class="entry-name">${e.name}</div>
+        ${e.displayName && e.displayName !== e.name ? `<div class="entry-member">${e.displayName}</div>` : ''}
+        <div style="margin-top:8px"><div class="round-grid">${roundCells}</div></div>
+      </td>
+      <td class="right">
+        <div style="margin-bottom:4px">${statusBadge}</div>
+        <div class="score-val">${curScore}</div>
+        <div class="score-max">max ${maxPoss}</div>
+        <div class="bar-wrap" style="margin-top:6px;justify-content:flex-end">
+          <div class="bar-bg"><div class="${barClass}" style="width:${barPct}%"></div></div>
+        </div>
+      </td>
+      <td>${champCell}</td>
+    </tr>`;
+  });
+
+  document.getElementById('panel-standings').innerHTML = `
+    <table class="standings">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Entry / Round Breakdown</th>
+          <th class="right">Score</th>
+          <th>Champion Pick</th>
+        </tr>
+      </thead>
+      <tbody>${rows.join('')}</tbody>
+    </table>`;
+
+  // ── Champion picks ───────────────────────────────────────────────────
+  const champCounts = {};
+  for (const e of entries) {
+    const id = e.championOutcomeId;
+    if (!id) continue;
+    if (!champCounts[id]) champCounts[id] = { outcome: outcomeMap[id], names: [] };
+    champCounts[id].names.push(e.name);
+  }
+  const champSorted = Object.entries(champCounts).sort((a, b) => b[1].names.length - a[1].names.length);
+
+  const champCards = champSorted.map(([id, { outcome, names }]) => {
+    const team = outcome || {};
+    return `<div class="champ-card">
+      ${team.logoUrl ? `<img class="champ-card-logo" src="${team.logoUrl}" onerror="this.style.display='none'">` : ''}
+      <div class="champ-card-team">${team.name || id}</div>
+      <div class="champ-card-count">${names.length} ${names.length === 1 ? 'entry' : 'entries'}</div>
+      <div class="champ-card-names">${names.join('<br>')}</div>
+    </div>`;
+  }).join('');
+
+  const noChamp = entries.filter(e => !e.championOutcomeId);
+  document.getElementById('panel-champion').innerHTML = `
+    <div class="section-header">Champion Pick Distribution</div>
+    <div class="champ-grid">${champCards}</div>
+    ${noChamp.length ? `<div style="margin-top:16px;font-size:12px;color:var(--muted)">${noChamp.map(e => e.name).join(', ')} — no champion recorded</div>` : ''}
+  `;
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────
+function showError(msg) {
+  document.getElementById('loading').style.display = 'none';
+  const el = document.getElementById('error');
+  el.textContent = '❌ ' + msg;
+  el.style.display = 'block';
+}
+</script>
+</body>
+</html>
