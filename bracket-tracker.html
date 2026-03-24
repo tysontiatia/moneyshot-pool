@@ -1212,6 +1212,8 @@ const CONFIG = {
   const p = new URLSearchParams(window.location.search);
   if (p.get('key')) { CONFIG.jsonbinKey = p.get('key'); localStorage.setItem('ms_jsonbinKey', p.get('key')); }
   if (p.get('name')) { CONFIG.myName = p.get('name'); localStorage.setItem('ms_myName', p.get('name')); }
+  if (p.get('bin')) { CONFIG.jsonbinId = p.get('bin'); }
+  if (p.get('poolname')) { CONFIG.poolName = decodeURIComponent(p.get('poolname')); }
   // Clean URL
   if (p.has('key') || p.has('name')) {
     window.history.replaceState({}, '', window.location.pathname);

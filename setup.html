@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Set Up Your Bracket Pool</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: #2e2e2e;
+    --text: #f0f0f0;
+    --text2: #c0c0c0;
+    --muted: #777;
+    --accent: #e8ff47;
+    --green: #4ade80;
+    --red: #f87171;
+    --orange: #fb923c;
+    --radius: 10px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 64px;
+  }
+
+  .wrap { max-width: 520px; margin: 0 auto; }
+
+  /* Header */
+  .logo {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+  .subtitle { font-size: 14px; color: var(--muted); margin-bottom: 32px; line-height: 1.5; }
+
+  /* Steps */
+  .steps { display: flex; gap: 6px; margin-bottom: 32px; }
+  .step-dot {
+    height: 4px;
+    flex: 1;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.2s;
+  }
+  .step-dot.active { background: var(--accent); }
+  .step-dot.done { background: var(--green); }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  /* Inputs */
+  label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 6px; }
+  input[type=text], input[type=url], textarea, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus, textarea:focus { border-color: var(--accent); }
+  textarea { min-height: 120px; resize: vertical; font-family: monospace; font-size: 12px; }
+  .hint { font-size: 11px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+
+  /* Platform tabs */
+  .platform-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .ptab {
+    flex: 1;
+    padding: 10px 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text2);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .ptab.active {
+    background: rgba(232,255,71,0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Buttons */
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 13px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.15s, transform 0.1s;
+    text-align: center;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: #0a0a0a; margin-top: 16px; }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    margin-top: 8px;
+  }
+
+  /* Entry list */
+  .entry-list { display: flex; flex-direction: column; gap: 6px; }
+  .entry-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  .entry-name { font-weight: 500; }
+  .entry-champ { font-size: 11px; color: var(--muted); }
+
+  /* Status / alerts */
+  .alert {
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .alert-warn { background: rgba(251,146,60,0.12); border: 1px solid rgba(251,146,60,0.3); color: var(--orange); }
+  .alert-error { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); color: var(--red); }
+  .alert-success { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); color: var(--green); }
+
+  /* Loader */
+  .loader {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Result URL */
+  .url-box {
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--accent);
+    word-break: break-all;
+    margin: 12px 0;
+  }
+
+  /* Scoring grid */
+  .scoring-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .scoring-row { display: flex; align-items: center; gap: 8px; }
+  .scoring-label { font-size: 12px; color: var(--text2); flex: 1; }
+  .scoring-input {
+    width: 56px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 13px;
+    padding: 6px 8px;
+    text-align: center;
+    outline: none;
+  }
+  .scoring-input:focus { border-color: var(--accent); }
+
+  /* Details/summary */
+  details summary { cursor: pointer; font-size: 12px; color: var(--muted); margin-top: 12px; }
+  details summary:hover { color: var(--text2); }
+  details > div { margin-top: 12px; }
+
+  /* Hidden sections */
+  .section { display: none; }
+  .section.visible { display: block; }
+
+  code { font-size: 11px; color: var(--accent); word-break: break-all; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logo">BracketIQ</div>
+
+  <h1>Set up your pool</h1>
+  <p class="subtitle">Import your league's picks from ESPN Tournament Challenge and get a live analytics dashboard to share with your pool.</p>
+
+  <!-- Step progress -->
+  <div class="steps">
+    <div class="step-dot active" id="dot-1"></div>
+    <div class="step-dot" id="dot-2"></div>
+    <div class="step-dot" id="dot-3"></div>
+    <div class="step-dot" id="dot-4"></div>
+  </div>
+
+  <!-- ── STEP 1: Pool info ── -->
+  <div class="section visible" id="step-1">
+    <div class="card">
+      <div class="card-title">Step 1 of 4 — Pool Info</div>
+      <label for="pool-name">Pool name</label>
+      <input type="text" id="pool-name" placeholder="e.g. The Office Pool 2026" maxlength="80">
+      <div class="hint">This shows in the header of your pool's dashboard.</div>
+    </div>
+    <button class="btn btn-primary" onclick="goStep2()">Continue →</button>
+  </div>
+
+  <!-- ── STEP 2: Import picks ── -->
+  <div class="section" id="step-2">
+    <div class="card">
+      <div class="card-title">Step 2 of 4 — Import Picks</div>
+
+      <div class="platform-tabs">
+        <div class="ptab active" onclick="setPlatform('espn')" id="tab-espn">ESPN TC</div>
+        <div class="ptab" onclick="setPlatform('manual')" id="tab-manual">Manual JSON</div>
+      </div>
+
+      <!-- ESPN TC panel -->
+      <div id="panel-espn">
+        <label for="espn-url">ESPN Tournament Challenge group URL</label>
+        <input type="url" id="espn-url" placeholder="https://fantasy.espn.com/tournament-challenge-bracket/2026/en/group?groupID=...">
+        <div class="hint">Your group must be <strong style="color:var(--text2)">public</strong> for automatic import. Private group? Use the manual option below.</div>
+
+        <details>
+          <summary>Private group? Add your ESPN credentials</summary>
+          <div>
+            <label for="espn-swid" style="margin-top:0">SWID cookie</label>
+            <input type="text" id="espn-swid" placeholder="{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}">
+            <label for="espn-s2" style="margin-top:10px">espn_s2 cookie</label>
+            <input type="text" id="espn-s2" placeholder="Long cookie value...">
+            <div class="hint">Find these in your browser's cookies while logged into ESPN. Settings → Application → Cookies → fantasy.espn.com</div>
+          </div>
+        </details>
+      </div>
+
+      <!-- Manual panel -->
+      <div id="panel-manual" style="display:none">
+        <div class="alert alert-warn" style="margin-bottom:12px">
+          While logged into ESPN, open this URL in your browser and paste the full JSON response below.
+        </div>
+        <div id="manual-url-hint" class="hint" style="margin-bottom:8px;word-break:break-all">
+          <code>https://fantasy.espn.com/apis/v3/games/tcmen/seasons/2026/groups/<strong>YOUR_GROUP_ID</strong>/entries?view=detail</code>
+        </div>
+        <label for="manual-json">Paste JSON response</label>
+        <textarea id="manual-json" placeholder='{"entries":[...]} or paste the raw array'></textarea>
+      </div>
+
+      <div id="import-error" style="display:none" class="alert alert-error"></div>
+    </div>
+
+    <button class="btn btn-primary" id="import-btn" onclick="importPicks()">Import Picks</button>
+    <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
+  </div>
+
+  <!-- ── STEP 3: Review entries ── -->
+  <div class="section" id="step-3">
+    <div class="card">
+      <div class="card-title">Step 3 of 4 — Review Entries</div>
+      <div id="entry-count" style="font-size:13px;color:var(--text2);margin-bottom:12px"></div>
+      <div class="entry-list" id="entry-list"></div>
+    </div>
+
+    <div id="review-warn" style="display:none" class="alert alert-warn"></div>
+
+    <button class="btn btn-primary" onclick="goStep4()">Looks good →</button>
+    <button class="btn btn-secondary" onclick="goStep(2)">← Re-import</button>
+  </div>
+
+  <!-- ── STEP 4: Scoring settings ── -->
+  <div class="section" id="step-4">
+    <div class="card">
+      <div class="card-title">Step 4 of 4 — Scoring Settings</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.5">
+        Points = multiplier × seed. Adjust to match your league's rules.
+      </p>
+      <div class="scoring-grid">
+        <div class="scoring-row"><span class="scoring-label">Round 1 (R64)</span><input class="scoring-input" id="sc-1" type="number" value="1" min="0" max="99"></div>
+        <div class="scoring-row"><span class="scoring-label">Round 2 (R32)</span><input class="scoring-input" id="sc-2" type="number" value="2" min="0" max="99"></div>
+        <div class="scoring-row"><span class="scoring-label">Sweet 16</span><input class="scoring-input" id="sc-3" type="number" value="3" min="0" max="99"></div>
+        <div class="scoring-row"><span class="scoring-label">Elite 8</span><input class="scoring-input" id="sc-4" type="number" value="4" min="0" max="99"></div>
+        <div class="scoring-row"><span class="scoring-label">Final Four</span><input class="scoring-input" id="sc-5" type="number" value="5" min="0" max="99"></div>
+        <div class="scoring-row"><span class="scoring-label">Championship</span><input class="scoring-input" id="sc-6" type="number" value="6" min="0" max="99"></div>
+      </div>
+      <div class="hint" style="margin-top:10px">Default is seed × round multiplier (1, 2, 3, 4, 5, 6). Change multipliers here if your pool uses different rules.</div>
+    </div>
+
+    <button class="btn btn-primary" id="create-btn" onclick="createPool()">Create My Pool →</button>
+    <button class="btn btn-secondary" onclick="goStep(3)">← Back</button>
+  </div>
+
+  <!-- ── RESULT ── -->
+  <div class="section" id="step-result">
+    <div class="alert alert-success">✅ Your pool is ready!</div>
+    <div class="card">
+      <div class="card-title">Your Pool URL</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.5">
+        Share this link with everyone in your pool. Bookmark it — anyone can open it to see live standings, analytics, and their bracket path.
+      </p>
+      <div class="url-box" id="result-url"></div>
+      <button class="btn btn-primary" onclick="copyURL()" id="copy-btn">Copy Link</button>
+      <a id="open-link" href="#" target="_blank">
+        <button class="btn btn-secondary" style="margin-top:8px">Open Pool →</button>
+      </a>
+    </div>
+    <div class="card" style="margin-top:8px">
+      <div class="card-title">Picks will refresh automatically</div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.5">
+        The dashboard pulls live game scores from ESPN every 45 seconds. If your pool's picks change mid-tournament, you'll need to re-run this setup to update them.
+      </p>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+// ─── Config ───────────────────────────────────────────────────────────────
+const PROXY     = 'https://pooliq-proxy.tysontiatia.workers.dev';
+const POOL_URL  = 'https://tysontiatia.github.io/moneyshot-pool/bracket-tracker.html';
+const TEAM_MAP_BIN = '69bdf9b3aa77b81da903ff97';
+const CBS_ROUND_MAP = { 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7 }; // ourRound → cbsTournamentRound
+
+// ─── State ────────────────────────────────────────────────────────────────
+let state = {
+  platform: 'espn',
+  entries: [],      // normalized: [{ name, picks:[{cbsTeamId,tournamentRound}], championCbsTeamId, championName }]
+  teamMap: {},      // cbsTeamId → team object (for rendering champion names)
+  espnCBSMap: {},   // espnTeamId → cbsTeamId
+  cbsEspnMap: {},   // cbsTeamId → espnTeamId
+};
+
+// ─── Step navigation ──────────────────────────────────────────────────────
+function goStep(n) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  const el = document.getElementById(`step-${n}`) || document.getElementById('step-result');
+  if (el) el.classList.add('visible');
+  updateDots(n);
+}
+
+function updateDots(active) {
+  for (let i = 1; i <= 4; i++) {
+    const d = document.getElementById(`dot-${i}`);
+    if (!d) continue;
+    d.classList.remove('active', 'done');
+    if (i < active) d.classList.add('done');
+    else if (i === active) d.classList.add('active');
+  }
+}
+
+function goStep2() {
+  const name = document.getElementById('pool-name').value.trim();
+  if (!name) { alert('Please enter a pool name'); return; }
+  goStep(2);
+}
+
+function goStep4() {
+  goStep(4);
+}
+
+// ─── Platform toggle ──────────────────────────────────────────────────────
+function setPlatform(p) {
+  state.platform = p;
+  document.getElementById('tab-espn').classList.toggle('active', p === 'espn');
+  document.getElementById('tab-manual').classList.toggle('active', p === 'manual');
+  document.getElementById('panel-espn').style.display  = p === 'espn'   ? '' : 'none';
+  document.getElementById('panel-manual').style.display = p === 'manual' ? '' : 'none';
+}
+
+// ─── Team map helpers ─────────────────────────────────────────────────────
+async function loadTeamMap() {
+  if (Object.keys(state.espnCBSMap).length > 0) return; // cached
+  try {
+    const res  = await fetch(`https://api.jsonbin.io/v3/b/${TEAM_MAP_BIN}/latest`);
+    const data = await res.json();
+    const teams = data.record?.teams || [];
+    teams.forEach(t => {
+      if (t.espnId && t.cbsTeamId) {
+        state.espnCBSMap[String(t.espnId)] = String(t.cbsTeamId);
+        state.cbsEspnMap[String(t.cbsTeamId)] = String(t.espnId);
+        state.teamMap[String(t.cbsTeamId)] = t;
+      }
+    });
+  } catch (e) {
+    console.warn('Team map load failed:', e.message);
+  }
+}
+
+// ─── ESPN TC slot → round number ─────────────────────────────────────────
+function espnSlotToRound(slotId) {
+  const s = parseInt(slotId);
+  if (s <= 32) return 1;
+  if (s <= 48) return 2;
+  if (s <= 56) return 3;
+  if (s <= 60) return 4;
+  if (s <= 62) return 5;
+  return 6;
+}
+
+// ─── Parse ESPN TC API response → normalized entries ─────────────────────
+function parseESPNTCResponse(data) {
+  // Handle both { entries: [...] } and raw array
+  const rawEntries = Array.isArray(data) ? data : (data.entries || data.items || []);
+  const normalized = [];
+
+  rawEntries.forEach(raw => {
+    const name = (raw.name || raw.entryName || raw.teamName || '').trim() || 'Unknown';
+    const picks = [];
+
+    // ESPN TC picks can be array or object keyed by slot
+    const rawPicks = raw.picks || raw.slots || raw.bracketPicks || [];
+    if (Array.isArray(rawPicks)) {
+      rawPicks.forEach(p => {
+        const slotId = p.slotId ?? p.slot ?? p.position;
+        const espnId = String(p.teamId ?? p.winner?.id ?? p.winnerId ?? '');
+        if (slotId != null && espnId) {
+          const roundNum = espnSlotToRound(slotId);
+          const cbsId   = state.espnCBSMap[espnId] || `espn_${espnId}`;
+          const cbsRound = CBS_ROUND_MAP[roundNum];
+          if (cbsRound) picks.push({ cbsTeamId: parseInt(cbsId) || cbsId, tournamentRound: cbsRound });
+        }
+      });
+    } else if (typeof rawPicks === 'object') {
+      Object.entries(rawPicks).forEach(([slotId, val]) => {
+        const espnId = String(typeof val === 'object' ? (val.id ?? val.teamId ?? val.winner?.id ?? '') : val);
+        if (espnId && espnId !== 'undefined') {
+          const roundNum = espnSlotToRound(slotId);
+          const cbsId   = state.espnCBSMap[espnId] || `espn_${espnId}`;
+          const cbsRound = CBS_ROUND_MAP[roundNum];
+          if (cbsRound) picks.push({ cbsTeamId: parseInt(cbsId) || cbsId, tournamentRound: cbsRound });
+        }
+      });
+    }
+
+    // Champion = round 6 pick (slot 63 → roundNum 6 → cbsRound 7)
+    const champPick = picks.find(p => p.tournamentRound === 7);
+    const champCbsId = champPick ? String(champPick.cbsTeamId) : null;
+    const champTeam  = champCbsId ? state.teamMap[champCbsId] : null;
+
+    normalized.push({
+      name,
+      picks,
+      championCbsTeamId: champCbsId ? (parseInt(champCbsId) || champCbsId) : null,
+      championName: champTeam?.mediumName || champTeam?.abbrev || null,
+    });
+  });
+
+  return normalized;
+}
+
+// ─── Import picks ─────────────────────────────────────────────────────────
+async function importPicks() {
+  const btn = document.getElementById('import-btn');
+  const errEl = document.getElementById('import-error');
+  errEl.style.display = 'none';
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span>Importing...';
+
+  try {
+    await loadTeamMap();
+
+    let rawData;
+
+    if (state.platform === 'espn') {
+      // Extract group ID from URL
+      const urlInput = document.getElementById('espn-url').value.trim();
+      const match = urlInput.match(/groupID?[=:]([^&\s]+)/i) || urlInput.match(/groups?\/([^/?&\s]+)/i);
+      const groupId = match ? match[1] : urlInput.replace(/[^a-zA-Z0-9_-]/g, '');
+      if (!groupId) throw new Error('Could not find group ID in URL. Check the URL and try again.');
+
+      const swid = document.getElementById('espn-swid').value.trim();
+      const s2   = document.getElementById('espn-s2').value.trim();
+      let proxyUrl = `${PROXY}/espn-tc/2026/${groupId}`;
+      if (swid && s2) proxyUrl += `?swid=${encodeURIComponent(swid)}&s2=${encodeURIComponent(s2)}`;
+
+      const res = await fetch(proxyUrl);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `ESPN TC API returned ${res.status}. Try the Manual JSON option.`);
+      }
+      rawData = await res.json();
+      rawData = rawData.entries || rawData; // proxy wraps in { entries, group }
+
+    } else {
+      // Manual paste
+      const raw = document.getElementById('manual-json').value.trim();
+      if (!raw) throw new Error('Paste your ESPN TC JSON first.');
+      rawData = JSON.parse(raw);
+    }
+
+    const entries = parseESPNTCResponse(rawData);
+    if (entries.length === 0) throw new Error('No entries found. Make sure the JSON is from the ESPN TC entries endpoint.');
+
+    state.entries = entries;
+    showReview(entries);
+    goStep(3);
+
+  } catch (err) {
+    errEl.textContent = '❌ ' + err.message;
+    errEl.style.display = 'block';
+    console.error('Import error:', err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Import Picks';
+  }
+}
+
+// ─── Show review ──────────────────────────────────────────────────────────
+function showReview(entries) {
+  document.getElementById('entry-count').textContent = `${entries.length} entries found`;
+
+  const list = document.getElementById('entry-list');
+  list.innerHTML = entries.map(e => `
+    <div class="entry-row">
+      <span class="entry-name">${e.name}</span>
+      <span class="entry-champ">${e.championName ? '🏆 ' + e.championName : '—'}</span>
+    </div>
+  `).join('');
+
+  const warnEl = document.getElementById('review-warn');
+  const unmapped = entries.filter(e => e.picks.length < 10);
+  if (unmapped.length > 0) {
+    warnEl.textContent = `⚠️ ${unmapped.length} entries have fewer picks than expected — team mapping may be incomplete. The dashboard will still work but some picks may not score correctly.`;
+    warnEl.style.display = 'block';
+  } else {
+    warnEl.style.display = 'none';
+  }
+}
+
+// ─── Create pool ──────────────────────────────────────────────────────────
+async function createPool() {
+  const btn = document.getElementById('create-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span>Creating pool...';
+
+  try {
+    const poolName = document.getElementById('pool-name').value.trim();
+
+    // Build team map subset (only teams in picks)
+    const usedCbsIds = new Set();
+    state.entries.forEach(e => {
+      e.picks.forEach(p => usedCbsIds.add(String(p.cbsTeamId)));
+      if (e.championCbsTeamId) usedCbsIds.add(String(e.championCbsTeamId));
+    });
+    const teamMap = {};
+    usedCbsIds.forEach(id => { if (state.teamMap[id]) teamMap[id] = state.teamMap[id]; });
+
+    // Strip internal-only fields before saving
+    const entries = state.entries.map(({ name, picks, championCbsTeamId }) => ({
+      name,
+      picks,
+      championCbsTeamId,
+    }));
+
+    const res = await fetch(`${PROXY}/create-pool`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ poolName, entries, teamMap }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.binId) throw new Error(data.error || 'Failed to create pool');
+
+    const poolURL = `${POOL_URL}?bin=${data.binId}&poolname=${encodeURIComponent(poolName)}`;
+    showResult(poolURL);
+
+  } catch (err) {
+    alert('❌ ' + err.message);
+    console.error('Create pool error:', err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Create My Pool →';
+  }
+}
+
+// ─── Show result ──────────────────────────────────────────────────────────
+function showResult(url) {
+  document.getElementById('result-url').textContent = url;
+  document.getElementById('open-link').href = url;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  document.getElementById('step-result').classList.add('visible');
+  document.querySelectorAll('.step-dot').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.step-dot').forEach(d => d.classList.add('done'));
+}
+
+function copyURL() {
+  const url = document.getElementById('result-url').textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = 'Copy Link', 2000);
+  }).catch(() => prompt('Copy this URL:', url));
+}
+</script>
+</body>
+</html>
