@@ -1202,8 +1202,8 @@ const CONFIG = {
     '20260326', '20260327', // Sweet 16
     '20260328',             // Elite 8 (Sat)
     '20260329',             // Elite 8 (Sun)
-    '20260405',             // Final Four
-    '20260407',             // Championship
+    '20260404',             // Final Four (Sat)
+    '20260406',             // Championship (Mon)
   ],
 };
 
@@ -1543,11 +1543,11 @@ async function fetchESPNGames() {
   const datesToFetch = new Set();
   datesToFetch.add(today);
   
-  // Add all tournament dates up to today + 1 day ahead
-  const todayNum = parseInt(today);
+  // Add all tournament dates up to 14 days from today
+  const todayMs = new Date(today.slice(0,4) + '-' + today.slice(4,6) + '-' + today.slice(6,8)).getTime();
   CONFIG.tournamentDates.forEach(d => {
-    const dNum = parseInt(d);
-    if (dNum <= todayNum + 7) datesToFetch.add(d);
+    const dMs = new Date(d.slice(0,4) + '-' + d.slice(4,6) + '-' + d.slice(6,8)).getTime();
+    if (dMs <= todayMs + 14 * 86400000) datesToFetch.add(d);
   });
   
   console.log(`🏀 Fetching ESPN games for ${datesToFetch.size} dates...`);
@@ -1560,13 +1560,33 @@ async function fetchESPNGames() {
       if (!res.ok) throw new Error(`ESPN ${res.status}`);
       const data = await res.json();
       const events = data.events || [];
-      
+
+      if (date >= '20260401') {
+        console.log(`📅 ESPN raw events for ${date}:`, events.length, events.map(e => ({
+          name: e.name,
+          headline: e.competitions[0]?.notes?.[0]?.headline || '(no headline)',
+          groups: e.competitions[0]?.groups,
+          season: e.season,
+        })));
+      }
+
       // Filter to tournament games only
       return events
         .filter(e => {
           const notes = e.competitions[0]?.notes || [];
           const headline = notes[0]?.headline || '';
-          return headline.includes('NCAA') && headline.includes('Championship');
+          const hl = headline.toLowerCase();
+          // Match any NCAA tournament game by headline or by date being a known tournament date
+          return (headline.includes('NCAA') || CONFIG.tournamentDates.includes(date)) && (
+            hl.includes('championship') ||
+            hl.includes('final four') ||
+            hl.includes('semifinal') ||
+            hl.includes('1st round') || hl.includes('first round') ||
+            hl.includes('2nd round') || hl.includes('second round') ||
+            hl.includes('sweet') ||
+            hl.includes('elite') ||
+            CONFIG.tournamentDates.includes(date)
+          );
         })
         .map(parseEspnGame);
     } catch (err) {
@@ -1819,7 +1839,7 @@ function computeStandings() {
 
   // Assign ranks (tied entries share the same rank)
   standings.forEach((s, i) => {
-    if (i > 0 && s.points === standings[i-1].points && s.correct === standings[i-1].correct) {
+    if (i > 0 && s.points === standings[i-1].points) {
       s.rank = standings[i-1].rank;
     } else {
       s.rank = i + 1;
@@ -2448,6 +2468,11 @@ function renderStandings() {
   // Standings list
   html += `<div class="standings-list">`;
   const leaderPts = state.standings[0]?.points || 0;
+  const thirdPlacePts = state.standings[2]?.points || leaderPts;
+  const contenderThreshold = thirdPlacePts;
+  const tiedRanks = new Set(
+    state.standings.filter((s, i, arr) => arr.some((o, j) => j !== i && o.rank === s.rank)).map(s => s.rank)
+  );
   let eliminatedDividerAdded = false;
   state.standings.forEach(s => {
     const prevRank = getPreviousRank(s.name);
@@ -2457,13 +2482,13 @@ function renderStandings() {
       if (diff > 0) movement = `<span class="movement-up">▲${diff}</span>`;
       else if (diff < 0) movement = `<span class="movement-down">▼${Math.abs(diff)}</span>`;
     }
-    
-    if (!eliminatedDividerAdded && leaderPts > 0 && s.maxPts < leaderPts) {
+
+    if (!eliminatedDividerAdded && contenderThreshold > 0 && s.maxPts < contenderThreshold) {
       eliminatedDividerAdded = true;
       html += `<div style="font-size:var(--fs-2xs);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:12px 4px 6px">Out of contention</div>`;
     }
     html += `<div class="standing-row ${s.isMe ? 'is-me' : ''}" onclick="openPlayerSheet('${s.name.replace(/'/g, "\\'")}')">`;
-    html += `<div class="standing-rank-col"><span class="standing-rank">${s.rank}</span><span class="standing-movement">${movement}</span></div>`;
+    html += `<div class="standing-rank-col"><span class="standing-rank">${tiedRanks.has(s.rank) ? 'T' : ''}${s.rank}</span><span class="standing-movement">${movement}</span></div>`;
     html += `<div class="standing-info">`;
     html += `<div class="standing-name">${s.name}</div>`;
     const champImg = s.champLogo

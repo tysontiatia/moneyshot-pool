@@ -1,0 +1,2060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fantasy Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0b;
+  --surface: #141416;
+  --surface2: #1c1c1f;
+  --surface3: #242428;
+  --border: #2a2a2e;
+  --border2: #38383d;
+  --text: #f0f0f2;
+  --text2: #c8c8cc;
+  --muted: #6e6e78;
+  --muted2: #8e8e98;
+  --accent: #e8ff47;
+  --green: #3ddc84;
+  --red: #ff5f57;
+  --blue: #5b9cf6;
+  --orange: #fb923c;
+  --purple: #c084fc;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --nav-height: 56px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --fs-2xs: 10px;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-base: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 18px;
+  --fs-2xl: 20px;
+  --fs-3xl: 24px;
+  --fs-4xl: 28px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-size: var(--fs-md);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 8px);
+}
+
+/* ── SETUP SCREEN ── */
+.setup-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 32px;
+}
+
+.setup-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.setup-subtitle {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  margin-top: 4px;
+  text-align: center;
+}
+
+.setup-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.setup-card h2 {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: var(--fs-sm);
+  color: var(--muted2);
+  font-weight: 500;
+}
+
+.form-group input {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: var(--fs-md);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.form-group input:focus {
+  border-color: var(--accent);
+}
+
+.form-group .hint {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #0a0a0b;
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  width: 100%;
+  transition: opacity 0.15s;
+}
+
+.btn-primary:hover { opacity: 0.9; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.setup-error {
+  background: rgba(255, 95, 87, 0.1);
+  border: 1px solid rgba(255, 95, 87, 0.3);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: var(--fs-sm);
+  color: var(--red);
+  display: none;
+}
+
+/* ── HEADER ── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: var(--fs-3xl);
+  letter-spacing: 1px;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.header-league {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.week-badge {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: var(--fs-xs);
+  color: var(--muted2);
+  font-weight: 500;
+}
+
+/* ── NAV ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding-bottom: var(--safe-bottom);
+  height: calc(var(--nav-height) + var(--safe-bottom));
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 8px 4px;
+  font-family: inherit;
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav-btn.active { color: var(--accent); }
+
+.nav-icon { font-size: 18px; line-height: 1; }
+.nav-label { font-size: var(--fs-2xs); font-weight: 500; }
+
+/* ── CONTENT ── */
+.content {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── SECTION HEADER ── */
+.section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+}
+
+.section-sub {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+/* ── STANDINGS ── */
+.standings-table {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.standings-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 60px 60px 60px;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+  transition: background 0.1s;
+  cursor: default;
+}
+
+.standings-row:last-child { border-bottom: none; }
+.standings-row.header-row {
+  background: var(--surface2);
+  padding: 6px 14px;
+}
+
+.standings-row.header-row span {
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.standings-row.is-me { background: rgba(232, 255, 71, 0.04); }
+
+.division-header {
+  padding: 6px 14px;
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+
+.playoff-line {
+  border-top: 1px dashed var(--border2);
+  margin: 0;
+}
+
+.seed-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: 700;
+  background: var(--surface3);
+  color: var(--muted);
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+
+.seed-badge.in { background: rgba(61,220,132,0.15); color: var(--green); }
+
+.allplay-sub {
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.live-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  margin-right: 4px;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.rank-num {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+}
+
+.rank-num.top3 { color: var(--accent); }
+
+.franchise-name {
+  font-size: var(--fs-md);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.franchise-owner {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.stat-cell {
+  font-size: var(--fs-sm);
+  font-family: 'DM Mono', monospace;
+  color: var(--text2);
+  text-align: right;
+}
+
+.stat-cell.pts { color: var(--text); font-weight: 500; }
+
+/* ── MATCHUP CARD ── */
+.matchup-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.matchup-teams {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.matchup-team {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.matchup-team.away { text-align: right; }
+
+.matchup-team-name {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.matchup-score {
+  font-size: var(--fs-3xl);
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.matchup-score.winner { color: var(--green); }
+.matchup-score.loser { color: var(--muted); }
+
+.matchup-vs {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.matchup-meta {
+  margin-top: 8px;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ── WEEK PICKER ── */
+.week-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.week-picker-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text2);
+  cursor: pointer;
+  font-size: var(--fs-base);
+  line-height: 1;
+  padding: 3px 7px;
+  font-family: inherit;
+  transition: background 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.week-picker-btn:disabled { opacity: 0.3; cursor: default; }
+.week-picker-btn:not(:disabled):hover { background: var(--surface3); }
+.week-picker-label {
+  font-size: var(--fs-xs);
+  color: var(--muted2);
+  min-width: 54px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* ── LINEUP CONSENSUS ── */
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.player-row:last-child { border-bottom: none; }
+
+.player-pos {
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  color: var(--muted);
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.player-name {
+  flex: 1;
+  font-size: var(--fs-md);
+  font-weight: 500;
+}
+
+.player-team {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.ownership-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ownership-pct {
+  font-size: var(--fs-xs);
+  font-family: 'DM Mono', monospace;
+  color: var(--muted2);
+  width: 32px;
+  text-align: right;
+}
+
+.ownership-fill {
+  width: 60px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.ownership-fill-inner {
+  height: 100%;
+  background: var(--blue);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.ownership-fill-inner.high { background: var(--accent); }
+
+/* ── LIVE TAB ── */
+.live-section-label {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  margin: 20px 0 8px;
+}
+
+.live-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.live-card.good { border-color: rgba(61,220,132,0.35); }
+.live-card.bad  { border-color: rgba(255,95,87,0.35); }
+
+.live-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+
+.live-verdict {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.live-verdict.good { color: var(--green); }
+.live-verdict.bad  { color: var(--red); }
+.live-verdict.neutral { color: var(--muted2); }
+
+.live-matchup-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  gap: 10px;
+}
+
+.live-team-block {
+  flex: 1;
+}
+.live-team-block.away { text-align: right; }
+
+.live-team-name {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.live-team-name.winning { color: var(--accent); }
+.live-team-name.me { color: var(--accent); }
+
+.live-team-score {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  line-height: 1.1;
+}
+.live-team-score.winning { color: var(--text); }
+.live-team-score.losing  { color: var(--muted); }
+
+.live-vs {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.live-team-meta {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.live-players {
+  padding: 0 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.live-player-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-player-pos {
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  color: var(--muted);
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.live-player-name {
+  flex: 1;
+  font-size: var(--fs-sm);
+  color: var(--text2);
+}
+
+.live-player-score {
+  font-size: var(--fs-sm);
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.live-player-score.active { color: var(--orange); }
+
+.live-still-playing {
+  font-size: var(--fs-xs);
+  color: var(--muted2);
+  padding: 4px 14px 10px;
+}
+
+.my-seed-banner {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.my-seed-label {
+  font-size: var(--fs-sm);
+  color: var(--muted2);
+}
+
+.my-seed-value {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ── EMPTY / LOADING ── */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  gap: 12px;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+/* ── CHIPS ── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 8px;
+  font-size: var(--fs-xs);
+  color: var(--muted2);
+  font-weight: 500;
+}
+
+.chip.green { background: rgba(61,220,132,0.1); border-color: rgba(61,220,132,0.3); color: var(--green); }
+.chip.red { background: rgba(255,95,87,0.1); border-color: rgba(255,95,87,0.3); color: var(--red); }
+
+/* ── SETTINGS ── */
+.settings-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+
+.settings-row:last-child { border-bottom: none; }
+
+.settings-label {
+  font-size: var(--fs-md);
+  font-weight: 500;
+}
+
+.settings-value {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+}
+
+.btn-danger {
+  background: rgba(255, 95, 87, 0.1);
+  border: 1px solid rgba(255, 95, 87, 0.3);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  color: var(--red);
+  font-size: var(--fs-md);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-secondary {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  color: var(--text2);
+  font-size: var(--fs-md);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.15s;
+}
+
+.btn-secondary:hover { background: var(--surface3); }
+
+.detected-info {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detected-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--fs-sm);
+}
+
+.detected-label { color: var(--muted); }
+.detected-value { color: var(--text); font-weight: 500; }
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.radio-option.selected {
+  border-color: var(--accent);
+  background: rgba(232, 255, 71, 0.04);
+}
+
+.radio-option input[type="radio"] { margin-top: 2px; accent-color: var(--accent); flex-shrink: 0; }
+
+.radio-option-text { display: flex; flex-direction: column; gap: 2px; }
+.radio-option-label { font-size: var(--fs-md); font-weight: 500; }
+.radio-option-sub { font-size: var(--fs-xs); color: var(--muted); }
+
+.setup-step { display: none; }
+.setup-step.active { display: flex; flex-direction: column; gap: 16px; }
+</style>
+</head>
+<body>
+
+<!-- ── SETUP SCREEN ── -->
+<div id="setup-screen" class="setup-screen" style="display:none">
+  <div style="text-align:center">
+    <div class="setup-logo">POOLIQ</div>
+    <div class="setup-subtitle">Fantasy analytics for your league</div>
+  </div>
+  <div class="setup-card">
+
+    <!-- STEP 1: League ID -->
+    <div class="setup-step active" id="setup-step-1">
+      <h2>Connect Your League</h2>
+      <div class="form-group">
+        <label>MyFantasyLeague League ID</label>
+        <input type="text" id="input-league-id" placeholder="e.g. 39251" inputmode="numeric">
+        <span class="hint">Found in your league URL</span>
+      </div>
+      <div class="form-group">
+        <label>Season Year</label>
+        <input type="text" id="input-season" placeholder="e.g. 2025" inputmode="numeric" value="2025">
+      </div>
+      <div class="form-group">
+        <label>Your Team Name <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+        <input type="text" id="input-my-team" placeholder="e.g. Tyson's Team">
+        <span class="hint">Highlights your team in standings</span>
+      </div>
+      <div id="setup-error" class="setup-error"></div>
+      <button class="btn-primary" id="detect-btn" onclick="detectLeague()">Detect League</button>
+    </div>
+
+    <!-- STEP 2: Confirm + wildcard question -->
+    <div class="setup-step" id="setup-step-2">
+      <h2>Confirm League Settings</h2>
+      <div class="detected-info" id="detected-info"></div>
+      <div class="form-group">
+        <label>How are wildcard seeds determined?</label>
+        <div class="radio-group">
+          <label class="radio-option selected" id="opt-pf">
+            <input type="radio" name="wildcard" value="pf" checked onchange="selectWildcard(this)">
+            <div class="radio-option-text">
+              <span class="radio-option-label">Most points scored (PF)</span>
+              <span class="radio-option-sub">Top PF among non-division winners get wildcard seeds</span>
+            </div>
+          </label>
+          <label class="radio-option" id="opt-record">
+            <input type="radio" name="wildcard" value="record" onchange="selectWildcard(this)">
+            <div class="radio-option-text">
+              <span class="radio-option-label">Best record</span>
+              <span class="radio-option-sub">Tiebreakers apply per league rules</span>
+            </div>
+          </label>
+        </div>
+      </div>
+      <button class="btn-primary" id="connect-btn" onclick="connectLeague()">Connect</button>
+      <button class="btn-secondary" onclick="backToStep1()">Back</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="main-app" style="display:none">
+
+  <div class="header">
+    <div>
+      <div class="header-title">POOLIQ</div>
+      <div class="header-league" id="header-league-name">—</div>
+    </div>
+    <div class="header-right">
+      <div class="week-badge" id="week-badge">Week —</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- STANDINGS TAB -->
+    <div class="tab-panel active" id="tab-standings">
+      <div id="standings-content">
+        <div class="loading-state"><div class="spinner"></div><span>Loading standings…</span></div>
+      </div>
+    </div>
+
+    <!-- MATCHUPS TAB -->
+    <div class="tab-panel" id="tab-matchups">
+      <div id="matchups-content">
+        <div class="loading-state"><div class="spinner"></div><span>Loading matchups…</span></div>
+      </div>
+    </div>
+
+    <!-- LINEUP TAB -->
+    <div class="tab-panel" id="tab-lineup">
+      <div id="lineup-content">
+        <div class="loading-state"><div class="spinner"></div><span>Loading lineups…</span></div>
+      </div>
+    </div>
+
+    <!-- LIVE TAB -->
+    <div class="tab-panel" id="tab-live">
+      <div id="live-content">
+        <div class="loading-state"><div class="spinner"></div><span>Loading live data…</span></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div class="tab-panel" id="tab-settings">
+      <div class="section-header"><span class="section-title">Settings</span></div>
+      <div class="settings-section">
+        <div class="settings-row">
+          <span class="settings-label">League ID</span>
+          <span class="settings-value" id="settings-league-id">—</span>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">Season</span>
+          <span class="settings-value" id="settings-season">—</span>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">My Team</span>
+          <span class="settings-value" id="settings-my-team">—</span>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">Wildcard seeding</span>
+          <span class="settings-value" id="settings-wildcard">—</span>
+        </div>
+      </div>
+      <button class="btn-danger" onclick="disconnect()">Disconnect League</button>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-tab="standings" onclick="switchTab('standings')">
+      <span class="nav-icon">🏆</span>
+      <span class="nav-label">Standings</span>
+    </button>
+    <button class="nav-btn" data-tab="live" onclick="switchTab('live')">
+      <span class="nav-icon">⚡</span>
+      <span class="nav-label">Live</span>
+    </button>
+    <button class="nav-btn" data-tab="matchups" onclick="switchTab('matchups')">
+      <span class="nav-icon">⚔️</span>
+      <span class="nav-label">Matchups</span>
+    </button>
+    <button class="nav-btn" data-tab="lineup" onclick="switchTab('lineup')">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Lineup</span>
+    </button>
+    <button class="nav-btn" data-tab="settings" onclick="switchTab('settings')">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Settings</span>
+    </button>
+  </nav>
+
+</div>
+
+<script>
+// ── STATE ──
+const state = {
+  leagueId: null,
+  season: null,
+  myTeam: null,
+  currentWeek: null,
+  lastFinalWeek: null,
+  league: null,
+  franchises: [],
+  franchiseInfo: {}, // id → { name, owner, divisionId }
+  divisionNames: {}, // id → name
+  weeklyResults: null, // current week results
+  allScores: {},       // week → { fid → pts }
+  allSchedule: {},     // week → [{ aId, aPts, bId, bPts }]
+  allWeeklyResults: {}, // week → raw weeklyResults object
+  liveMatchups: [],    // current live week matchups
+  players: {},         // id → { name, position, team }
+  wildcardMethod: 'pf', // 'pf' or 'record'
+  activeTab: 'standings',
+  selectedWeek: null,         // week shown in matchups/lineup tabs
+  selectedStandingsWeek: null, // week shown in standings tab
+  simulateWeek: null,          // live tab simulation week (null = real live)
+};
+
+// ── MFL API ──
+const PROXY = 'https://pooliq-proxy.tysontiatia.workers.dev';
+
+async function mflFetch(type, extra = '') {
+  const url = `${PROXY}/mfl/${state.season}/export?TYPE=${type}&L=${state.leagueId}${extra}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+// ── INIT ──
+function init() {
+  const leagueId = localStorage.getItem('piq_league_id');
+  const season = localStorage.getItem('piq_season') || '2025';
+  const myTeam = localStorage.getItem('piq_my_team') || '';
+  const wildcardMethod = localStorage.getItem('piq_wildcard') || 'pf';
+
+  if (leagueId) {
+    state.leagueId = leagueId;
+    state.season = season;
+    state.myTeam = myTeam;
+    state.wildcardMethod = wildcardMethod;
+    showApp();
+    loadAll();
+  } else {
+    showSetup();
+  }
+}
+
+// ── SETUP FLOW ──
+async function detectLeague() {
+  const leagueId = document.getElementById('input-league-id').value.trim();
+  const season = document.getElementById('input-season').value.trim() || '2025';
+
+  if (!leagueId) {
+    showError('Please enter your League ID.');
+    return;
+  }
+
+  const btn = document.getElementById('detect-btn');
+  btn.disabled = true;
+  btn.textContent = 'Detecting…';
+  document.getElementById('setup-error').style.display = 'none';
+
+  state.leagueId = leagueId;
+  state.season = season;
+
+  try {
+    const [leagueData, bracketData] = await Promise.all([
+      mflFetch('league'),
+      mflFetch('playoffBrackets'),
+    ]);
+
+    const league = leagueData.league;
+    const divCount = parseInt(league.divisions?.count || 0);
+    const brackets = bracketData.playoffBrackets?.playoffBracket || [];
+    const mainBracket = (Array.isArray(brackets) ? brackets : [brackets])
+      .find(b => parseInt(b.teamsInvolved) > 2) || brackets[0];
+    const playoffTeams = parseInt(mainBracket?.teamsInvolved || 0);
+    const wildcardSeeds = playoffTeams - divCount;
+
+    // Parse tiebreaker chain
+    const sortStr = league.standingsSort || '';
+    const tbLabels = { PCT: 'Record', PTS: 'PF', DIVPCT: 'Div record', H2H: 'H2H', ALL_PLAY_PCT: 'All-play' };
+    const tiebreakers = sortStr.split(',').filter(Boolean).map(k => tbLabels[k] || k).join(' → ');
+
+    // Show detected info
+    document.getElementById('detected-info').innerHTML = `
+      <div class="detected-row"><span class="detected-label">League</span><span class="detected-value">${league.name}</span></div>
+      <div class="detected-row"><span class="detected-label">Divisions</span><span class="detected-value">${divCount || 'None'}</span></div>
+      <div class="detected-row"><span class="detected-label">Playoff teams</span><span class="detected-value">${playoffTeams}</span></div>
+      <div class="detected-row"><span class="detected-label">Division seeds</span><span class="detected-value">${divCount} (seeds 1–${divCount})</span></div>
+      <div class="detected-row"><span class="detected-label">Wildcard seeds</span><span class="detected-value">${wildcardSeeds} (seeds ${divCount + 1}–${playoffTeams})</span></div>
+      <div class="detected-row"><span class="detected-label">Tiebreakers</span><span class="detected-value" style="font-size:var(--fs-xs);text-align:right;max-width:60%">${tiebreakers}</span></div>
+    `;
+
+    // Hide step 1, show step 2
+    document.getElementById('setup-step-1').classList.remove('active');
+    document.getElementById('setup-step-2').classList.add('active');
+
+  } catch (err) {
+    showError(`Could not connect. Check your League ID and try again. (${err.message})`);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Detect League';
+}
+
+function backToStep1() {
+  document.getElementById('setup-step-2').classList.remove('active');
+  document.getElementById('setup-step-1').classList.add('active');
+}
+
+function selectWildcard(radio) {
+  document.querySelectorAll('.radio-option').forEach(el => el.classList.remove('selected'));
+  radio.closest('.radio-option').classList.add('selected');
+}
+
+async function connectLeague() {
+  const myTeam = document.getElementById('input-my-team').value.trim();
+  const wildcardMethod = document.querySelector('input[name="wildcard"]:checked')?.value || 'pf';
+
+  const btn = document.getElementById('connect-btn');
+  btn.disabled = true;
+  btn.textContent = 'Connecting…';
+
+  state.myTeam = myTeam;
+  state.wildcardMethod = wildcardMethod;
+
+  localStorage.setItem('piq_league_id', state.leagueId);
+  localStorage.setItem('piq_season', state.season);
+  localStorage.setItem('piq_my_team', myTeam);
+  localStorage.setItem('piq_wildcard', wildcardMethod);
+
+  showApp();
+  loadAll();
+
+  btn.disabled = false;
+  btn.textContent = 'Connect';
+}
+
+function showSetup() {
+  document.getElementById('setup-screen').style.display = 'flex';
+  document.getElementById('main-app').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  document.getElementById('settings-league-id').textContent = state.leagueId;
+  document.getElementById('settings-season').textContent = state.season;
+  document.getElementById('settings-my-team').textContent = state.myTeam || 'Not set';
+  document.getElementById('settings-wildcard').textContent = state.wildcardMethod === 'pf' ? 'Most points (PF)' : 'Best record';
+}
+
+function showError(msg) {
+  const el = document.getElementById('setup-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function disconnect() {
+  if (!confirm('Disconnect from this league?')) return;
+  localStorage.clear();
+  location.reload();
+}
+
+// ── LOAD DATA ──
+async function loadAll() {
+  try {
+    // Phase 1: league meta + players in parallel
+    const [leagueData, playersData] = await Promise.all([
+      mflFetch('league'),
+      mflFetch('players', '&DETAILS=1'),
+    ]);
+
+    // League info
+    const league = leagueData.league;
+    state.league = league;
+    state.franchises = Array.isArray(league.franchises.franchise)
+      ? league.franchises.franchise
+      : [league.franchises.franchise];
+    document.getElementById('header-league-name').textContent = league.name || 'My League';
+
+    // Franchise + division maps
+    const divisions = league.divisions?.division || [];
+    const divArr = Array.isArray(divisions) ? divisions : [divisions];
+    divArr.forEach(d => { state.divisionNames[d.id] = d.name; });
+    state.franchises.forEach(f => {
+      state.franchiseInfo[f.id] = {
+        name: f.name || '',
+        owner: f.owner_name || '',
+        divisionId: f.division || '',
+      };
+    });
+
+    // Players lookup
+    const playerList = playersData.players?.player || [];
+    playerList.forEach(p => {
+      const parts = (p.name || '').split(', ');
+      const name = parts.length === 2 ? `${parts[1]} ${parts[0]}` : p.name;
+      state.players[p.id] = { name, position: p.position, team: p.team };
+    });
+
+    // Phase 2: resolve current week
+    state.currentWeek = await resolveCurrentWeek(league);
+    document.getElementById('week-badge').textContent = `Week ${state.currentWeek}`;
+
+    // Phase 3: fetch all weekly results in parallel (weeks 1 → endWeek)
+    const endWeek = parseInt(league.endWeek || 17);
+    const startWeek = parseInt(league.startWeek || 1);
+    const weekNums = Array.from({ length: endWeek - startWeek + 1 }, (_, i) => startWeek + i);
+
+    // Fetch in batches of 4 to avoid MFL rate limits
+    const weekResults = [];
+    for (let i = 0; i < weekNums.length; i += 4) {
+      const batch = weekNums.slice(i, i + 4);
+      const results = await Promise.all(
+        batch.map(w => mflFetch('weeklyResults', `&W=${w}`).catch(() => null))
+      );
+      weekResults.push(...results);
+    }
+
+    state.allScores = {};
+    state.allSchedule = {};
+    state.allWeeklyResults = {};
+    state.lastFinalWeek = 0;
+
+    weekResults.forEach((data, i) => {
+      const w = weekNums[i];
+      const matchups = data?.weeklyResults?.matchup;
+      if (!matchups) return;
+      const list = Array.isArray(matchups) ? matchups : [matchups];
+      // Check if week has real scores
+      const hasScores = list.some(m => {
+        const teams = Array.isArray(m.franchise) ? m.franchise : [m.franchise].filter(Boolean);
+        return teams.some(t => parseFloat(t.score || 0) > 0);
+      });
+      if (!hasScores) return;
+
+      state.allWeeklyResults[w] = data.weeklyResults;
+      state.lastFinalWeek = Math.max(state.lastFinalWeek, w);
+      state.allScores[w] = {};
+      state.allSchedule[w] = [];
+
+      list.forEach(m => {
+        const teams = Array.isArray(m.franchise) ? m.franchise : [m.franchise].filter(Boolean);
+        if (teams.length < 2) return;
+        const [A, B] = teams;
+        const aId = String(A.id || '').trim();
+        const bId = String(B.id || '').trim();
+        const aPts = parseFloat(A.score || 0);
+        const bPts = parseFloat(B.score || 0);
+        state.allScores[w][aId] = (state.allScores[w][aId] || 0) + aPts;
+        state.allScores[w][bId] = (state.allScores[w][bId] || 0) + bPts;
+        state.allSchedule[w].push({ aId, aPts, bId, bPts });
+      });
+    });
+
+    // Current week results for matchups + lineup tabs
+    state.selectedWeek = state.currentWeek;
+    state.selectedStandingsWeek = state.currentWeek;
+    state.weeklyResults = weekResults[state.currentWeek - startWeek]?.weeklyResults || null;
+
+    // Phase 4: fetch live scoring if current week is beyond last final
+    state.liveMatchups = [];
+    if (state.currentWeek > state.lastFinalWeek) {
+      try {
+        const liveData = await mflFetch('liveScoring', `&W=${state.currentWeek}&DETAILS=1`);
+        const mm = liveData?.liveScoring?.matchup;
+        state.liveMatchups = mm ? (Array.isArray(mm) ? mm : [mm]) : [];
+      } catch (_) {}
+    }
+
+    renderStandings();
+    renderMatchups();
+    renderLineup();
+    renderLive();
+
+  } catch (err) {
+    console.error('Load failed:', err);
+  }
+}
+
+async function resolveCurrentWeek(league) {
+  // 1. Try liveScoring — most accurate during season
+  try {
+    const ls = await mflFetch('liveScoring', '&DETAILS=0');
+    const wk = parseInt(ls?.liveScoring?.week);
+    if (!isNaN(wk) && wk > 0) return wk;
+  } catch (_) {}
+  // 2. Try league.currentWeek
+  const cw = parseInt(league?.currentWeek);
+  if (!isNaN(cw) && cw > 0) return cw;
+  // 3. Fall back to endWeek (season over)
+  return parseInt(league?.endWeek || 17);
+}
+
+// ── STANDINGS COMPUTATION ──
+function pct(w, l, t = 0) {
+  const g = w + l + t;
+  return g ? (w + 0.5 * t) / g : 0;
+}
+
+function computeAllPlay(teamIds, scores) {
+  const ap = {};
+  teamIds.forEach(fid => { ap[fid] = { wins: 0, losses: 0, ties: 0 }; });
+  Object.values(scores).forEach(weekScores => {
+    const entries = teamIds.map(fid => ({ fid, pts: weekScores[fid] || 0 }));
+    entries.forEach(a => {
+      entries.forEach(b => {
+        if (a.fid === b.fid) return;
+        if (a.pts > b.pts) ap[a.fid].wins++;
+        else if (a.pts < b.pts) ap[a.fid].losses++;
+        else ap[a.fid].ties++;
+      });
+    });
+  });
+  return ap;
+}
+
+function computeH2H(teamIds, schedule) {
+  const h2h = {};
+  teamIds.forEach(a => { h2h[a] = {}; });
+  Object.values(schedule).forEach(list => {
+    list.forEach(g => {
+      const { aId: a, bId: b, aPts, bPts } = g;
+      if (!a || !b) return;
+      h2h[a][b] = h2h[a][b] || { w: 0, l: 0, t: 0 };
+      h2h[b][a] = h2h[b][a] || { w: 0, l: 0, t: 0 };
+      if (aPts === bPts) { h2h[a][b].t++; h2h[b][a].t++; }
+      else if (aPts > bPts) { h2h[a][b].w++; h2h[b][a].l++; }
+      else { h2h[a][b].l++; h2h[b][a].w++; }
+    });
+  });
+  return h2h;
+}
+
+function buildTeamStandings(includeLive = false, throughWeek = null) {
+  const teamIds = Object.keys(state.franchiseInfo);
+
+  // Filter to weeks up to throughWeek if specified
+  const maxWeek = throughWeek || Infinity;
+  let scores = Object.fromEntries(Object.entries(state.allScores).filter(([w]) => Number(w) <= maxWeek));
+  let schedule = Object.fromEntries(Object.entries(state.allSchedule).filter(([w]) => Number(w) <= maxWeek));
+
+  // Overlay live week if needed (only if throughWeek includes current week)
+  if (includeLive && state.currentWeek > state.lastFinalWeek && state.liveMatchups.length && state.currentWeek <= maxWeek) {
+    const liveScores = {};
+    const liveSched = [];
+    state.liveMatchups.forEach(m => {
+      const teams = Array.isArray(m.franchise) ? m.franchise : [m.franchise].filter(Boolean);
+      if (teams.length < 2) return;
+      const [A, B] = teams;
+      const aId = String(A.id || '').trim();
+      const bId = String(B.id || '').trim();
+      const aPts = parseFloat(A.score || 0);
+      const bPts = parseFloat(B.score || 0);
+      liveScores[aId] = (liveScores[aId] || 0) + aPts;
+      liveScores[bId] = (liveScores[bId] || 0) + bPts;
+      liveSched.push({ aId, aPts, bId, bPts });
+    });
+    scores[state.currentWeek] = liveScores;
+    schedule[state.currentWeek] = liveSched;
+  }
+
+  const allPlay = computeAllPlay(teamIds, scores);
+  const h2h = computeH2H(teamIds, schedule);
+
+  // Build team objects
+  const byId = {};
+  teamIds.forEach(fid => {
+    const info = state.franchiseInfo[fid];
+    byId[fid] = {
+      fid,
+      name: info.name,
+      owner: info.owner,
+      divisionId: info.divisionId,
+      wins: 0, losses: 0, ties: 0,
+      divWins: 0, divLosses: 0, divTies: 0,
+      pf: 0,
+    };
+  });
+
+  Object.values(schedule).forEach(list => {
+    list.forEach(({ aId, bId, aPts, bPts }) => {
+      const a = byId[aId], b = byId[bId];
+      if (!a || !b) return;
+      const sameDiv = a.divisionId && a.divisionId === b.divisionId;
+      a.pf += aPts; b.pf += bPts;
+      if (aPts === bPts) {
+        a.ties++; b.ties++;
+        if (sameDiv) { a.divTies++; b.divTies++; }
+      } else if (aPts > bPts) {
+        a.wins++; b.losses++;
+        if (sameDiv) { a.divWins++; b.divLosses++; }
+      } else {
+        a.losses++; b.wins++;
+        if (sameDiv) { a.divLosses++; b.divWins++; }
+      }
+    });
+  });
+
+  // Tiebreaker comparator
+  function cmp(a, b) {
+    const ap = pct(a.wins, a.losses, a.ties), bp = pct(b.wins, b.losses, b.ties);
+    if (ap !== bp) return bp - ap;
+    if (a.pf !== b.pf) return b.pf - a.pf;
+    const ad = pct(a.divWins, a.divLosses, a.divTies), bd = pct(b.divWins, b.divLosses, b.divTies);
+    if (ad !== bd) return bd - ad;
+    const ah = h2h[a.fid]?.[b.fid] || { w: 0, l: 0, t: 0 };
+    const bh = h2h[b.fid]?.[a.fid] || { w: 0, l: 0, t: 0 };
+    const ahp = pct(ah.w, ah.l, ah.t), bhp = pct(bh.w, bh.l, bh.t);
+    if (ahp !== bhp) return bhp - ahp;
+    const aap = allPlay[a.fid] || { wins: 0, losses: 0, ties: 0 };
+    const bap = allPlay[b.fid] || { wins: 0, losses: 0, ties: 0 };
+    const aapp = pct(aap.wins, aap.losses, aap.ties), bapp = pct(bap.wins, bap.losses, bap.ties);
+    if (aapp !== bapp) return bapp - aapp;
+    return (a.name || '').localeCompare(b.name || '');
+  }
+
+  const teams = Object.values(byId);
+
+  // Playoff seeds: div winners (1-3) + wildcards by PF (4-6)
+  const byDiv = {};
+  teams.forEach(t => {
+    const div = t.divisionId || 'none';
+    if (!byDiv[div]) byDiv[div] = [];
+    byDiv[div].push(t);
+  });
+
+  const divWinners = Object.values(byDiv)
+    .map(dt => dt.slice().sort(cmp)[0])
+    .filter(Boolean)
+    .sort(cmp);
+
+  const winnerIds = new Set(divWinners.map(t => t.fid));
+  const wildcardPool = teams.filter(t => !winnerIds.has(t.fid));
+  const wildcardSort = state.wildcardMethod === 'pf'
+    ? (a, b) => b.pf - a.pf || cmp(a, b)
+    : cmp;
+  const numWildcards = Math.max(0, (state.league ? parseInt(state.league.endWeek || 17) : 6) - divWinners.length);
+  const wildcardCount = divWinners.length > 0 ? Math.max(3, wildcardPool.length > 3 ? 3 : wildcardPool.length) : wildcardPool.length;
+  const wildcards = wildcardPool.sort(wildcardSort).slice(0, 3);
+  const playoffIds = new Set([...divWinners, ...wildcards].map(t => t.fid));
+
+  // Attach all-play + playoff info
+  teams.forEach(t => {
+    t.allPlay = allPlay[t.fid] || { wins: 0, losses: 0, ties: 0 };
+    t.inPlayoffs = playoffIds.has(t.fid);
+    t.playoffSeed = [...divWinners, ...wildcards].findIndex(p => p.fid === t.fid) + 1 || null;
+    t.isDivWinner = winnerIds.has(t.fid);
+  });
+
+  return { teams, cmp, byDiv };
+}
+
+// ── STANDINGS ──
+function renderStandings() {
+  const container = document.getElementById('standings-content');
+  if (!Object.keys(state.franchiseInfo).length) {
+    container.innerHTML = '<div class="empty-state">No standings data.</div>';
+    return;
+  }
+
+  const sw = state.selectedStandingsWeek || state.currentWeek;
+  const isLive = sw === state.currentWeek && state.currentWeek > state.lastFinalWeek && state.liveMatchups.length > 0;
+  const { teams, cmp } = buildTeamStandings(isLive, sw);
+
+  // Sort all teams overall for global rank + playoff line
+  const allSorted = teams.slice().sort(cmp);
+  const playoffCutoff = 6; // seeds 1-6 make playoffs
+
+  // Group by division
+  const byDiv = {};
+  teams.forEach(t => {
+    const div = t.divisionId || '';
+    if (!byDiv[div]) byDiv[div] = [];
+    byDiv[div].push(t);
+  });
+  const divIds = Object.keys(byDiv).sort();
+  const hasDivisions = divIds.length > 1 || (divIds.length === 1 && divIds[0] !== '');
+
+  let html = `
+    <div class="section-header">
+      <span class="section-title">Standings</span>
+      ${standingsWeekPickerHTML()}
+    </div>
+    <div class="standings-table">
+      <div class="standings-row header-row" style="grid-template-columns:28px 1fr 72px 68px">
+        <span></span><span>Team</span><span style="text-align:right">W-L</span><span style="text-align:right">PF</span>
+      </div>`;
+
+  let globalRank = 0;
+  let playoffLineDrawn = false;
+
+  const renderTeamRow = (t) => {
+    globalRank++;
+    const isMe = state.myTeam && t.name.toLowerCase().includes(state.myTeam.toLowerCase());
+    const record = t.ties > 0 ? `${t.wins}-${t.losses}-${t.ties}` : `${t.wins}-${t.losses}`;
+    const apRecord = `${t.allPlay.wins}-${t.allPlay.losses}`;
+    const pfStr = t.pf.toFixed(1);
+    const inPlayoffs = t.inPlayoffs;
+
+    // Draw playoff cutline before first non-playoff team
+    let lineHtml = '';
+    if (!playoffLineDrawn && !inPlayoffs) {
+      playoffLineDrawn = true;
+      lineHtml = `<div class="playoff-line"></div>`;
+    }
+
+    return lineHtml + `
+      <div class="standings-row ${isMe ? 'is-me' : ''}" style="grid-template-columns:28px 1fr 72px 68px">
+        <span class="rank-num ${inPlayoffs ? 'top3' : ''}">${globalRank}</span>
+        <div>
+          <div class="franchise-name" style="display:flex;align-items:center;gap:4px">
+            ${t.name}
+            ${inPlayoffs ? `<span class="seed-badge in">${t.playoffSeed}</span>` : ''}
+          </div>
+          ${t.owner ? `<div class="franchise-owner">${t.owner}</div>` : ''}
+          <div class="allplay-sub">All-play ${apRecord}</div>
+        </div>
+        <span class="stat-cell">${record}</span>
+        <span class="stat-cell pts">${pfStr}</span>
+      </div>`;
+  };
+
+  if (hasDivisions) {
+    // Sort teams within each division then render division by division
+    // but use global sorted order for the playoff line
+    const globalOrder = allSorted.map(t => t.fid);
+    divIds.forEach(divId => {
+      const divTeams = byDiv[divId].slice().sort(cmp);
+      const divName = state.divisionNames[divId] || `Division ${divId}`;
+      html += `<div class="division-header">${divName}</div>`;
+      // Render in global order within division
+      const divSorted = divTeams.sort((a, b) => globalOrder.indexOf(a.fid) - globalOrder.indexOf(b.fid));
+      divSorted.forEach(t => { html += renderTeamRow(t); });
+    });
+  } else {
+    allSorted.forEach(t => { html += renderTeamRow(t); });
+  }
+
+  html += `</div>`;
+
+  if (isLive) {
+    html += `<div style="margin-top:8px;font-size:var(--fs-xs);color:var(--muted);text-align:center">
+      Live scores included · Refreshes every 3 min
+    </div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+// ── WEEK PICKER ──
+function availableWeeks() {
+  const weeks = Object.keys(state.allWeeklyResults).map(Number).sort((a, b) => a - b);
+  // Include current live week if it's beyond last final
+  if (state.currentWeek > state.lastFinalWeek && !weeks.includes(state.currentWeek)) {
+    weeks.push(state.currentWeek);
+  }
+  return weeks;
+}
+
+function weekPickerHTML(idPrefix) {
+  const weeks = availableWeeks();
+  const cur = state.selectedWeek;
+  const idx = weeks.indexOf(cur);
+  const hasPrev = idx > 0;
+  const hasNext = idx < weeks.length - 1;
+  const isLive = cur === state.currentWeek && cur > state.lastFinalWeek;
+  const label = isLive ? `Wk ${cur} Live` : `Wk ${cur}`;
+  return `<div class="week-picker">
+    <button class="week-picker-btn" onclick="changeWeek(-1,'${idPrefix}')" ${hasPrev ? '' : 'disabled'}>‹</button>
+    <span class="week-picker-label">${label}</span>
+    <button class="week-picker-btn" onclick="changeWeek(1,'${idPrefix}')" ${hasNext ? '' : 'disabled'}>›</button>
+  </div>`;
+}
+
+function changeWeek(delta, context) {
+  const weeks = availableWeeks();
+  const idx = weeks.indexOf(state.selectedWeek);
+  const newIdx = idx + delta;
+  if (newIdx < 0 || newIdx >= weeks.length) return;
+  state.selectedWeek = weeks[newIdx];
+  if (context === 'matchups') renderMatchups();
+  else if (context === 'lineup') renderLineup();
+}
+
+function availableStandingsWeeks() {
+  const weeks = Object.keys(state.allScores).map(Number).sort((a, b) => a - b);
+  if (state.currentWeek > state.lastFinalWeek && !weeks.includes(state.currentWeek)) {
+    weeks.push(state.currentWeek);
+  }
+  return weeks;
+}
+
+function standingsWeekPickerHTML() {
+  const weeks = availableStandingsWeeks();
+  const cur = state.selectedStandingsWeek;
+  const idx = weeks.indexOf(cur);
+  const hasPrev = idx > 0;
+  const hasNext = idx < weeks.length - 1;
+  const isLive = cur === state.currentWeek && cur > state.lastFinalWeek;
+  const label = isLive ? `Wk ${cur} Live` : `Wk ${cur}`;
+  return `<div class="week-picker">
+    <button class="week-picker-btn" onclick="changeStandingsWeek(-1)" ${hasPrev ? '' : 'disabled'}>‹</button>
+    <span class="week-picker-label">${label}</span>
+    <button class="week-picker-btn" onclick="changeStandingsWeek(1)" ${hasNext ? '' : 'disabled'}>›</button>
+  </div>`;
+}
+
+function changeStandingsWeek(delta) {
+  const weeks = availableStandingsWeeks();
+  const idx = weeks.indexOf(state.selectedStandingsWeek);
+  const newIdx = idx + delta;
+  if (newIdx < 0 || newIdx >= weeks.length) return;
+  state.selectedStandingsWeek = weeks[newIdx];
+  renderStandings();
+}
+
+// ── MATCHUPS ──
+function renderMatchups() {
+  const container = document.getElementById('matchups-content');
+  const isLiveWeek = state.selectedWeek === state.currentWeek && state.selectedWeek > state.lastFinalWeek;
+  const results = state.allWeeklyResults[state.selectedWeek] || null;
+  const liveMatchups = isLiveWeek ? state.liveMatchups : [];
+
+  if (!results && !liveMatchups.length) {
+    container.innerHTML = `<div class="section-header"><span class="section-title">Matchups</span>${weekPickerHTML('matchups')}</div><div class="empty-state">No matchup data.</div>`;
+    return;
+  }
+
+  const franchiseMap = {};
+  state.franchises.forEach(f => { franchiseMap[f.id] = f; });
+
+  // Use live matchups if available, else weekly results
+  let matchups = liveMatchups.length ? liveMatchups : (results?.matchup || []);
+  if (!Array.isArray(matchups)) matchups = [matchups];
+
+  let html = `
+    <div class="section-header">
+      <span class="section-title">Matchups</span>
+      ${weekPickerHTML('matchups')}
+    </div>`;
+
+  matchups.forEach(m => {
+    const teams = Array.isArray(m.franchise) ? m.franchise : [m.franchise].filter(Boolean);
+    if (teams.length < 2) return;
+
+    const [t1, t2] = teams;
+    const f1 = franchiseMap[t1.id] || {};
+    const f2 = franchiseMap[t2.id] || {};
+    const s1 = parseFloat(t1.score || 0);
+    const s2 = parseFloat(t2.score || 0);
+    const isMe1 = state.myTeam && (f1.name || '').toLowerCase().includes(state.myTeam.toLowerCase());
+    const isMe2 = state.myTeam && (f2.name || '').toLowerCase().includes(state.myTeam.toLowerCase());
+    const isDone = s1 > 0 && s2 > 0;
+
+    html += `
+      <div class="matchup-card">
+        <div class="matchup-teams">
+          <div class="matchup-team ${isMe1 ? 'is-me' : ''}">
+            <div class="matchup-team-name">${f1.name || t1.id}</div>
+            <div class="matchup-score ${isDone ? (s1 > s2 ? 'winner' : 'loser') : ''}">${s1.toFixed(1)}</div>
+          </div>
+          <div class="matchup-vs">vs</div>
+          <div class="matchup-team away ${isMe2 ? 'is-me' : ''}">
+            <div class="matchup-team-name">${f2.name || t2.id}</div>
+            <div class="matchup-score ${isDone ? (s2 > s1 ? 'winner' : 'loser') : ''}">${s2.toFixed(1)}</div>
+          </div>
+        </div>
+        ${isDone ? `<div class="matchup-meta">${s1 > s2 ? f1.name + ' wins' : f2.name + ' wins'} · ${Math.abs(s1 - s2).toFixed(1)} pts</div>` : ''}
+      </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+// ── LINEUP CONSENSUS ──
+function renderLineup() {
+  const container = document.getElementById('lineup-content');
+  const results = state.allWeeklyResults[state.selectedWeek] || state.weeklyResults;
+  if (!results) {
+    container.innerHTML = '<div class="empty-state">No lineup data.</div>';
+    return;
+  }
+
+  // Collect all starters across all teams
+  let matchups = results.matchup || [];
+  if (!Array.isArray(matchups)) matchups = [matchups];
+
+  const playerCounts = {}; // playerId → { count, pos, score }
+  let totalTeams = 0;
+
+  matchups.forEach(m => {
+    const teams = Array.isArray(m.franchise) ? m.franchise : [m.franchise].filter(Boolean);
+    teams.forEach(team => {
+      totalTeams++;
+      const players = Array.isArray(team.player) ? team.player : [team.player].filter(Boolean);
+      players.filter(p => p.status === 'starter').forEach(p => {
+        if (!playerCounts[p.id]) {
+          playerCounts[p.id] = { count: 0, pos: p.slot, score: 0 };
+        }
+        playerCounts[p.id].count++;
+        playerCounts[p.id].score += parseFloat(p.score || 0);
+      });
+    });
+  });
+
+  // Sort by ownership descending
+  const sorted = Object.entries(playerCounts)
+    .map(([id, d]) => ({ id, ...d, pct: Math.round((d.count / totalTeams) * 100) }))
+    .sort((a, b) => b.count - a.count);
+
+  let html = `
+    <div class="section-header">
+      <span class="section-title">Lineup Consensus</span>
+      ${weekPickerHTML('lineup')}
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:0 14px">`;
+
+  if (!sorted.length) {
+    html += `<div class="empty-state">No lineup data available yet.</div>`;
+  } else {
+    sorted.slice(0, 30).forEach(p => {
+      const isHigh = p.pct >= 50;
+      const info = state.players[p.id] || {};
+      const name = info.name || `Player ${p.id}`;
+      const pos = info.position || '—';
+      const team = info.team || '';
+      html += `
+        <div class="player-row">
+          <span class="player-pos">${pos}</span>
+          <div>
+            <div class="player-name">${name}</div>
+            ${team ? `<div class="player-team">${team}</div>` : ''}
+          </div>
+          <div class="ownership-bar">
+            <span class="ownership-pct">${p.pct}%</span>
+            <div class="ownership-fill">
+              <div class="ownership-fill-inner ${isHigh ? 'high' : ''}" style="width:${p.pct}%"></div>
+            </div>
+          </div>
+        </div>`;
+    });
+  }
+
+  html += `</div>`;
+
+  container.innerHTML = html;
+}
+
+// ── LIVE TAB ──
+function findMyFid() {
+  if (!state.myTeam) return null;
+  const needle = state.myTeam.toLowerCase();
+  const match = state.franchises.find(f => (f.name || '').toLowerCase().includes(needle));
+  return match ? match.id : null;
+}
+
+function changeLiveSimWeek(delta) {
+  const weeks = Object.keys(state.allWeeklyResults).map(Number).sort((a, b) => a - b);
+  // null = real live; otherwise a historical week
+  const allOpts = [null, ...weeks]; // null = live
+  const cur = state.simulateWeek;
+  const idx = allOpts.indexOf(cur);
+  const newIdx = Math.max(0, Math.min(allOpts.length - 1, idx + delta));
+  state.simulateWeek = allOpts[newIdx];
+  renderLive();
+}
+
+function liveSimPickerHTML() {
+  const weeks = Object.keys(state.allWeeklyResults).map(Number).sort((a, b) => a - b);
+  const allOpts = [null, ...weeks];
+  const cur = state.simulateWeek;
+  const idx = allOpts.indexOf(cur);
+  const hasPrev = idx > 0;
+  const hasNext = idx < allOpts.length - 1;
+  const label = cur === null ? 'Live' : `Sim Wk ${cur}`;
+  return `<div class="week-picker" style="gap:8px">
+    <button class="week-picker-btn" onclick="changeLiveSimWeek(-1)" ${hasPrev ? '' : 'disabled'}>‹</button>
+    <span class="week-picker-label" style="min-width:64px">${label}</span>
+    <button class="week-picker-btn" onclick="changeLiveSimWeek(1)" ${hasNext ? '' : 'disabled'}>›</button>
+  </div>`;
+}
+
+// Convert weeklyResults matchup format → liveScoring matchup format for simulation
+function weeklyResultsToLiveMatchups(weeklyResults) {
+  if (!weeklyResults) return [];
+  let matchups = weeklyResults.matchup || [];
+  if (!Array.isArray(matchups)) matchups = [matchups];
+  return matchups.map(m => {
+    const frs = Array.isArray(m.franchise) ? m.franchise : [m.franchise].filter(Boolean);
+    return {
+      franchise: frs.map(f => {
+        const players = Array.isArray(f.player) ? f.player : f.player ? [f.player] : [];
+        return {
+          id: f.id,
+          score: f.score || '0',
+          playersYetToPlay: '0',
+          playersCurrentlyPlaying: '0',
+          players: {
+            player: players.map(p => ({
+              id: p.id,
+              score: p.score || '0',
+              status: p.status || 'starter',
+              gameSecondsRemaining: '0',
+            })),
+          },
+        };
+      }),
+    };
+  });
+}
+
+function renderLive() {
+  const container = document.getElementById('live-content');
+
+  // Simulation mode: use a historical week's data
+  const simWeek = state.simulateWeek;
+  const isSimulating = simWeek !== null;
+  const isLiveWeek = state.currentWeek > state.lastFinalWeek;
+
+  // Determine which matchups to use
+  let liveMatchups;
+  let standingsThroughWeek;
+  if (isSimulating) {
+    liveMatchups = weeklyResultsToLiveMatchups(state.allWeeklyResults[simWeek]);
+    standingsThroughWeek = simWeek - 1;
+  } else {
+    liveMatchups = state.liveMatchups;
+    standingsThroughWeek = null; // all weeks
+  }
+
+  const pickerHTML = liveSimPickerHTML();
+
+  if (!isSimulating && (!isLiveWeek || !liveMatchups.length)) {
+    container.innerHTML = `
+      <div class="section-header"><span class="section-title">Live Tracker</span>${pickerHTML}</div>
+      <div class="empty-state">No live games right now.<br>Use the picker to simulate a past week.</div>`;
+    return;
+  }
+
+  if (!liveMatchups.length) {
+    container.innerHTML = `
+      <div class="section-header"><span class="section-title">Live Tracker</span>${pickerHTML}</div>
+      <div class="empty-state">No data for this week.</div>`;
+    return;
+  }
+
+  const myFid = findMyFid();
+  if (!myFid) {
+    container.innerHTML = `
+      <div class="section-header"><span class="section-title">Live Tracker</span>${pickerHTML}</div>
+      <div class="empty-state">Set your team name in Settings to see your live tracker.</div>`;
+    return;
+  }
+
+  // Standings: through simWeek-1 as base, then overlay current liveMatchups
+  // For simulation we manually inject the sim week's matchups as live
+  let savedLiveMatchups = null;
+  if (isSimulating) {
+    savedLiveMatchups = state.liveMatchups;
+    state.liveMatchups = liveMatchups;
+  }
+  const { teams } = buildTeamStandings(true, standingsThroughWeek);
+  if (isSimulating) {
+    state.liveMatchups = savedLiveMatchups;
+  }
+  const allSorted = teams.slice().sort((a, b) => {
+    if (a.playoffSeed && b.playoffSeed) return a.playoffSeed - b.playoffSeed;
+    if (a.playoffSeed) return -1;
+    if (b.playoffSeed) return 1;
+    return b.pf - a.pf;
+  });
+  const myTeamData = allSorted.find(t => t.fid === myFid);
+  const myRank = allSorted.findIndex(t => t.fid === myFid);
+  const inPlayoffs = myTeamData?.inPlayoffs;
+  const mySeed = myTeamData?.playoffSeed;
+
+  // Split matchups: mine vs others
+  let myMatchup = null;
+  const otherMatchups = [];
+  liveMatchups.forEach(m => {
+    const frs = Array.isArray(m.franchise) ? m.franchise : [m.franchise].filter(Boolean);
+    if (frs.some(f => f.id === myFid)) myMatchup = m;
+    else otherMatchups.push(m);
+  });
+
+  // Determine impact of each other matchup
+  const franchiseMap = {};
+  state.franchises.forEach(f => { franchiseMap[f.id] = f; });
+
+  function getTeamRank(fid) { return allSorted.findIndex(t => t.fid === fid); }
+
+  function classifyMatchup(m) {
+    const frs = Array.isArray(m.franchise) ? m.franchise : [m.franchise].filter(Boolean);
+    if (frs.length < 2) return { verdict: 'neutral', priority: 99 };
+    const [A, B] = frs;
+    const rankA = getTeamRank(A.id), rankB = getTeamRank(B.id);
+    const sA = parseFloat(A.score || 0), sB = parseFloat(B.score || 0);
+    const winnerFid = sA >= sB ? A.id : B.id;
+    const winnerRank = sA >= sB ? rankA : rankB;
+
+    // Closest rival wins: bad if above me and winning, or below but threatening
+    const minRank = Math.min(rankA, rankB);
+    const maxRank = Math.max(rankA, rankB);
+    const priority = Math.min(Math.abs(rankA - myRank), Math.abs(rankB - myRank));
+
+    // Team above me (closer seed) is currently winning → bad
+    if (winnerRank < myRank && winnerRank >= 0) return { verdict: 'bad', priority };
+    // Team below me (chasing me) is currently winning → bad
+    if (winnerRank > myRank && winnerRank <= myRank + 3) return { verdict: 'bad', priority };
+    // Team above me is losing → good
+    if (winnerRank > myRank && Math.min(rankA, rankB) < myRank) return { verdict: 'good', priority };
+    return { verdict: 'neutral', priority };
+  }
+
+  // Top scorers for a franchise in a live matchup
+  function getTopScorers(franchise, n = 4) {
+    const players = franchise.players?.player || [];
+    const list = Array.isArray(players) ? players : [players];
+    return list
+      .filter(p => p.status === 'starter' && parseFloat(p.score || 0) > 0)
+      .sort((a, b) => parseFloat(b.score) - parseFloat(a.score))
+      .slice(0, n)
+      .map(p => {
+        const info = state.players[p.id] || {};
+        return {
+          name: info.name || `Player ${p.id}`,
+          pos: info.position || '—',
+          score: parseFloat(p.score),
+          active: parseInt(p.gameSecondsRemaining || 0) > 0,
+        };
+      });
+  }
+
+  function renderMatchupCard(m, verdict, isMyMatchup) {
+    const frs = Array.isArray(m.franchise) ? m.franchise : [m.franchise].filter(Boolean);
+    if (frs.length < 2) return '';
+    const [A, B] = frs;
+    const sA = parseFloat(A.score || 0), sB = parseFloat(B.score || 0);
+    const aWin = sA >= sB;
+    const nameA = franchiseMap[A.id]?.name || A.id;
+    const nameB = franchiseMap[B.id]?.name || B.id;
+    const isA = A.id === myFid, isB = B.id === myFid;
+    const ytpA = parseInt(A.playersYetToPlay || 0);
+    const ytpB = parseInt(B.playersYetToPlay || 0);
+    const cpA = parseInt(A.playersCurrentlyPlaying || 0);
+    const cpB = parseInt(B.playersCurrentlyPlaying || 0);
+
+    const verdictLabel = isMyMatchup ? 'Your Matchup'
+      : verdict === 'bad' ? '↑ Hurting You' : verdict === 'good' ? '↓ Helping You' : 'Watching';
+    const verdictClass = isMyMatchup ? 'neutral' : verdict;
+
+    // For "bad" matchup cards, show top scorers of the team that's winning and hurting you
+    const showScorersFor = !isMyMatchup && verdict === 'bad'
+      ? (aWin ? A : B)
+      : isMyMatchup ? (isA ? A : B) // show opponent's scorers in my matchup
+      : null;
+
+    const topScorers = showScorersFor ? getTopScorers(showScorersFor) : [];
+    const scName = showScorersFor ? (franchiseMap[showScorersFor.id]?.name || '') : '';
+
+    let html = `
+      <div class="live-card ${isMyMatchup ? '' : verdict}">
+        <div class="live-card-header">
+          <span style="font-size:var(--fs-xs);color:var(--muted2);font-weight:500">${isMyMatchup ? 'Your Game' : 'Playoff Race'}</span>
+          <span class="live-verdict ${verdictClass}">${verdictLabel}</span>
+        </div>
+        <div class="live-matchup-row">
+          <div class="live-team-block">
+            <div class="live-team-name ${isA ? 'me' : aWin ? 'winning' : ''}">${nameA}</div>
+            <div class="live-team-score ${aWin ? 'winning' : 'losing'}">${sA.toFixed(1)}</div>
+            ${cpA > 0 ? `<div class="live-team-meta">${cpA} playing</div>` : ytpA > 0 ? `<div class="live-team-meta">${ytpA} left</div>` : ''}
+          </div>
+          <div class="live-vs">vs</div>
+          <div class="live-team-block away">
+            <div class="live-team-name ${isB ? 'me' : !aWin ? 'winning' : ''}">${nameB}</div>
+            <div class="live-team-score ${!aWin ? 'winning' : 'losing'}">${sB.toFixed(1)}</div>
+            ${cpB > 0 ? `<div class="live-team-meta">${cpB} playing</div>` : ytpB > 0 ? `<div class="live-team-meta">${ytpB} left</div>` : ''}
+          </div>
+        </div>`;
+
+    if (topScorers.length) {
+      html += `<div class="live-players">`;
+      topScorers.forEach(p => {
+        html += `
+          <div class="live-player-row">
+            <span class="live-player-pos">${p.pos}</span>
+            <span class="live-player-name">${p.name}</span>
+            <span class="live-player-score ${p.active ? 'active' : ''}">${p.score.toFixed(1)}${p.active ? ' ●' : ''}</span>
+          </div>`;
+      });
+      html += `</div>`;
+    }
+
+    html += `</div>`;
+    return html;
+  }
+
+  // Sort other matchups by impact priority
+  const classified = otherMatchups
+    .map(m => ({ m, ...classifyMatchup(m) }))
+    .sort((a, b) => a.priority - b.priority || (a.verdict === 'bad' ? -1 : 1));
+
+  const badOnes = classified.filter(c => c.verdict === 'bad');
+  const goodOnes = classified.filter(c => c.verdict === 'good');
+  const neutralOnes = classified.filter(c => c.verdict === 'neutral');
+
+  const seedLabel = mySeed
+    ? `${inPlayoffs ? 'Projected Seed #' + mySeed : 'Outside Playoffs'}`
+    : 'Calculating…';
+
+  const simLabel = isSimulating ? ` · Sim Wk ${simWeek}` : '';
+
+  let html = `
+    <div class="section-header"><span class="section-title">Live Tracker${simLabel}</span>${pickerHTML}</div>
+    <div class="my-seed-banner">
+      <span class="my-seed-label">${myTeamData?.name || 'Your Team'}</span>
+      <span class="my-seed-value">${seedLabel}</span>
+    </div>`;
+
+  if (myMatchup) html += renderMatchupCard(myMatchup, 'neutral', true);
+
+  if (badOnes.length) {
+    html += `<div class="live-section-label">Root Against</div>`;
+    badOnes.forEach(c => { html += renderMatchupCard(c.m, c.verdict, false); });
+  }
+
+  if (goodOnes.length) {
+    html += `<div class="live-section-label">Root For</div>`;
+    goodOnes.forEach(c => { html += renderMatchupCard(c.m, c.verdict, false); });
+  }
+
+  if (neutralOnes.length) {
+    html += `<div class="live-section-label">Other Games</div>`;
+    neutralOnes.forEach(c => { html += renderMatchupCard(c.m, c.verdict, false); });
+  }
+
+  container.innerHTML = html;
+}
+
+// ── TAB SWITCHING ──
+function switchTab(tab) {
+  state.activeTab = tab;
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+}
+
+// ── START ──
+init();
+</script>
+</body>
+</html>

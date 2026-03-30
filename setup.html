@@ -419,9 +419,10 @@ function goStep2() {
 async function goStep4() {
   if (state.platform === 'espn-tc-2026') {
     // ESPN TC scoring is already computed by ESPN — skip to create
-    const btn = document.getElementById('create-btn-inline');
-    if (btn) btn.disabled = true;
+    const btn = document.getElementById('step3-next-btn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="loader"></span>Creating pool...'; }
     await createPool();
+    if (btn) { btn.disabled = false; btn.textContent = 'Create My Pool →'; }
     return;
   }
   goStep(4);
@@ -698,8 +699,7 @@ function showReview(entries) {
 // ─── Create pool ──────────────────────────────────────────────────────────
 async function createPool() {
   const btn = document.getElementById('create-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="loader"></span>Creating pool...';
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="loader"></span>Creating pool...'; }
 
   try {
     const poolName = document.getElementById('pool-name').value.trim();
@@ -757,8 +757,7 @@ async function createPool() {
     alert('❌ ' + err.message);
     console.error('Create pool error:', err);
   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Create My Pool →';
+    if (btn) { btn.disabled = false; btn.textContent = 'Create My Pool →'; }
   }
 }
 

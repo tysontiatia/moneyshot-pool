@@ -10,6 +10,7 @@
     --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424; --border: #2e2e2e;
     --text: #f0f0f0; --text2: #c0c0c0; --muted: #777;
     --accent: #e8ff47; --green: #4ade80; --red: #f87171; --orange: #fb923c;
+    --blue: #60a5fa;
     --radius: 10px;
   }
   body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
@@ -71,6 +72,48 @@
   .champ-card-count { font-size: 11px; color: var(--muted); }
   .champ-card-names { font-size: 10px; color: var(--muted); line-height: 1.6; }
 
+  /* Path to Victory */
+  .ptv-entry { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; }
+  .ptv-header { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; user-select: none; }
+  .ptv-header:hover { background: var(--surface2); }
+  .ptv-rank { font-size: 12px; color: var(--muted); width: 24px; flex-shrink: 0; }
+  .ptv-rank.top3 { color: var(--accent); font-weight: 700; }
+  .ptv-name { font-weight: 600; font-size: 14px; flex: 1; }
+  .ptv-score { font-size: 13px; font-weight: 700; color: var(--accent); }
+  .ptv-max { font-size: 11px; color: var(--muted); }
+  .ptv-chevron { font-size: 12px; color: var(--muted); transition: transform 0.2s; }
+  .ptv-entry.open .ptv-chevron { transform: rotate(180deg); }
+  .ptv-body { display: none; padding: 0 14px 12px; }
+  .ptv-entry.open .ptv-body { display: block; }
+  .ptv-needs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ptv-team-chip { display: flex; align-items: center; gap: 5px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; font-size: 12px; }
+  .ptv-team-chip.high-value { border-color: rgba(232,255,71,0.3); background: rgba(232,255,71,0.06); }
+  .ptv-chip-logo { width: 16px; height: 16px; border-radius: 50%; object-fit: contain; }
+  .ptv-chip-name { font-weight: 500; }
+  .ptv-chip-round { font-size: 10px; color: var(--muted); }
+  .ptv-chip-pts { font-size: 10px; font-weight: 700; color: var(--accent); margin-left: 2px; }
+  .ptv-no-picks { font-size: 12px; color: var(--muted); padding: 4px 0; }
+  .ptv-eliminated { font-size: 12px; color: var(--red); padding: 4px 0; }
+
+  /* Team Tracker */
+  .tracker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+  .tracker-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+  .tracker-team-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .tracker-logo { width: 32px; height: 32px; border-radius: 50%; object-fit: contain; background: var(--surface2); flex-shrink: 0; }
+  .tracker-team-info { flex: 1; min-width: 0; }
+  .tracker-team-name { font-weight: 600; font-size: 14px; }
+  .tracker-seed { font-size: 11px; color: var(--muted); }
+  .tracker-count { font-size: 11px; font-weight: 600; color: var(--accent); text-align: right; white-space: nowrap; }
+  .tracker-entries { display: flex; flex-direction: column; gap: 4px; }
+  .tracker-entry-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; background: var(--surface2); border-radius: 5px; padding: 4px 8px; }
+  .tracker-entry-name { color: var(--text2); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tracker-entry-round { font-size: 10px; color: var(--muted); margin: 0 6px; }
+  .tracker-entry-pts { font-size: 10px; font-weight: 700; color: var(--accent); }
+  .tracker-total-pts { font-size: 10px; color: var(--muted); margin-top: 6px; text-align: right; }
+
+  /* No-picks notice */
+  .no-picks-notice { background: rgba(251,146,60,0.1); border: 1px solid rgba(251,146,60,0.3); color: var(--orange); border-radius: 8px; padding: 12px 14px; font-size: 13px; margin-bottom: 16px; line-height: 1.5; }
+
   /* Loading */
   .loading { text-align: center; padding: 60px 20px; color: var(--muted); }
   .spinner { display: inline-block; width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 12px; }
@@ -92,6 +135,8 @@
 
 <div class="tabs">
   <div class="tab active" onclick="showTab('standings')">Standings</div>
+  <div class="tab" onclick="showTab('path')">Path to Victory</div>
+  <div class="tab" onclick="showTab('tracker')">Team Tracker</div>
   <div class="tab" onclick="showTab('champion')">Champion Picks</div>
 </div>
 
@@ -102,20 +147,23 @@
   <div id="error" class="error-box" style="display:none"></div>
 
   <div class="tab-panel active" id="panel-standings"></div>
+  <div class="tab-panel" id="panel-path"></div>
+  <div class="tab-panel" id="panel-tracker"></div>
   <div class="tab-panel" id="panel-champion"></div>
 </div>
 
 <script>
 // ── Config ───────────────────────────────────────────────────────────────
-const JSONBIN_BASE = 'https://api.jsonbin.io/v3/b';
-const ROUND_LABELS = { '1': 'R64', '2': 'R32', '3': 'S16', '4': 'E8', '5': 'F4', '6': 'Champ' };
+const JSONBIN_BASE  = 'https://api.jsonbin.io/v3/b';
+const ROUND_LABELS  = { '1': 'R64', '2': 'R32', '3': 'S16', '4': 'E8', '5': 'F4', '6': 'Champ' };
+const ROUND_POINTS  = { 1: 10, 2: 20, 3: 40, 4: 80, 5: 160, 6: 320 };
 
 // ── State ────────────────────────────────────────────────────────────────
 let pool = null;
 
 // ── Tab switching ────────────────────────────────────────────────────────
 function showTab(name) {
-  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', t.getAttribute('onclick').includes(name)));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.getAttribute('onclick').includes(name)));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
 }
 
@@ -151,31 +199,39 @@ function showTab(name) {
   }
 })();
 
-// ── Render ───────────────────────────────────────────────────────────────
+// ── Render all panels ─────────────────────────────────────────────────────
 function renderPool() {
   const name = pool.groupSettings?.name || 'Bracket Pool';
   document.getElementById('pool-name').textContent = name;
   document.title = name + ' — BracketIQ';
 
-  const entries = pool.entries || [];
+  const entries    = pool.entries || [];
   const outcomeMap = pool.outcomeMap || {};
+  const entryPicks = pool.entryPicks || {};
 
-  // Sort by score descending, then by possiblePointsMax descending
+  // Sorted entries (by score desc, then maxPoss desc)
   const sorted = [...entries].sort((a, b) => {
     const sa = a.score?.overallScore ?? 0, sb = b.score?.overallScore ?? 0;
     if (sb !== sa) return sb - sa;
     return (b.score?.possiblePointsMax ?? 0) - (a.score?.possiblePointsMax ?? 0);
   });
 
-  const maxScore = sorted[0]?.score?.possiblePointsMax ?? 1;
+  const maxPossAll = sorted[0]?.score?.possiblePointsMax ?? 1;
   document.getElementById('pool-meta').textContent = `${entries.length} entries`;
 
-  // ── Standings ────────────────────────────────────────────────────────
+  renderStandings(sorted, outcomeMap, maxPossAll);
+  renderPathToVictory(sorted, outcomeMap, entryPicks);
+  renderTeamTracker(sorted, outcomeMap, entryPicks);
+  renderChampionPicks(entries, outcomeMap);
+}
+
+// ── Standings ─────────────────────────────────────────────────────────────
+function renderStandings(sorted, outcomeMap, maxPossAll) {
   let rank = 0, lastScore = null, lastMax = null;
   const rows = sorted.map((e, i) => {
     const s = e.score || {};
     const curScore = s.overallScore ?? 0;
-    const maxPoss = s.possiblePointsMax ?? 0;
+    const maxPoss  = s.possiblePointsMax ?? 0;
     if (curScore !== lastScore || maxPoss !== lastMax) { rank = i + 1; lastScore = curScore; lastMax = maxPoss; }
 
     const champOutcome = outcomeMap[e.championOutcomeId];
@@ -183,22 +239,20 @@ function renderPool() {
       ? `<div class="champ-cell">${champOutcome.logoUrl ? `<img class="champ-logo" src="${champOutcome.logoUrl}" onerror="this.style.display='none'">` : ''}<span>${champOutcome.name || '—'}</span></div>`
       : '<span style="color:var(--muted)">—</span>';
 
-    const eliminated = s.eliminated;
-    const statusBadge = eliminated
+    const eliminated   = s.eliminated;
+    const statusBadge  = eliminated
       ? '<span class="badge-eliminated">OUT</span>'
       : '<span class="badge-alive">ALIVE</span>';
 
-    const barPct = maxScore > 0 ? Math.round((maxPoss / maxScore) * 100) : 0;
+    const barPct   = maxPossAll > 0 ? Math.round((maxPoss / maxPossAll) * 100) : 0;
     const barClass = barPct < 40 ? 'bar-fill low' : 'bar-fill';
-
     const rankClass = rank <= 3 ? 'rank top3' : 'rank';
 
-    // Round breakdown mini-grid
     const periods = s.scoreByPeriod || {};
     const roundCells = [1,2,3,4,5,6].map(r => {
-      const pd = periods[String(r)] || {};
-      const sc = pd.score ?? 0;
-      const mx = pd.possiblePointsMax ?? 0;
+      const pd    = periods[String(r)] || {};
+      const sc    = pd.score ?? 0;
+      const mx    = pd.possiblePointsMax ?? 0;
       const color = sc > 0 ? 'var(--green)' : mx === 0 ? 'var(--red)' : 'var(--text2)';
       return `<div class="round-cell">
         <div class="round-label">${ROUND_LABELS[r]}</div>
@@ -210,8 +264,8 @@ function renderPool() {
     return `<tr>
       <td class="${rankClass}">${rank}</td>
       <td>
-        <div class="entry-name">${e.name}</div>
-        ${e.displayName && e.displayName !== e.name ? `<div class="entry-member">${e.displayName}</div>` : ''}
+        <div class="entry-name">${esc(e.name)}</div>
+        ${e.displayName && e.displayName !== e.name ? `<div class="entry-member">${esc(e.displayName)}</div>` : ''}
         <div style="margin-top:8px"><div class="round-grid">${roundCells}</div></div>
       </td>
       <td class="right">
@@ -238,8 +292,171 @@ function renderPool() {
       </thead>
       <tbody>${rows.join('')}</tbody>
     </table>`;
+}
 
-  // ── Champion picks ───────────────────────────────────────────────────
+// ── Path to Victory ───────────────────────────────────────────────────────
+function renderPathToVictory(sorted, outcomeMap, entryPicks) {
+  const hasAnyPicks = Object.keys(entryPicks).length > 0;
+
+  let html = '';
+
+  if (!hasAnyPicks) {
+    html += `<div class="no-picks-notice">
+      Individual bracket picks were not captured during setup.
+      To enable Path to Victory, re-run setup and use the interception script (Step 3) to capture everyone's picks.
+    </div>`;
+  }
+
+  let rank = 0, lastScore = null, lastMax = null;
+  const cards = sorted.map((e, i) => {
+    const s = e.score || {};
+    const curScore = s.overallScore ?? 0;
+    const maxPoss  = s.possiblePointsMax ?? 0;
+    if (curScore !== lastScore || maxPoss !== lastMax) { rank = i + 1; lastScore = curScore; lastMax = maxPoss; }
+    const rankClass = rank <= 3 ? 'ptv-rank top3' : 'ptv-rank';
+
+    const picks = entryPicks[e.id] || [];
+    const eliminated = s.eliminated;
+
+    // Gather undecided picks, sorted by points descending
+    const needed = [];
+    for (const pick of picks) {
+      const op = pick.outcomesPicked?.[0];
+      if (!op || op.result !== 'UNDECIDED') continue;
+      const round = pick.periodReached;
+      const pts   = ROUND_POINTS[round] ?? 0;
+      const team  = outcomeMap[op.outcomeId] || {};
+      needed.push({ outcomeId: op.outcomeId, round, pts, team });
+    }
+    needed.sort((a, b) => b.pts - a.pts || a.round - b.round);
+
+    let bodyHtml = '';
+    if (eliminated) {
+      bodyHtml = `<div class="ptv-eliminated">Eliminated — no path to victory remaining.</div>`;
+    } else if (picks.length === 0) {
+      bodyHtml = hasAnyPicks
+        ? `<div class="ptv-no-picks">Picks not captured for this entry.</div>`
+        : `<div class="ptv-no-picks">Picks not available.</div>`;
+    } else if (needed.length === 0) {
+      bodyHtml = `<div class="ptv-no-picks" style="color:var(--green)">All remaining picks are settled — no more games needed!</div>`;
+    } else {
+      const chips = needed.map(n => {
+        const highValue = n.pts >= 80;
+        const logo = n.team.logoUrl ? `<img class="ptv-chip-logo" src="${n.team.logoUrl}" onerror="this.style.display='none'">` : '';
+        const teamName = n.team.abbrev || n.team.name || '?';
+        const seed = n.team.seed ? `(${n.team.seed})` : '';
+        return `<div class="ptv-team-chip${highValue ? ' high-value' : ''}">
+          ${logo}
+          <span class="ptv-chip-name">${esc(teamName)}</span>
+          <span class="ptv-chip-round">${seed} ${ROUND_LABELS[String(n.round)] || 'R' + n.round}</span>
+          <span class="ptv-chip-pts">+${n.pts}</span>
+        </div>`;
+      }).join('');
+      const totalPending = needed.reduce((s, n) => s + n.pts, 0);
+      bodyHtml = `<div class="ptv-needs">${chips}</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--muted)">${needed.length} games remaining · ${totalPending} pts still to play</div>`;
+    }
+
+    return `<div class="ptv-entry" id="ptv-${e.id}">
+      <div class="ptv-header" onclick="togglePTV('${e.id}')">
+        <span class="${rankClass}">${rank}</span>
+        <span class="ptv-name">${esc(e.name)}</span>
+        <span class="ptv-score">${curScore}</span>
+        <span class="ptv-max">/ max ${maxPoss}</span>
+        <span class="ptv-chevron">▼</span>
+      </div>
+      <div class="ptv-body">${bodyHtml}</div>
+    </div>`;
+  });
+
+  document.getElementById('panel-path').innerHTML = html + cards.join('');
+}
+
+function togglePTV(id) {
+  const el = document.getElementById('ptv-' + id);
+  if (el) el.classList.toggle('open');
+}
+
+// ── Team Tracker ──────────────────────────────────────────────────────────
+function renderTeamTracker(sorted, outcomeMap, entryPicks) {
+  const hasAnyPicks = Object.keys(entryPicks).length > 0;
+
+  if (!hasAnyPicks) {
+    document.getElementById('panel-tracker').innerHTML = `
+      <div class="no-picks-notice">
+        Individual bracket picks were not captured during setup.
+        To enable Team Tracker, re-run setup and use the interception script (Step 3) to capture everyone's picks.
+      </div>`;
+    return;
+  }
+
+  // Build: teamOutcomeId → { team, entries: [{ entryName, round, pts }] }
+  const teamMap = {};
+
+  for (const e of sorted) {
+    const picks = entryPicks[e.id] || [];
+    for (const pick of picks) {
+      const op = pick.outcomesPicked?.[0];
+      if (!op || op.result !== 'UNDECIDED') continue;
+      const oid   = op.outcomeId;
+      const round = pick.periodReached;
+      const pts   = ROUND_POINTS[round] ?? 0;
+      if (!teamMap[oid]) teamMap[oid] = { team: outcomeMap[oid] || {}, entries: [] };
+      teamMap[oid].entries.push({ entryName: e.name, round, pts });
+    }
+  }
+
+  // Sort teams: most entries cheering first, then total pts desc
+  const teams = Object.entries(teamMap).sort((a, b) => {
+    const ca = a[1].entries.length, cb = b[1].entries.length;
+    if (cb !== ca) return cb - ca;
+    const pa = a[1].entries.reduce((s, e) => s + e.pts, 0);
+    const pb = b[1].entries.reduce((s, e) => s + e.pts, 0);
+    return pb - pa;
+  });
+
+  if (teams.length === 0) {
+    document.getElementById('panel-tracker').innerHTML = `<div style="font-size:13px;color:var(--muted);padding:24px 0;text-align:center">No undecided picks found — all games are settled.</div>`;
+    return;
+  }
+
+  const cards = teams.map(([oid, { team, entries }]) => {
+    const logo = team.logoUrl ? `<img class="tracker-logo" src="${team.logoUrl}" onerror="this.style.display='none'">` : '<div class="tracker-logo"></div>';
+    const totalPts = entries.reduce((s, e) => s + e.pts, 0);
+
+    // Sort entries within card by pts desc
+    const sortedEntries = [...entries].sort((a, b) => b.pts - a.pts || a.entryName.localeCompare(b.entryName));
+
+    const entryRows = sortedEntries.map(e =>
+      `<div class="tracker-entry-row">
+        <span class="tracker-entry-name">${esc(e.entryName)}</span>
+        <span class="tracker-entry-round">${ROUND_LABELS[String(e.round)] || 'R' + e.round}</span>
+        <span class="tracker-entry-pts">+${e.pts}</span>
+      </div>`
+    ).join('');
+
+    const seed = team.seed ? `Seed ${team.seed}` : '';
+    return `<div class="tracker-card">
+      <div class="tracker-team-header">
+        ${logo}
+        <div class="tracker-team-info">
+          <div class="tracker-team-name">${esc(team.name || oid.slice(0, 8))}</div>
+          ${seed ? `<div class="tracker-seed">${seed}</div>` : ''}
+        </div>
+        <div class="tracker-count">${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}</div>
+      </div>
+      <div class="tracker-entries">${entryRows}</div>
+      <div class="tracker-total-pts">${totalPts} pts at stake</div>
+    </div>`;
+  });
+
+  document.getElementById('panel-tracker').innerHTML = `
+    <div class="section-header">Teams with entries still cheering for them</div>
+    <div class="tracker-grid">${cards.join('')}</div>`;
+}
+
+// ── Champion Picks ────────────────────────────────────────────────────────
+function renderChampionPicks(entries, outcomeMap) {
   const champCounts = {};
   for (const e of entries) {
     const id = e.championOutcomeId;
@@ -253,9 +470,9 @@ function renderPool() {
     const team = outcome || {};
     return `<div class="champ-card">
       ${team.logoUrl ? `<img class="champ-card-logo" src="${team.logoUrl}" onerror="this.style.display='none'">` : ''}
-      <div class="champ-card-team">${team.name || id}</div>
+      <div class="champ-card-team">${esc(team.name || id)}</div>
       <div class="champ-card-count">${names.length} ${names.length === 1 ? 'entry' : 'entries'}</div>
-      <div class="champ-card-names">${names.join('<br>')}</div>
+      <div class="champ-card-names">${names.map(esc).join('<br>')}</div>
     </div>`;
   }).join('');
 
@@ -263,7 +480,7 @@ function renderPool() {
   document.getElementById('panel-champion').innerHTML = `
     <div class="section-header">Champion Pick Distribution</div>
     <div class="champ-grid">${champCards}</div>
-    ${noChamp.length ? `<div style="margin-top:16px;font-size:12px;color:var(--muted)">${noChamp.map(e => e.name).join(', ')} — no champion recorded</div>` : ''}
+    ${noChamp.length ? `<div style="margin-top:16px;font-size:12px;color:var(--muted)">${noChamp.map(e => esc(e.name)).join(', ')} — no champion recorded</div>` : ''}
   `;
 }
 
@@ -273,6 +490,10 @@ function showError(msg) {
   const el = document.getElementById('error');
   el.textContent = '❌ ' + msg;
   el.style.display = 'block';
+}
+
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
 </body>
